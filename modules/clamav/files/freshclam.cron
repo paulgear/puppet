@@ -1,0 +1,23 @@
+#!/bin/sh
+
+##########
+# Taken from the CentOS clamav-db package
+# This file is managed by puppet
+##########
+
+### A simple update script for the clamav virus database.
+### This could as well be replaced by a SysV script.
+
+### fix log file if needed
+LOG_FILE="/var/log/clamav/freshclam.log"
+if [ ! -f "$LOG_FILE" ]; then
+    touch "$LOG_FILE"
+    chmod 644 "$LOG_FILE"
+    chown clamav.clamav "$LOG_FILE"
+fi
+
+/usr/bin/freshclam \
+    --quiet \
+    --datadir="/var/clamav" \
+    --log="$LOG_FILE" \
+    --daemon-notify="/etc/clamd.conf"

@@ -1,0 +1,9 @@
+/var/log/clamav/freshclam.log {
+	missingok
+	notifempty
+	create 644 clamav clamav
+	weekly
+	rotate 52
+	compress
+	delaycompress
+}

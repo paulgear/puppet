@@ -1,0 +1,12 @@
+/var/log/clamav/clamd.log {
+	missingok
+	notifempty
+	create 644 clamav clamav
+	postrotate
+		killall -HUP clamd 2>/dev/null || :
+	endscript
+	weekly
+	rotate 52
+	compress
+	delaycompress
+}
