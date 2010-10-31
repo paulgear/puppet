@@ -1,0 +1,75 @@
+PATH="/usr/bin:$PATH:/usr/local/bin"
+SHELL=/bin/sh
+
+# change from mbox to maildir
+#DEFAULT=$HOME/Maildir/
+DEFAULT=/home/Maildir/$LOGNAME/
+
+
+POISONED_EXECUTABLES=/etc/procmail/poisoned
+#STRIPPED_EXECUTABLES=/etc/procmail/stripped
+SECURITY_NOTIFY="your@mail.here"
+#SECURITY_TRUSTED_MTAS="your.host.goes.here"
+#SECURITY_NOTIFY_VERBOSE="virus-checker"
+SECURITY_NOTIFY_SENDER=YES
+#SECURITY_NOTIFY_SENDER=/etc/procmail/replytosender.txt
+SECRET="yourdirtylittlesecret"
+
+# Reset some things to avoid leaking info to
+# the users...
+#POISONED_EXECUTABLES=
+#SECURITY_NOTIFY=
+#SECURITY_NOTIFY_VERBOSE=
+#SECURITY_NOTIFY_SENDER=
+#SECURITY_QUARANTINE=
+#SECRET=
+
+
+# this file must already exist, with proper permissions (rw--w--w-):
+#SECURITY_QUARANTINE=/var/spool/mail/quarantine
+SECURITY_QUARANTINE=/dev/null
+
+POISONED_SCORE=50
+DISABLE_MACRO_CHECK=YES
+SCORE_HISTORY=/var/log/macro-scanner-scores
+
+# If an attachment gets passed the poisoned list, then it get compared
+# against this mangle list
+# Exclude *.rtf *.doc, *.xls *.xlw *.ppt |p[po]t| from mangle list
+MANGLE_EXTENSIONS='html?|exe|com|cmd|bat|pif|sc[rt]|lnk|dll|ocx|dot|xlt|vb[se]?|hta|p[lm]|sh[bs]|hlp|chm|eml|ws[cfh]|ad[ep]|jse?|md[abew]|ms[ip]|reg|as[dfx]|cil|pps|wm[avszd]|nws|\{[-0-9a-f]+\}'
+###|vcf|
+DROPPRIVS=YES
+LOGFILE=/var/log/procmail.log
+
+# Finished setting up, now run the sanitizer...
+:0
+# -------------------------------------
+# Add more whitelist entries below here 
+# -------------------------------------
+#* ! ^From:.*<your@white.list.entry>
+
+{
+    INCLUDERC=/etc/procmail/html-trap.procmail
+}
+
+
+# The condition line ensures that only messages smaller than 250 kB
+# (250 * 1024 = 256000 bytes) are processed by SpamAssassin. Most spam
+# isn't bigger than a few k and working with big messages can bring
+# SpamAssassin to its knees.
+
+:0fw
+* < 256000
+| spamc
+
+# Work around procmail bug: any output on stderr will cause the "F" in "From"
+# to be dropped.  This will re-add it.
+:0
+* ^^rom[ ]
+{
+   LOG="*** Dropped F off From_ header! Fixing up. "
+
+   :0 fhw
+   | sed -e '1s/^/F/'
+}
+

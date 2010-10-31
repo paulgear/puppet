@@ -1,0 +1,25 @@
+<% require '/etc/puppet/include/qbpuppetutils.rb' -%>
+
+<%= include_header( "NTP configuration" ) -%>
+
+server	127.127.1.0	# local clock
+fudge	127.127.1.0 stratum 13	
+
+driftfile /var/lib/ntp/drift
+keys /etc/ntp/keys
+
+# Default restrictions
+restrict default kod nomodify notrap nopeer noquery
+restrict -6 default kod nomodify notrap nopeer noquery
+
+# localhost unrestricted
+restrict 127.0.0.1 
+restrict -6 ::1
+
+# Hosts on local networks are less restricted.
+<% localnetworks.each do |localnet| -%>
+restrict <%= localnet %> nomodify notrap
+<% end -%>
+# End local networks
+
+<%= ntp_peers.join("\n") %>
