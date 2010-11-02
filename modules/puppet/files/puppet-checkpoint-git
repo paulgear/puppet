@@ -1,6 +1,24 @@
 #!/bin/sh
 # Managed by puppet - do not edit manually!
+set -e
+set -u
+
 cd /etc/puppet
 git stat
-git add *
+git diff
+
+VERSION=`git --version|awk '{print $NF}'`
+case $VERSION in
+1.7*)
+	git add --all
+	;;
+    1.5*)
+    	git add -u
+	git add *
+	;;
+    *)
+    	echo "ERROR: Unknown git version $VERSION" >&2
+	exit 1
+	;;
+esac
 git commit -a -m'Automatic checkpoint'
