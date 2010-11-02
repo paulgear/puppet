@@ -1,9 +1,8 @@
 # /etc/puppet/manifests/site.pp
 
 # backup server
-filebucket {
-    main:
-        server => puppet
+filebucket { main:
+	server => puppet
 }
 
 # global defaults:
