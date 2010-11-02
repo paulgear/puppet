@@ -10,7 +10,7 @@ class puppet::server_conf {
 	$group = "support"
 	$mailto = "root@localhost"
 
-	# Checkpoint puppet configuration in subversion
+	# Checkpoint puppet configuration
 	cron_job { "puppet-checkpoint":
 		script		=> "#!/bin/sh
 /usr/local/bin/puppet-checkpoint-git
