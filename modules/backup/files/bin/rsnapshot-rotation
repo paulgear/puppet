@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# Author:	Paul Gear
+# Created:	2010-04-01
+# Modified:	2010-04-01
+# Description:	Run rsnapshot rotations
+#
+
+#no set -e because we want to press on with all backups regardless of the result
+set -u
+
+ARGS="$@"
+PROG=`basename $0`
+
+DOM=`date +%d|sed -e 's/^0*//g'`	# remove leading zero
+MON=`date +%m|sed -e 's/^0*//g'`	# remove leading zero
+DAY=`date +%w`
+
+message()
+{
+	echo `date`: "$@"
+	logger -t $PROG "$@"
+}
+
+run_rotation()
+{
+	ROT=$1
+	shift
+	for CONF; do
+		message "running $ROT rotation for $CONF"
+		rsnapshot -v -c $CONF $ROT
+	done
+}
+
+message "starting rsnapshot rotations for $ARGS"
+
+if [ $DOM -eq 1 ]; then
+	case $MON in
+	7)
+		# I have a feeling this is actually wrong and we will need to
+		# do the eofy rotation after the quarterly is done.
+		run_rotation eofy $ARGS
+
+		run_rotation quarterly $ARGS
+		run_rotation monthly $ARGS
+		;;
+	1|4|10)
+		run_rotation quarterly $ARGS
+		run_rotation monthly $ARGS
+		;;
+	*)
+		run_rotation monthly $ARGS
+		;;
+	esac
+fi
+
+# run weekly rotations on Saturday
+if [ $DAY -eq 6 ]; then
+	run_rotation weekly $ARGS
+fi
+
+run_rotation daily $ARGS
+message "finished rsnapshot rotations for $ARGS"
+

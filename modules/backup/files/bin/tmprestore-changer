@@ -1,0 +1,5 @@
+#!/bin/bash
+echo Parameters: "$@"
+mtx unload
+mtx load $2
+/usr/local/bin/tmp-settape $1

@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# Author:	Paul Gear
+# Created:	2008-02-14
+# Modified:	2010-02-04
+# Description:	Back up the specified directories to tape
+#
+
+set -u
+
+DEVICE=/dev/st0
+LOG=$HOME/tmpbackup.log
+
+if [ -f $LOG ]; then
+	mv -f $LOG $LOG.old
+fi
+
+renice -5 $$
+/usr/local/bin/tmp-settape $DEVICE
+dump -Q $HOME/restore.qaf -F /usr/local/bin/tmpbackup-changer -0 -b 1024 -f $DEVICE "$@" 2>&1 | \
+	tee $LOG
+
+#( tar -cvf - "${@:-.}" | dd of=$DEVICE obs=256k ) 2>&1 | nice bzip2 -9 >$LOG

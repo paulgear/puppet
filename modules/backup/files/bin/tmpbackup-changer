@@ -1,0 +1,4 @@
+#!/bin/bash
+mtx next
+/usr/local/bin/tmp-settape $1
+exit 0

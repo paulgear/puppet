@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# Author:	Paul Gear
+# Created:	2010-03-16
+# Modified:	2010-03-18
+# Description:
+#
+# Report on backup statistics - call from within other backup scripts.  Output
+# is in RRDtool format, consisting of the following fields:
+# - time (in Unix time - number of seconds since 1 Jan 1970)
+# - files modified in last day
+# - files modified in last week
+# - files modified in last month
+# - total number of files
+# - MB of space total on filesystem
+# - MB of space used on filesystem
+# - MB of space available on filesystem
+# - % of space used on filesystem
+#
+# If --no-df is specified on the command line, the last 4 figures are skipped.
+#
+# If --fortnight is specified on the command line, the week interval is
+# modified to 2 weeks.  Internally, all intervals are dynamic, so further
+# interval changes could be added with very little effort.
+#
+# All fields except the time are repeated once for each directory provided on
+# the command line, so calling with 3 directories will result in 24 fields
+# being printed after the time (assuming --no-df is not specified).
+#
+# Note that the --fortnight and --no-df flags only take effect from that point
+# forward in the argument list, so the following example would produce df
+# output for the first directory, and weekly intervals for the first two, but
+# fortnightly for the last:
+#	backup-file-check /tmp/blah1 --no-df /tmp/blah2 --fortnight /tmp/blah3
+#
+
+set -e
+set -u
+
+RRD=1
+DF=1
+INTERVAL_1=1
+INTERVAL_2=7
+INTERVAL_3=31
+NOW=`date +%s`
+
+report_stats()
+{
+	find "$@" -type f -printf "%T@\t%p\n" 2>/dev/null | \
+	rrd=$RRD findpath="$@" now="$NOW" \
+	interval1="$INTERVAL_1" interval2="$INTERVAL_2" interval3="$INTERVAL_3" \
+	perl -we '
+	# initialise counters
+	my $dayfiles = 0;
+	my $weekfiles = 0;
+	my $monthfiles = 0;
+	my $totalfiles = 0;
+
+	# set cutoff dates
+	my $day   = $ENV{"now"} - (60 * 60 * 24 * $ENV{"interval1"});
+	my $week  = $ENV{"now"} - (60 * 60 * 24 * $ENV{"interval2"});
+	my $month = $ENV{"now"} - (60 * 60 * 24 * $ENV{"interval3"});
+
+	# determine file counts
+	while (<>) {
+		chomp;
+		my ($time, $path) = split(/\s+/, $_, 2);
+		++$dayfiles   if ($time > $day);
+		++$weekfiles  if ($time > $week);
+		++$monthfiles if ($time > $month);
+		++$totalfiles;
+	}
+
+	# print summary
+	if ($ENV{"rrd"} != 0) {
+		print ":$dayfiles:$weekfiles:$monthfiles:$totalfiles";
+	}
+	else {
+		print "$dayfiles\t$weekfiles\t$monthfiles\t$totalfiles\t" . $ENV{"findpath"} . "\n";
+	}
+	'
+	if [ "$DF" != "0" ]; then
+		df --block-size=1M --portability "$@" | tail -1 | tr -d "%" | \
+			awk '{printf ":%s:%s:%s:%s", $2, $3, $4, $5}'
+	fi
+}
+
+# print the RRD header
+if [ "$RRD" -ne 0 ]; then
+	echo -n "$NOW"
+fi
+
+for i in "$@"; do
+	case "$i" in
+	--no-df)
+		DF=0
+		;;
+	--fortnight*)
+		INTERVAL_2=14
+		;;
+	-*)
+		echo "$PROG: Invalid option ($i) specified - ignored" >&2
+		;;
+	*)
+		report_stats "$i"
+		;;
+	esac
+done
+
+# add a newline if we are in RRD mode
+if [ "$RRD" -ne 0 ]; then
+	echo ""
+fi
+

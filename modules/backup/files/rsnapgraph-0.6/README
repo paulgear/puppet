@@ -1,0 +1,93 @@
+
+rsnapgraph README
+
+Denis McLaughlin
+denism@cyberus.ca
+http://denism.homeip.net
+
+---------------------------------------------------------------------------
+
+----------
+What is it?
+
+  rsnapgraph is a utility that will analyze the snapshot backups created
+  by rsnapshot (http://www.rsnapshot.org), and produce two graphs showing
+  file and disk space changes over time.
+
+  - The rsnapshot-files.png graph shows the number of files created and
+    deleted between each snapshot, as well as a running graph showing the
+    total number of files in each snapshot.
+
+  - The rsnapshot-size graph shows the amount of disk space being freed or
+    used by each snapshot, as well as a running graph showing the total
+    amount of disk space used by each snapshot.
+
+  It's useful to know whether the snapshots are very volatile, and if so,
+  which directories.  If disk space is tight, then this can help identify
+  directories within each snapshot which can be removed from the snapshot
+  to save space.  Plus the graphs are pretty.
+
+
+----------
+Requirements
+  - a set of rsnapshot directories (see http://www.rsnapshot.org)
+  - Perl v5 with the File::Find module (should be there by default I believe)
+  - gnuplot v4 or better (3.7 may work, could it plot inline data?)
+  - something to view PNG graphic files (Firefox, GQView, etc)
+
+
+----------
+Installing
+  - the default install prefix is /usr/local: edit Makefile to change
+  - run "make install": this will put the rsnapgraph executable in 
+    /usr/local/bin, and the rsnapgraph.conf configuration file in /etc
+  - edit the /etc/rsnapgraph.conf file, setting the following parameters:
+     - rootdir: this should be set to the directory containing the rsnapshot
+       managed directories, ie. the same value as snapshot_root in the
+       rsnapshot.conf file
+     - workdir: this should be set to a directory to which only root can
+       read and write (for security reasons), so its permissions should
+       be 700; it specifies the directory in which a cached copy of the
+       data files are kept, to reduce the processing overhead on subsequent
+       runs
+     - graphdir: this should be set to a directory to which only root can
+       write (for security reasons), although anyone can read from it; it
+       specifies the directory into which rsnapgraph will create the graph
+       images
+  - other parameters are described in the rsnapshot.conf file
+
+
+----------
+Running
+  - if the /etc/rsnapgraph.conf has been set up, you just need to run
+    'rsnapgraph'
+  - the various rsnapgraph.conf settings can be overridden on the command
+    line: run 'rsnapgraph -h' for details
+
+
+----------
+Results
+  - the green and red bars show increase (green) and decrease (red) in
+    either the number of files or the used disk space; these bars are
+    measured against the left Y axis
+  - the blue line shows the number of files in or total space used by each
+    of the snapshot directories, and is measured against the right Y axis
+
+
+----------
+Further Configuration
+  I call rsnapgraph nightly, after I call rsnapshot, and put the results on
+  my web page: http://denism.homeip.net/graphs/rsnapgraph-data.html
+
+  The crontab entry to do this looks like:
+
+45 04  * * * /usr/local/bin/rsnapgraph 1> /tmp/rsnapgraph.out 2>&1
+
+
+----------
+License
+  This software is copyright by Denis McLaughlin, and licensed under the
+  GNU General Public License, version 2.  The text of the license can be
+  found in the LICENSE file in the source distribution, or here:
+
+  http://www.gnu.org/copyleft/gpl.html

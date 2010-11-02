@@ -1,0 +1,384 @@
+#!/usr/bin/perl -wT
+#
+# Author:	Paul Gear
+# Created:	2010-03-16
+# Modified:	2010-03-18
+# Description:	Display and graph backup statistics
+#
+
+use strict;
+use CGI qw/:standard start_ul/;
+use File::Basename;
+use File::Path;
+use RRDs;
+
+my $now = time;
+my $backup_err_hours =  7 * 24;
+my $backup_warn_hours = 3 * 24;
+my $vmware_err_hours = 21 * 24;
+my $vmware_warn_hours = 14 * 24;
+my $err_disk_free = 100;
+my $warn_disk_free = 1000;
+my $err_percent_used = 99;
+my $warn_percent_used = 95;
+
+my $dir = "/var/www/html/backupstats";
+my $rrddir = "$dir/RRDs";
+if (! -d $rrddir) {
+	mkpath $rrddir
+		or die "Cannot make directory $rrddir: $!";
+}
+chdir $dir
+	or die "Cannot change to directory $dir: $!";
+
+my $INTERVAL = 60 * 60 * 24 * 7;	# one day
+my $SAMPLES = 3660;			# ten years' worth
+my $XFF = 0.3;				# we can have missing data 2 out of 3 days
+
+my @intervals = ( "week", "month", "year" );
+my $template = "day:week:month:total:space:used:avail:percent:backupday:backupweek:backupmonth:backuptotal:backupspace:backupused:backupavail:backuppercent";
+my @headings = (
+	"Files modified in last day",
+	"Files modified in last week",
+	"Files modified in last month",
+	"Total files",
+	"Total space (MB)",
+	"Used space (MB)",
+	"Available space (MB)",
+	"Percent used",
+);
+my @short_headings = @headings[0..3];
+my @vmware_headings = @short_headings;
+$vmware_headings[1] = "Files modified in last two weeks";
+
+sub dsd (@)
+{
+	my $name = shift;
+	my $max = ($#_ > -1) ? shift : "U";
+
+	return "DS:$name:GAUGE:$INTERVAL:0:$max";
+}
+
+sub check_rrd_error ($)
+{
+	my $err = RRDs::error;
+	warn "@_: $err" if $err;
+}
+
+sub create_rrd ($)
+{
+	my $host = shift;
+	my $rrd = "$rrddir/$host.rrd";
+	if (! -e $rrd) {
+		RRDs::create( $rrd, "--step", $INTERVAL,
+			dsd( "day" ), dsd( "week" ), dsd( "month" ), dsd( "total" ),
+			dsd( "space" ), dsd( "used" ), dsd( "avail" ), dsd( "percent", 100 ),
+			dsd( "backupday" ), dsd( "backupweek" ), dsd( "backupmonth" ),
+			dsd( "backuptotal" ), dsd( "backupspace" ), dsd( "backupused" ),
+			dsd( "backupavail" ), dsd( "backuppercent", 100 ),
+			"RRA:LAST:$XFF:1:$SAMPLES", "RRA:MIN:$XFF:1:$SAMPLES",
+			"RRA:MAX:$XFF:1:$SAMPLES", "RRA:AVERAGE:$XFF:1:$SAMPLES",
+		);
+		check_rrd_error( "Cannot create RRD $rrd" );
+	}
+}
+
+sub update_rrd ($)
+{
+	my $host = shift;
+	my $data = shift;
+	my $rrd = "$rrddir/$host.rrd";
+	RRDs::update( $rrd, "--template=$template", "$data" );
+	check_rrd_error( "Cannot update RRD $rrd" );
+}
+
+sub graph_rrd ($) {
+	my $host = shift;
+	my $rrd = "$rrddir/$host.rrd";
+	for my $i (@intervals) {
+		my $graph = "$host/$i.png";
+		RRDs::graph( $graph,
+			"--title=$host file counts - last $i",
+			"--lower-limit=0",
+			"--watermark=Paul was here",
+			"--alt-autoscale-max",
+			"--vertical-label=Number of files",
+			"--start=e-1$i",
+			"DEF:day=$rrd:day:AVERAGE",
+			"DEF:week=$rrd:week:AVERAGE",
+			"DEF:month=$rrd:month:AVERAGE",
+			"DEF:total=$rrd:total:AVERAGE",
+			"DEF:backupday=$rrd:backupday:AVERAGE",
+			"DEF:backupweek=$rrd:backupweek:AVERAGE",
+			"DEF:backupmonth=$rrd:backupmonth:AVERAGE",
+			"DEF:backuptotal=$rrd:backuptotal:AVERAGE",
+			"LINE1:day#FF0000:Files modified last day",
+			"LINE2:week#7F0000:Files modified last week",
+			"LINE3:month#00FF00:Files modified last month",
+			"LINE4:total#007F00:Total files",
+			"LINE5:backupday#0000FF:Files modified last day (in backup)",
+			"LINE6:backupweek#00007F:Files modified last week (in backup)",
+			"LINE7:backupmonth#FFFF00:Files modified last month (in backup)",
+			"LINE8:backuptotal#FF7F00:Total files (in backup)",
+		);
+		check_rrd_error( "Cannot create graph $i for RRD $rrd" );
+	}
+}
+
+sub nbsp ($)
+{
+	my $ret = shift;
+	$ret =~ s/ /&nbsp;/g;
+	return $ret;
+}
+
+# TODO: combine stat_pair, disk_free, and percent_used
+
+sub stat_pair ($$) {
+	my $a = shift;
+	my $b = shift;
+	my $diff = $a - $b;
+	my $class;
+	if ($diff < -($a / 20)) {
+		# error: there are more than 5% of modified files that are not on the backup
+		$class = "error";
+	}
+	elsif ($diff < 0) {
+		# warning: there is more than 1 modified file that is not on the backup
+		$class = "warn";
+	}
+	else {
+		# everything's fine
+		$class = "normal";
+	}
+	return td( { -class => $class, -align => "right" }, $a );
+}
+
+sub disk_free ($) {
+	my $a = shift;
+	my $class;
+	if ($a < $err_disk_free) {
+		# error: there is less than 100 MB free
+		$class = "error";
+	}
+	elsif ($a < $warn_disk_free) {
+		# warning: there is less than 1000 MB free
+		$class = "warn";
+	}
+	else {
+		# everything's fine
+		$class = "normal";
+	}
+	return td( { -class => $class, -align => "right" }, $a );
+}
+
+sub percent_used ($) {
+	my $a = shift;
+	my $class;
+	if ($a > $err_percent_used) {
+		# error: there is more than 99% used
+		$class = "error";
+	}
+	elsif ($a > $warn_percent_used) {
+		# warning: there is more than 95% used
+		$class = "warn";
+	}
+	else {
+		# everything's fine
+		$class = "normal";
+	}
+	return td( { -class => $class, -align => "right" }, $a );
+}
+
+sub check_stats ($)
+{
+	my $stats = shift;
+	if ($#$stats > 7) {	# this is a USB rsync backup comparison line
+		$stats->[8] = stat_pair( $stats->[8], $stats->[0] );
+		$stats->[9] = stat_pair( $stats->[9], $stats->[1] );
+		$stats->[10] = stat_pair( $stats->[10], $stats->[2] );
+		$stats->[11] = stat_pair( $stats->[11], $stats->[3] );
+		$stats->[6] = disk_free( $stats->[6] );
+		$stats->[7] = percent_used( $stats->[7] );
+		$stats->[14] = disk_free( $stats->[14] );
+		$stats->[15] = percent_used( $stats->[15] );
+		for my $i (12 .. 13) {
+			$stats->[$i] = td( { -align => "right" }, $stats->[$i] );
+		}
+	}
+	my $max = $#$stats > 5 ? 5 : $#$stats;
+	for my $i (0 .. $max) {
+		$stats->[$i] = td( { -align => "right" }, $stats->[$i] );
+	}
+}
+
+# right align all of the stats - they are numbers
+sub check_vmware_stats ($)
+{
+	my $stats = shift;
+	my $max = $#$stats > 5 ? 5 : $#$stats;
+	for my $i (0 .. $max) {
+		$stats->[$i] = td( { -align => "right" }, $stats->[$i] );
+	}
+}
+
+sub time_class_check ($$$)
+{
+	my ($time, $err_hours, $warn_hours) = @_;
+	if ($now - $time > ($err_hours * 60 * 60)) {
+		return "error";
+	}
+	if ($now - $time > ($warn_hours * 60 * 60)) {
+		return "warn";
+	}
+	return "normal";
+}
+
+sub time_class ($)
+{
+	return time_class_check($_[0], $backup_err_hours, $backup_warn_hours);
+}
+
+sub vmware_time_class ($)
+{
+	return time_class_check($_[0], $vmware_err_hours, $vmware_warn_hours);
+}
+
+sub host_row ($$$$$)
+{
+	my ($host, $path, $stats, $check_stats_func, $check_time_func) = @_;
+	my @stats = split /:/, $stats;
+	my $rawtime = shift @stats;
+	my $time = localtime($rawtime);
+	$check_stats_func->(\@stats);
+	my @ret = td( a( { -href => "$host/" }, $host ) );
+	if ($path ne "") {
+		$path =~ s/_/\//g;
+		push @ret, td( $path );
+	}
+	push @ret, td( { -align => "right", -class => $check_time_func->($rawtime) },
+		nbsp($time) ), join( " ", @stats ), "\n";
+	return @ret;
+}
+
+sub print_legend ()
+{
+	print	h5( "Legend" ), "\n",
+		p( span( { -class => "error" }, "Errors" ) ),
+		ul(
+			li( "the number of files in the backup is more than 5% less than the number of files in the live file system" ),
+			li( "the amount of available space in the file system is less than $err_disk_free MB" ),
+			li( "the file system is more than $err_percent_used% used" ),
+			li( "the backup statistics are more than $backup_err_hours hours old" ),
+		),
+		p( span( { -class => "warn" }, "Warnings" ) ),
+		ul(
+			li( "the number of files in the backup is less than the number of files in the live file system" ),
+			li( "the amount of available space in the file system is less than $warn_disk_free MB" ),
+			li( "the file system is more than $warn_percent_used% used" ),
+			li( "the backup statistics are more than $backup_warn_hours hours old" ),
+		);
+
+}
+
+sub start_table ()
+{
+	print	"\n<table border=1 cellspacing=0 cellpadding=1>\n",
+		Tr( th( { -rowspan => 2 }, "Host" ),
+		  th( { -rowspan => 2 }, "Path" ),
+		  th( { -rowspan => 2 }, "Time" ),
+		  th( { -colspan => 8 }, "Source filesystem" ),
+		  th( { -colspan => 8 }, "Backup filesystem" ) ), "\n",
+		Tr( td( [ @headings ] ), td( [ @headings ] ) ), "\n";
+}
+
+sub finish_table () {
+	print	"</table>\n",
+}
+
+sub start_table_rsnapshot ()
+{
+	print	"\n<table border=1 cellspacing=0 cellpadding=1>\n",
+		Tr( th( "Host" ), th( "Time" ), th( [ @short_headings ] ) ), "\n";
+}
+
+sub start_table_vmware ()
+{
+	print	"\n<table border=1 cellspacing=0 cellpadding=1>\n",
+		Tr( th( "Host" ), th( "Time" ), th( [ @vmware_headings ] ) ), "\n";
+}
+
+sub last_line (@)
+{
+	my @rows = @_;			# read file
+	my $row = $rows[$#rows];	# grab last line
+	chomp $row;			# delete newline
+	return $row;
+}
+
+# use hosts specified on the command line, or all directories
+my @hosts = ($#ARGV > -1) ? @ARGV : <*/>;
+
+sub print_table ($$$)
+{
+	my $prefix = shift;
+	my $check_stats_func = shift;
+	my $check_time_func = shift;
+	for my $host (@hosts) {
+		$host =~ s/\/$//;		# remove trailing /
+		#create_rrd $host;
+		for my $file (<$host/$prefix*>) {
+			if (-e "$file") {
+				unless (open( DATA, "$file" )) {
+					warn "Cannot open $file: $!";
+					next;
+				}
+
+				my $row = last_line(<DATA>);
+				#update_rrd $host, $row;
+				my $basename = basename($file);
+				$basename =~ s/^$prefix//;
+				print Tr(host_row($host, $basename, $row,
+					$check_stats_func, $check_time_func)), "\n";
+
+				unless (close( DATA )) {
+					warn "Cannot close $file: $!";
+					next;
+				}
+			}
+		}
+	}
+}
+
+print start_html(
+	-title	=> "Backup summary",
+	-style	=> { src => "backupstats.css" },
+	-head	=> meta({ -http_equiv => "refresh", content => "3600" }),
+);
+
+print_legend;
+
+print h2( "Backup summary" ),
+	"\n",
+	p( nbsp( scalar localtime( $now ) ) );
+print h3( "USB backups" );
+start_table;
+print_table("backup-stats", \&check_stats, \&time_class);
+finish_table;
+
+print h3( "Linux rsnapshots" );
+start_table_rsnapshot;
+print_table("rsnapshot-stats-linux", \&check_stats, \&time_class);
+finish_table;
+
+print h3( "Windows rsnapshots" );
+start_table_rsnapshot;
+print_table("rsnapshot-stats-windows", \&check_stats, \&time_class);
+finish_table;
+
+print h3( "VMware backups" );
+start_table_vmware;
+print_table("vmware-backup-stats", \&check_vmware_stats, \&vmware_time_class);
+finish_table;
+
+print end_html();

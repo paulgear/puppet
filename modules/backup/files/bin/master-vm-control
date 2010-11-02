@@ -1,0 +1,108 @@
+#!/bin/bash
+#
+# Author:	Rick Saul
+# Created:	2007-09-11
+# Modified:	2007-09-20
+#
+# Managed by puppet - DO NOT EDIT LOCALLY!
+#
+
+# include these in every script!
+set -e		# stop script on error
+set -u		# unset variables are an error
+
+# debugging
+DEBUG=""
+if [ "$#" -gt 1 ]; then
+    if [ "$1" = "--debug" ]; then
+	DEBUG="$1"
+	shift
+	set -x
+    fi
+fi
+
+# get command line parameters
+ACTION="$1"
+NAME="$2"
+HOST="$3"
+DIR="$4"
+DEST="$5"
+VMX="$6"
+
+#BACKUP="scp -rp"
+BACKUP="rsync -Sa --delete --stats --human-readable"
+LOG="/tmp/$NAME.log"
+rm -f $LOG
+
+# This runs a subshell that lets us redirect all the output at once.
+(
+
+    # run the action
+    case $ACTION in
+
+    suspend|start|stop|reset|getstate)
+	ssh $HOST "vmware-cmd '$DIR/$NAME/$VMX' $ACTION"
+	;;
+
+    backup)
+	echo "`date`: starting $NAME"
+	STATE=`ssh $HOST "vmware-cmd -q '$DIR/$NAME/$VMX' getstate"`
+	case "$STATE" in
+	on)
+		ssh $HOST "vmware-cmd '$DIR/$NAME/$VMX' suspend"
+		;;
+	suspended|off)
+		;;
+	*)
+		echo "ERROR: $DIR/$NAME/$VMX is in an unknown state: $STATE"
+		exit 1
+		;;
+	esac
+	mkdir -p $DEST					# create dest folder
+	$BACKUP "root@$HOST:$DIR/$NAME" "$DEST/" || true
+	    # We need the '|| true' to ensure that the start is executed
+	    # regardless of the result of the rsync.  If it were not
+	    # there, a failed backup would cause the script to exit, due
+	    # to the 'set -e' above.
+	if [ "$STATE" = "on" ]; then
+		ssh $HOST "vmware-cmd '$DIR/$NAME/$VMX' start"
+	fi
+	echo "`date`: finished $NAME"
+	vmware-backup-stats $NAME $DEST
+	;;
+
+    backupifdown)
+	STATE=`ssh $HOST "vmware-cmd -q '$DIR/$NAME/$VMX' getstate"`
+	case "$STATE" in
+	suspended|off)
+		mkdir -p $DEST					# create dest folder
+		echo "`date`: starting $NAME"
+		$BACKUP "root@$HOST:$DIR/$NAME" "$DEST/" || true
+		    # We need the '|| true' to ensure that the start is executed
+		    # regardless of the result of the rsync.  If it were not
+		    # there, a failed backup would cause the script to exit, due
+		    # to the 'set -e' above.
+		echo "`date`: finished $NAME"
+		vmware-backup-stats $NAME $DEST
+		;;
+	*)
+		echo "$NAME is $STATE - not backing up"
+		;;
+	esac
+	;;
+
+    *)
+	echo "First parameter not a valid vmware-cmd command for this script:
+    use suspend, start, stop, reset or backup" 2>&1
+	exit 1
+	;;
+
+    esac
+
+) >$LOG 2>&1
+
+# display output if there was any
+if [ -s $LOG ]; then
+    echo "================== $NAME =================="
+    cat $LOG
+fi

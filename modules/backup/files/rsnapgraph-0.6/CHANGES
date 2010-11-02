@@ -1,0 +1,33 @@
+
+rsnapgraph CHANGES
+
+---------------------------------------------------------------------------
+
+  March 12, 2005
+  Denis McLaughlin
+   - initial implementation
+
+  March 25, 2005
+  Denis McLaughlin
+   - added command line switches
+   - added configuration file
+   - added ability to clean work directory
+   - added ability to symlink dated graphs to base name
+   - added CHANGES
+
+  March 27, 2005
+  Denis McLaughlin
+   - changed relative graph of file count and disk space to absolute
+   - added Makefile with install and uninstall targets
+   - moved key to lower left
+   - added README
+
+  March 27, 2005: released version 0.5
+
+  March 31, 2005
+  Nathan Rosenquist
+   - made workdir have no default, for security reasons
+   - made graphdir have no default, for security reasons
+   - modified Makefile to prevent an existing config file being overwritten
+
+  March 31, 2005: released version 0.6

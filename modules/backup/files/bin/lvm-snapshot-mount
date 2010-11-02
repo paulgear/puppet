@@ -1,0 +1,142 @@
+#!/bin/bash
+#
+# Author:	Paul Gear
+# Created:	2010-10-12
+# Description:	Prepare a filesystem for backup using LVM snapshots
+#
+# Overall flow of script:
+#	- run preremove (e.g. to show LV state)
+#	- umount snapshot dir
+#	- delete snapshot lv
+#	- run preexec (e.g. to shut down processes)
+#	- umount original lv
+#	- create snapshot lv
+#	- mount original lv
+#	- run post-exec (e.g. to start processes back up again)
+#	- mount snapshot lv in read-only mode
+#
+
+set -e
+set -u
+#set -x
+
+PATH="/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/sbin:/usr/local/bin:$PATH"
+PROG=`basename $0`
+
+ORIGINAL_DIR=""
+ORIGINAL_LV=""
+SNAPSHOT_DIR=""
+SNAPSHOT_LV=""
+SNAPSHOT_SIZE=""
+PRE_REMOVE=""
+PRE_SNAP=""
+POST_SNAP=""
+
+JUST_UMOUNT=0
+JUST_MOUNT=0
+if [ "$#" -gt 0 ]; then
+	case "$1" in
+	mount)
+		JUST_MOUNT=1
+		;;
+	umount)
+		JUST_UMOUNT=1
+		;;
+	*)
+		;;
+	esac
+fi
+
+CONF="/usr/local/etc/$PROG.conf"
+if [ -r $CONF ]; then
+	. $CONF
+fi
+
+error()
+{
+	echo "$PROG: $@" >&2
+}
+
+fatal()
+{
+	error "$@"
+	exit 1
+}
+
+ismounted()
+{
+	ARG="$1"
+	mount 2>&1 | awk -v ARG=$ARG '$1 == ARG || $3 == ARG { FOUND=ARG } END { if (FOUND) { exit 0 } else { exit 1 } }'
+}
+
+islv()
+{
+	lvdisplay "$@" >/dev/null 2>&1
+}
+
+# check for the variables being set
+for i in ORIGINAL_DIR ORIGINAL_LV SNAPSHOT_DIR SNAPSHOT_LV SNAPSHOT_SIZE; do
+	if [ -z "${!i}" ]; then
+		fatal "$i not set"
+	fi
+done
+
+if [ $JUST_UMOUNT -ne 0 ]; then
+	# if we're called with the umount argument, just umount the snapshot and exit
+	if ismounted $SNAPSHOT_DIR; then
+		umount $SNAPSHOT_DIR
+	fi
+	exit 0
+elif [ $JUST_MOUNT -ne 0 ]; then
+	# if we're called with the mount argument, just mount the snapshot and exit
+	if ! ismounted $SNAPSHOT_DIR; then
+		mount -o ro $SNAPSHOT_LV $SNAPSHOT_DIR
+	fi
+	exit 0
+else
+	# otherwise continue on to recreating the snapshot and mounting it
+	:
+fi
+
+if [ -n "${PRE_REMOVE:-''}" ]; then
+	set +e
+	eval "$PRE_REMOVE"
+	set -e
+fi
+
+LV=`basename $SNAPSHOT_LV`
+
+if ismounted $SNAPSHOT_DIR; then
+	umount $SNAPSHOT_DIR
+else
+	mkdir -p $SNAPSHOT_DIR
+fi
+
+if islv $SNAPSHOT_LV; then
+	lvremove --force $SNAPSHOT_LV
+fi
+
+if [ -n "${PRE_SNAP:-''}" ]; then
+	set +e
+	eval "$PRE_SNAP"
+	set -e
+fi
+
+if ismounted $ORIGINAL_DIR; then
+	# ignore errors if we can't unmount original
+	umount $ORIGINAL_DIR || true
+fi
+
+lvcreate --size $SNAPSHOT_SIZE --name $LV --snapshot $ORIGINAL_LV
+
+if ! ismounted $ORIGINAL_DIR; then
+	mount $ORIGINAL_LV $ORIGINAL_DIR
+fi
+
+if [ -n "$POST_SNAP" ]; then
+	set +e
+	eval "$POST_SNAP"
+	set -e
+fi
+
+mount -o ro $SNAPSHOT_LV $SNAPSHOT_DIR

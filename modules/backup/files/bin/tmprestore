@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Author:	Paul Gear
+# Created:	2009-06-22
+# Modified:	2010-02-04
+# Description:	Restore specified directories from autoloader tape
+#
+
+set -e
+set -u
+
+DEVICE=/dev/st0
+DATE=`date +%Y%m%d-%H%M%S`
+
+renice -5 $$
+cd /testrestore
+(
+
+mtx status
+/usr/local/bin/tmp-settape $DEVICE
+restore -Q $HOME/restore.qaf -x -F /usr/local/bin/tmprestore-changer -b 1024 -f $DEVICE "$@"
+mtx status
+mtx unload
+
+) 2>&1 | tee testrestore-$DATE.log
