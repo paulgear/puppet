@@ -1,0 +1,6 @@
+#!/bin/sh
+# Managed by puppet - do not edit manually!
+cd /etc/puppet
+git stat
+git add *
+git commit -a -m'Automatic checkpoint'
