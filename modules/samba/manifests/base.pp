@@ -2,7 +2,6 @@
 # puppet class to copy samba server data from the central repository via rsync
 #
 # FIXME - Ubuntu: only samba 3.4 is available
-# FIXME: split out site-specific configs from generic
 #
 
 class samba::base {
