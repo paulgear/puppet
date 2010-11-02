@@ -1,0 +1,10 @@
+
+#Blanket IP Block.  To block all sites specified only as an IP,
+#remove the # from the next line to leave only a '*ip':
+*ip
+
+#Blanket SSL/CONNECT IP Block.  To block all SSL and CONNECT
+#tunnels to sites specified only as an IP,
+#remove the # from the next line to leave only a '*ips':
+*ips
+

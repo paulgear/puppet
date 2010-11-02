@@ -1,0 +1,18 @@
+/var/log/dansguardian/access.log {
+	rotate 52
+	weekly
+
+	compress
+	delaycompress
+	missingok
+	notifempty
+
+	sharedscripts
+	prerotate
+		/sbin/service dansguardian stop > /dev/null
+		sleep 5
+	endscript
+	postrotate
+		/sbin/service dansguardian start > /dev/null
+	endscript
+} 

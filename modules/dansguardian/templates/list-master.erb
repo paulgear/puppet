@@ -1,0 +1,21 @@
+<% require '/etc/puppet/include/qbpuppetutils.rb' -%>
+
+<%= include_header( "Dan's Guardian list: " + basename + "f" + filtergroup ) -%>
+
+# Included list categories:
+<% (default_categories + extra_categories).each do |category| -%>
+<% if File.exists?( puppetdir + "/files/lists/Categories/" + category + "/" + basename ) then -%>
+.Include</etc/dansguardian/lists/Categories/<%= category %>/<%= basename %>>
+<% end -%>
+<% end -%>
+# End of categories list
+
+# Included squidGuard blacklists:
+<% (default_blacklists + extra_blacklists).each do |blacklist| -%>
+.Include</etc/dansguardian/lists/blacklists/<%= blacklist %>/<%= blacklist_type %>>
+<% end -%>
+# End of squidGuard blacklists
+
+#####
+# End of file: <%= basename + "f" + filtergroup %>
+#####

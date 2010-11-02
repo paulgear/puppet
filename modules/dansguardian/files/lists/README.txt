@@ -1,0 +1,29 @@
+The following files are constructed from custom categories:
+
+bannedsitelist
+bannedurllist
+exceptionsitelist
+exceptionurllist
+
+The following files are global:
+
+contentscanners/exceptionvirussitelist
+bannedextensionlist
+bannedmimetypelist
+bannedphraselist
+bannedregexpheaderlist
+bannedregexpurllist
+contentregexplist
+exceptionextensionlist
+exceptionfilesitelist
+exceptionfileurllist
+exceptionmimetypelist
+exceptionphraselist
+exceptionregexpurllist
+exceptionurllist
+greysitelist
+greyurllist
+headerregexplist
+picsfile
+urlregexplist
+weightedphraselist

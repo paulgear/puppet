@@ -1,0 +1,15 @@
+# Filter Groups List file for DansGuardian
+#
+# Format is <user>=filter<1-9> where 1-9 are the groups
+#
+# Eg:
+# daniel=filter2
+#
+# This file is only of use if you have more than 1 filter group
+#
+
+##########
+# There are currently <%= numfiltergroups %> filter groups defined: <%= filtergroups_description -%>
+##########
+
+<%= IO.read( puppetdir + "/files/filtergroupslist" ) -%>
