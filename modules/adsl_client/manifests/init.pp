@@ -8,7 +8,11 @@ class adsl_client {
 
 # FIXME: use OpenDNS instead of ISP name servers
 
-	define configure ($eth, $isp = $isp, $search) {
+	define configure (
+			$eth,
+			$isp = $isp,
+			$search
+			) {
 
 		$isp_ns = $isp ? {
 			iinet		=> "203.0.178.191",
