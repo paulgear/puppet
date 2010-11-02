@@ -13,13 +13,17 @@ class snmp {
 		ubuntu		=> "snmpd",
 		debian		=> "snmpd",
 	}
+	$servers = [ "127.0.0.1", ]
 
 	# ensure package is installed
 	package { $pkg: ensure => installed }
 
 	# call this with appropriate parameters to define snmpd.conf
-	define snmpd_conf( $location = "Unknown", $contact = "Unknown",
-			$snmp_servers = [ "127.0.0.1", ] ) {
+	define snmpd_conf(
+			$location = "Unknown",
+			$contact = "Unknown",
+			$snmp_servers = $snmp::servers
+			) {
 		# configuration file
 		file { "/etc/snmp/snmpd.conf":
 			ensure	=> file,
