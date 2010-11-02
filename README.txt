@@ -1,14 +1,13 @@
 LICENSE
 -------
 
-puppet-modules - a collection of puppet modules focused on support of remote office
-Linux servers.
+This is a collection of puppet modules focused on support of remote office Linux servers.
 
     Copyright (c) 2010 Gear Consulting Pty Ltd <http://libertysys.com.au/>
 
     Written by Paul Gear <github@libertysys.com.au>
 
-    The latest version of puppet-modules may be found at
+    The latest version of these modules may be found at
     <http://github.com/paulgear/puppet-modules>
 
 This program is free software: you can redistribute it and/or modify it under the terms
@@ -26,9 +25,10 @@ details.
 ACKNOWLEDGEMENT
 ---------------
 
-The kind support Queensland Baptist Care <http://www.qbc.com.au/> ICT Services Manager,
-Rick Saul, in the development of these is gratefully acknowledged.  Without Rick's
-encouragement and committment, most of this code would never have been possible.
+The kind support of Queensland Baptist Care <http://www.qbc.com.au/> ICT Services
+Manager, Rick Saul, in the development of these is gratefully acknowledged.  Without
+Rick's encouragement and commitment, most of this code would never have been
+possible.
 
 NOTES
 -----
