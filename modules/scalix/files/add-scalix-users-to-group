@@ -1,0 +1,52 @@
+#!/usr/bin/perl -w
+#
+# Bulk-add users to a Scalix group. 
+#
+# NOTE:	This file is managed by puppet. Do not edit locally.
+#
+# BUGS:	Uses a slower method for group maintenance, but you probably don't care.
+#	These aren't the droids you're looking for.
+#
+# Author:	Paul D. Gear
+# Date:		2010-01-21
+
+use strict;
+use Getopt::Long;
+
+my $default_instance = "";
+
+# configuration
+my $instance = "$default_instance";
+my $group = "";
+my $help = 0;
+
+GetOptions(
+	'help' => \$help,
+	'instance=s' => \$instance,
+	'group=s' => \$group,
+);
+
+if ($help or $group eq "") {
+	print STDERR "Usage: $0 [options] filename.csv
+Options:
+	--group 'Group Name'		[MANDATORY]
+	--instance scalix_instance	(default: $default_instance)
+";
+	exit 0;
+}
+
+while (<>) {
+
+	chomp;
+	my @F = split /,/;
+	if ($#F != 1) {
+		warn "User name $_ not valid - must be in the form Firstname,Lastname";
+		next;
+	}
+
+	my $first = join( "_", split( /\s+/, $F[0] ) );
+	my $last = join( "_", split( /\s+/, $F[1] ) );
+
+	# Add the user to the given group.
+	print "omaddpdln -l '$group' -n '$first $last/$instance'\n";
+}

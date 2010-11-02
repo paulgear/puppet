@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#set -e
+set -u
+
+PATH=/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH
+
+randomsleep 1800		# sleep for up to 30 minutes
+yum clean expire-cache
+yum update -y
+service squid restart
+service dansguardian restart

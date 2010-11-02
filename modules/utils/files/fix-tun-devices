@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# Check for multiple tunX devices and kill all those other than the first
+#
+
+set -e
+set -u
+
+PATH=/sbin:/usr/sbin:$PATH
+PROG=`basename $0`
+
+TUNS=`ifconfig | awk '$1 ~ /^tun/ {print $1}'`
+NUM_TUNS=`echo $TUNS | wc -w`
+HOST=`hostname`
+MAILTO="your@email.here"
+
+if [ "$NUM_TUNS" -gt 1 ]; then
+
+	(
+		# gather some diagnostics
+		ls -la /var/run/openvpn
+		grep . /var/run/openvpn*/*
+		ps -ef|grep openvpn
+		ifconfig
+		ip addr
+		netstat -rn
+		dmesg
+
+		killall openvpn
+		sleep 1
+
+		# remove any remaining tuns
+		TUNS=`ifconfig | awk '$1 ~ /^tun/ {print $1}'`
+		for t in $TUNS; do
+			echo "Trying to delete $t"
+			ifconfig $t delete || true
+			echo "Deleted $t"
+		done
+
+		# restart vpn & other services
+		service openvpn restart
+		service named restart
+		/sbin/shorewall restart && /sbin/shorewall save
+
+		mail -s "Multiple TUN diagnostics: $HOST" $MAILTO <<EOF
+$NUM_TUNS tun devices were detected - openvpn restarted
+EOF
+	) | logger -i -p user.info -t $PROG
+
+#else
+#	echo "$NUM_TUNS found - all is well"
+
+fi
+

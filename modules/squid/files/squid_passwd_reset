@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#
+# Description:	Reset password of special users to a random number
+# Author:	Paul D. Gear
+# Date:		2010-08-31
+#
+
+set -e
+set -u
+
+DIR=/etc/squid
+FILE=squid_passwd
+USERLIST=""
+
+cd $DIR
+for SQUIDUSER in $USERLIST; do
+	htpasswd -b $FILE $SQUIDUSER $RANDOM$RANDOM$RANDOM 2>&1 | \
+		grep -v "^Updating password for user $SQUIDUSER" || true
+done

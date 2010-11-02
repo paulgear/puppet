@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+# Set proxy username & password in /etc/yum.conf
+#
+# Author:	Paul D. Gear
+# Date:		2009-12-09
+#
+
+set -e
+set -u
+
+FILE=${1:-"/etc/yum.conf"}
+MAGIC='#YUM_PROXY_USER'
+USER="changeme"
+PASS="changeme"
+PROXY="http://your.proxy.server:portnum/"
+export USER PASS PROXY
+
+# skip updates if the file is already right
+awk -F= '
+$1 == "proxy" { if ($2 != ENVIRON["PROXY"]) exit 1 }
+$1 == "proxy_username" { if ($2 != ENVIRON["USER"]) exit 1 }
+$1 == "proxy_password" { if ($2 != ENVIRON["PASS"]) exit 1 }
+' $FILE && exit 0
+
+# remove existing proxy details
+sed -ri.BAK -e "
+/^proxy=/d
+/^proxy_username=/d
+/^proxy_password=/d
+/^$MAGIC/,/^$MAGIC/d
+" $FILE
+
+# add our stuff to the end of the file
+cat >> $FILE <<EOF
+$MAGIC - do not remove this line
+proxy=$PROXY
+proxy_username=$USER
+proxy_password=$PASS
+$MAGIC - do not remove this line
+EOF
+

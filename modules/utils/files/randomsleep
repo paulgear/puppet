@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Sleep a random amount limited by the arguments
+# e.g.	randomsleep 45 will sleep a random amount between 1 and 45 seconds
+#	randomsleep '5 * 5' will sleep a random amount between 1 and 25 seconds
+#
+# Author: Paul Gear
+#
+
+RAND32=`dd if=/dev/urandom bs=4 count=1 2>/dev/null | od -t u4 | head -1 | awk '{print $2}'`
+
+(( SLEEP=RAND32 % "$@" ))
+
+sleep $SLEEP

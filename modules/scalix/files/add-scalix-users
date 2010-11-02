@@ -1,0 +1,73 @@
+#!/usr/bin/perl -w
+#
+# Bulk-add users to the scalix mail system with automatic redirects
+#
+# NOTE:	This file is managed by puppet. Do not edit locally.
+#
+# BUGS:	Uses a slower method for group maintenance, but you probably don't care.
+#	These aren't the droids you're looking for.
+#
+# Author:	Paul D. Gear
+# Date:		2009-12-04
+
+use strict;
+use Getopt::Long;
+
+my $default_instance = "";
+my $default_domain = "";
+
+# configuration
+my $instance = "$default_instance";
+my $class = "limited";
+my $redir = "$default_domain";
+my $dest = "";
+my $group = "";
+my $help = 0;
+
+GetOptions(
+	'help' => \$help,
+	'instance=s' => \$instance,
+	'class=s' => \$class,
+	'redirect-domain=s' => \$redir,
+	'group=s' => \$group,
+	'dest-domain=s' => \$dest,
+);
+
+if ($help or $dest eq "") {
+	print STDERR "Usage: $0 [options] filename.csv
+Options:
+	--class limited|full		(default: limited)
+	--dest subdomain.your.domain	[MANDATORY]
+	--group 'Group Name'		(default: none)
+	--redirect subdomain.your.domain	(default: $default_domain)
+	--instance scalix_instance	(default: $default_instance)
+";
+	exit 0;
+}
+
+while (<>) {
+
+	chomp;
+	my @F = split /,/;
+	if ($#F != 1) {
+		warn "User name $_ not valid - must be in the form Firstname,Lastname";
+		next;
+	}
+
+	my $first = join( "_", split( /\s+/, $F[0] ) );
+	my $last = join( "_", split( /\s+/, $F[1] ) );
+	my $name = join ".", $first, $last;
+	$name =~ s/_/-/g;
+	my $displayName = join " ", @F;
+
+	# Add a standard user
+	print "omaddu --class $class -n '$first $last/$instance/IA=\"$displayName\" <$name\@$redir>'\n";
+
+	# Add a redirect rule from their redirect address to their original address.
+	print "sxaa --user '$first $last' --redirect '$name\@$dest'\n";
+
+	# If a group was specified, add the user to that group.
+	if ($group ne "") {
+		print "omaddpdln -l '$group' -n '$first $last/$instance'\n";
+	}
+}

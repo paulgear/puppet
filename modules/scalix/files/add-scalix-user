@@ -1,0 +1,67 @@
+#!/usr/bin/perl -w
+#
+# Add a single user to the scalix mail system
+#
+# NOTE:	This file is managed by puppet. Do not edit locally.
+#
+# Author:	Paul D. Gear
+# Date:		2009-12-04
+# FIXME: 
+
+use strict;
+use Getopt::Long;
+
+my $default_instance = "";
+my $default_domain = "";
+
+# configuration
+my $instance = "$default_instance";
+my $class = "limited";
+my $domain = "$default_domain";
+my $forward = "";
+my $group = "";
+my $help = 0;
+
+sub usage {
+	print STDERR "Usage: $0 [options] Firstname Lastname
+Options:
+	--class limited|full		(default: limited)
+	--domain domain.name		(default: $default_domain)
+	--forward email\@example.com	(default: none)
+	--group \"My Group\"		(default: none)
+	--instance scalix_instance	(default: $default_instance)
+";
+	exit 0;
+}
+
+GetOptions(
+	'help' => \$help,
+	'instance=s' => \$instance,
+	'class=s' => \$class,
+	'domain=s' => \$domain,
+	'forward=s' => \$forward,
+	'group=s' => \$group,
+) or usage;
+
+if ($help or $#ARGV != 1) {
+	usage;
+}
+
+my $first = join( "_", split( /\s+/, $ARGV[0] ) );
+my $last = join( "_", split( /\s+/, $ARGV[1] ) );
+my $name = join ".", $first, $last;
+$name =~ s/_/-/g;
+my $displayName = join " ", @ARGV;
+
+# Add a standard user
+print "omaddu --class $class -n '$first $last/$instance/IA=\"$displayName\" <$name\@$domain>'\n";
+
+# redirect rule from their redirect address to their original address.
+if ($forward ne "") {
+	print "sxaa --user '$displayName' --redirect '$forward'\n";
+}
+
+if ($group ne "") {
+	print "omaddpdln -l '$group' -n '$first $last/$instance'\n";
+}
+
