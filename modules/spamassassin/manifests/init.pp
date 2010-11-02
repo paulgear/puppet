@@ -33,7 +33,7 @@ class spamassassin {
 		owner		=> root,
 		group		=> root,
 		mode		=> 644,
-		source		=> template("spamassassin/local.cf.erb"),
+		content		=> template("spamassassin/local.cf.erb"),
 	}
 
 	if $operatingsystem == "CentOS" {

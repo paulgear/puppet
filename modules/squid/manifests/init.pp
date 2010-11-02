@@ -41,7 +41,7 @@ class squid {
 		file { "/etc/squid/squid.conf":
 			ensure	=> file,
 			owner	=> root,
-			group	=> $group,
+			group	=> $squid::group,
 			mode	=> 640,
 			content	=> template("squid/squid.conf/MASTER.erb"),
 			notify	=> Exec[$squid::reload],
@@ -53,7 +53,7 @@ class squid {
 	file { "/etc/squid/nopasswordsites.txt":
 		ensure	=> file,
 		owner	=> root,
-		group	=> $group,
+		group	=> $squid::group,
 		mode	=> 640,
 		notify	=> Exec[$squid::reload],
 		content	=> template("squid/nopasswordsites/MASTER.erb"),
@@ -63,7 +63,7 @@ class squid {
 	file { "/var/spool/squid/swap.state":
 		ensure	=> file,
 		owner	=> $owner,
-		group	=> $group,
+		group	=> $squid::group,
 		mode	=> 640,
 	}
 
@@ -71,7 +71,7 @@ class squid {
 	file { "/etc/squid/squid_passwd":
 		ensure	=> file,
 		owner	=> root,
-		group	=> $group,
+		group	=> $squid::group,
 		mode	=> 640,
 		notify	=> Exec[$squid::reload],
 		source	=> "puppet:///modules/squid/squid_passwd",
