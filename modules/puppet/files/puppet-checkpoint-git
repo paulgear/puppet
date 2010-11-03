@@ -9,7 +9,7 @@ git diff
 
 VERSION=`git --version|awk '{print $NF}'`
 case $VERSION in
-1.7*)
+    1.7*)
 	git add --all
 	;;
     1.5*)
