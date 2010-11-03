@@ -1,6 +1,6 @@
 #!/bin/sh
 # Managed by puppet - do not edit manually!
-set -e
+#set -e
 set -u
 
 git commit -a -m'Automatic checkpoint'
