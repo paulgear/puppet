@@ -3,6 +3,8 @@
 set -e
 set -u
 
+git commit -a -m'Automatic checkpoint'
+
 cd /etc/puppet
 git status
 git diff
@@ -21,4 +23,3 @@ case $VERSION in
 	exit 1
 	;;
 esac
-git commit -a -m'Automatic checkpoint'
