@@ -3,8 +3,6 @@
 #set -e
 set -u
 
-git commit -a -m'Automatic checkpoint'
-
 cd /etc/puppet
 git status
 git diff
@@ -16,10 +14,11 @@ case $VERSION in
 	;;
     1.5*)
     	git add -u
-	git add *
+	git add `git ls-files --others`
 	;;
     *)
     	echo "ERROR: Unknown git version $VERSION" >&2
 	exit 1
 	;;
 esac
+git commit -a -m'Automatic checkpoint'
