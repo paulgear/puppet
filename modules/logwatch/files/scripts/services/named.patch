@@ -1,0 +1,23 @@
+--- orig/scripts/services/named	2008-12-31 21:31:12.000000000 +1000
++++ hosts/kenan/scripts/services/named	2009-10-15 09:00:03.000000000 +1000
+@@ -316,6 +325,9 @@
+       $UnknownCCCommands{$CCC}++;
+    } elsif (($CCC) = ($ThisLine =~ /received control channel command '(.*)'/)) {
+       $CCCommands{$CCC}++;
++   } elsif ( ($ThisLine =~ /too many timeouts resolving .*: reducing the advertised EDNS UDP packet size to 512 octets/) ) {
++      #chomp($ThisLine);
++      $EDNSReduce++;
+    } else {
+       # Report any unmatched entries...
+       # remove PID from named messages
+@@ -566,6 +578,10 @@
+    }               
+ }
+ 
++if ($EDNSReduce) {
++      print "   $EDNSReduce EDNS packet size reductions due to timeouts\n";
++}
++
+ if (keys %OtherList) {
+    print "\n**Unmatched Entries**\n";
+    foreach $line (sort {$a cmp $b} keys %OtherList) {

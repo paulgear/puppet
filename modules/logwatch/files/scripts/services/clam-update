@@ -1,0 +1,221 @@
+#!/usr/bin/perl
+##########################################################################
+## $Id: clam-update,v 1.20 2008/06/30 23:07:51 kirk Exp $
+###########################################################################
+# $Log: clam-update,v $
+# Revision 1.20  2008/06/30 23:07:51  kirk
+# fixed copyright holders for files where I know who they should be
+#
+# Revision 1.19  2008/03/24 23:31:26  kirk
+# added copyright/license notice to each script
+#
+# Revision 1.18  2007/01/10 22:22:21  bjorn
+# Clarifying options when daemon fails.
+#
+# Revision 1.17  2006/09/15 16:16:09  bjorn
+# Added additional instructions for syslog logging.
+#
+# Revision 1.16  2006/01/20 23:03:57  bjorn
+# Fix trailing space when using syslog; problem identified by Kenneth Porter.
+#
+# Revision 1.15  2006/01/10 17:28:01  bjorn
+# Corrected typo, by Sergey Svishchev.
+#
+# Revision 1.14  2005/12/01 04:15:55  bjorn
+# Made starts less verbose.
+#
+# Revision 1.13  2005/10/31 16:21:20  bjorn
+# Updates to paths to reflect new Filesystem Hierarchy Standard,
+# by Ivana Varekova.
+#
+# Revision 1.12  2005/05/03 19:34:30  bjorn
+# Added support for new date ranges
+#
+###########################################################################
+# clam-update script for Logwatch
+# Analyzes the Clam Anti-Virus update log
+#
+# Originally written by: Lars Skjærlund <lars@skjaerlund.dk>
+#
+# Please send all comments, suggestions, bug reports,
+#    etc, to logwatch-devel@logwatch.org
+#########################################################################
+
+########################################################
+## Copyright (c) 2008 Lars Skjærlund
+## Covered under the included MIT/X-Consortium License:
+##    http://www.opensource.org/licenses/mit-license.php
+## All modifications and contributions by other persons to
+## this script are assumed to have been donated to the
+## Logwatch project and thus assume the above copyright
+## and licensing terms.  If you want to make contributions
+## under your own copyright or a different license this
+## must be explicitly stated in the contribution an the
+## Logwatch project reserves the right to not accept such
+## contributions.  If you have made significant
+## contributions to this script and want to claim
+## copyright please contact logwatch-devel@logwatch.org.
+#########################################################
+
+#########################################################################
+# Files - all shown with default paths:
+#
+# /usr/share/logwatch/default.conf/logfiles/clam-update.conf
+# /usr/share/logwatch/default.conf/services/clam-update.conf
+# /usr/share/logwatch/scripts/services/clam-update (this file)
+#
+# ... and of course
+#
+# /var/log/clamav/freshclam.log
+#########################################################################
+
+#########################################################################
+# Important note:
+#
+# If no update attempt has been done, an alert will be output to inform
+# you about this (which probably means that freshclam isn't running).
+# 
+# If you have stopped using ClamAV and would like to get rid of the 
+# alert, you should delete the logfile. If there's no logfile, no alerts
+# will be output - but if Logwatch finds a logfile and no update attempts
+# have been made for whatever timeperiod Logwatch is analyzing, an alert
+# will be output.
+#########################################################################
+
+use Logwatch ':dates';
+
+my $Detail = $ENV{'LOGWATCH_DETAIL_LEVEL'};
+
+my $time          = time;
+my $Date;
+my $SearchDate;
+my $InRange       = 0;
+my $UpdatedNum    = 0;
+my $Status        = "";
+my $Version       = "";
+
+my %Starts;
+my %Errors;
+my %Warnings;
+my %Files;
+
+$SearchDate = TimeFilter("%b %e");
+
+#WARNING: Your ClamAV installation is OUTDATED!
+#WARNING: Local version: 0.95.3 Recommended version: 0.96
+#DON'T PANIC! Read http://www.clamav.net/support/faq
+
+while (defined(my $ThisLine = <STDIN>)) {
+   # Freshclam ends log messages with a newline.  If using the LogSyslog option, this is
+   # turned into a space.  So we remove a space from every line, if it exists.
+   $ThisLine =~ s/ $//;
+   if (
+       # separator of 38 dashes
+       ($ThisLine =~ /^\-{38}$/) or
+       # the following failure is also recorded with ERROR later on
+       ($ThisLine =~ /^Giving up/) or
+       # SIGALRM, SIGUSR1, and SIGHIP signals
+       ($ThisLine =~ /^Connecting via proxy/) or
+       ($ThisLine =~ /^Received signal( \d*,|:) wake up$/) or
+       ($ThisLine =~ /^Received signal( \d*,|:) re-opening log file$/) or
+       # temporary failure
+       ($ThisLine =~ /^Trying again/) ) {
+      # Do nothing for the above statements
+   } elsif ($ThisLine =~ /^(\S+.cld) is up to date/) {
+      # Files are up to date
+      $Files{$1}++;
+   } elsif ($ThisLine =~ /^Received signal \d*, terminating$/) {
+      $InRange = 0;
+      $Status = "Last Status:\n   Freshclam daemon was terminated, and is not currently running\n";
+   } elsif ((my $Temp) = ($ThisLine =~ /^freshclam daemon (.*)/)) {
+      # just set version for now, to be used later
+      $Version = $Temp;
+   } elsif (($Date) = ($ThisLine =~ /^ClamAV update process started at \w{3} (\w{3} [\d ]\d ..:..:.. \d{4})$/)) {
+      if ($Date =~ $SearchDate) {
+         $InRange = 1;
+         $UpdatedNum++;
+         $Status = "Last " . $ThisLine . "\nLast Status:\n";
+         if ($Version) {
+            # $Starts is only set if $Version was set just before the current update process
+            $Starts{$Version}++;
+         }
+      } else {
+         $InRange = 0;
+      }
+      # $Version was already logged if necessary, so now we clear it 
+      $Version = "";
+   } elsif ($InRange) {
+      $Status = $Status . "   " . $ThisLine;
+      chomp($ThisLine);
+      if ((my $Text) = ($ThisLine =~ /^ERROR: (.*)/)) {
+         $Errors{$Text}++;
+      } elsif (($Text) = ($ThisLine =~ /^WARNING: (.*)/)) {
+         $Warnings{$Text}++;
+      }
+   }
+}
+
+#####################################################################
+if (keys %Starts and ($Detail >= 5)) {
+   print "\nThe following version(s) of the freshclam daemon were started\n";
+   foreach my $Version (sort keys %Starts) {
+      print "   $Version: $Starts{$Version} Time(s)\n";
+   }
+}
+
+if ($UpdatedNum) {
+   if ($Detail >= 5) {
+      print "\nThe ClamAV update process was started $UpdatedNum time(s)\n";
+      print "The following files were up-to-date:\n";
+      for my $f (sort keys %Files) {
+	 print "$f: $Files{$f} times\n";
+      }
+      print "\n";
+   }
+}
+else {
+   print "\nNo updates detected in the log for the freshclam daemon (the\n";
+   print "ClamAV update process).  If the freshclam daemon is not running,\n";
+   print "you may need to restart it.  Other options:\n\n";
+   print "A. If you no longer wish to run freshclam, deleting the log file\n";
+   print "   (default is freshclam.log) will suppress this error message.\n\n";
+   print "B. If you use a different log file, update the appropriate\n";
+   print "   configuration file.  For example:\n";
+   print "      echo \"LogFile = log_file\" >> /etc/logwatch/conf/logfiles/clam-update.conf\n";
+   print "   where log_file is the filename of the freshclam log file.\n\n";
+   print "C. If you are logging using syslog, you need to indicate that your\n";
+   print "   log file uses the syslog format.  For example:\n";
+   print "      echo \"*OnlyService = freshclam\" >> /etc/logwatch/conf/logfiles/clam-update.conf\n";
+   print "      echo \"*RemoveHeaders\" >> /etc/logwatch/conf/logfiles/clam-update.conf\n";
+}
+
+if ($Status) {
+   print "\n" . $Status;
+};
+
+if ($Detail >= 10) {
+   if ((keys %Errors) or (keys %Warnings)) {
+      print "\nThe following ERRORS and/or WARNINGS were detected when\n";
+      print "running the ClamAV update process.  If these ERRORS and/or\n";
+      print "WARNINGS do not show up in the \"Last Status\" section above,\n";
+      print "then their underlying cause has probably been corrected.\n";
+   }
+
+   if (keys %Errors) {
+      print "\nERRORS:\n";
+      foreach my $Text (keys %Errors) {
+         print "   $Text: $Errors{$Text} Time(s)\n";
+      }
+   }
+
+   if (keys %Warnings) {
+      print "\nWARNINGS:\n";
+      foreach my $Text (keys %Warnings) {
+         print "   $Text: $Warnings{$Text} Time(s)\n";
+      }
+   }
+}
+
+exit(0);
+
+# vi: shiftwidth=3 tabstop=3 syntax=perl et

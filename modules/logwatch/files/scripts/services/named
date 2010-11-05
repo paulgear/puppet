@@ -1,0 +1,587 @@
+#!/usr/bin/perl
+##########################################################################
+# $Id: named,v 1.57 2008/03/24 23:31:26 kirk Exp $
+##########################################################################
+# $Log: named,v $
+# Revision 1.57  2008/03/24 23:31:26  kirk
+# added copyright/license notice to each script
+#
+# Revision 1.56  2007/09/02 01:22:30  mrc
+#  - Zone notify update from Orion Poplawski
+#
+# Revision 1.55  2007/08/22 19:13:00  bjorn
+# Additional filtering, including configuration and control channel errors,
+# by Ivana Varekova.
+#
+# Revision 1.54  2007/08/02 05:13:49  mrc
+# - Catch unmatched update forwarding denied, automatic empty zone, and
+#   unexpected rcode [Thanks: Orion Poplawski]
+# - Catch unmatched shutdown failure messages
+#
+# Revision 1.53  2007/07/08 18:44:51  mrc
+# Catch unmatched zone update refusals, including viewname in output [Thanks: Åge Strand]
+#
+# Revision 1.52  2007/04/28 20:58:39  bjorn
+# More generic RCODE handling - prints summary of unexpected DNS RCODEs.
+#
+# Revision 1.51  2007/04/15 20:03:25  bjorn
+# Filtering updating zones with views, based on submittal by
+# Jesper K. Pedersen.
+#
+# Revision 1.50  2007/02/16 03:36:25  bjorn
+# Filtering some D-BUS statements, by Ivana Varekova.
+#
+# Revision 1.49  2007/01/29 18:28:38  bjorn
+# Better formatting of output, by Markus Lude.
+#
+# Revision 1.48  2006/11/12 21:14:02  bjorn
+# Filtering 'transfer started' message, by Russell Coker / Tom London.
+#
+# Revision 1.47  2006/10/20 21:02:00  bjorn
+# Typo fixed by Alex S.
+#
+# Revision 1.46  2006/10/20 16:44:38  bjorn
+# Changed regexp to handle IPV6, by Willi Mann.
+#
+# Revision 1.45  2006/09/15 15:40:58  bjorn
+# Additional filtering by Ivana Varekova.
+#
+# Revision 1.44  2006/03/20 20:42:57  bjorn
+# Additional filtering, by Ivana Varekova.
+#
+# Revision 1.43  2005/11/30 05:01:44  bjorn
+# Don't search for info: string (for Debian), by Willi Mann.
+#
+# Revision 1.42  2005/11/24 16:48:30  bjorn
+# Handles additional statements, by Ivana Varekova.
+#
+# Revision 1.41  2005/09/29 15:02:52  bjorn
+# Filtering 'succeeded' by Ivana Varekova.
+#
+# Revision 1.40  2005/04/15 21:44:35  bjorn
+# testing from anonymous
+#
+# Revision 1.39  2005/04/15 21:36:59  bjorn
+# typo fixed in 'named' release during 2004
+#
+# Revision 1.38  2005/04/13 17:24:13  kirk
+# Test change
+#
+# Revision 1.37  2005/02/24 17:08:04  kirk
+# Applying consolidated patches from Mike Tremaine
+#
+# Revision 1.9  2005/02/21 19:09:52  mgt
+# Bump to 5.2.8 removed some cvs logs -mgt
+#
+# Revision 1.8  2005/02/16 00:43:28  mgt
+# Added #vi tag to everything, updated ignore.conf with comments, added emerge and netopia to the tree from Laurent -mgt
+#
+# Revision 1.7  2005/02/13 17:15:40  mgt
+# perl -w corrections for uninit stuff -mgt
+#
+# Revision 1.6  2004/10/11 18:14:47  mgt
+# update from Laurent -mgt
+#
+# Revision 1.41  2004/09/29 10:33:29  laurent Dufour <laurent.dufour@havas.com>
+# Removed some ^ in regex to prevent message not being in start on line to be matched
+# Added some check for error in named zone config file
+# Added some check for message not being matched
+#
+# Revision 1.4  2004/07/29 19:33:29  mgt
+# Chmod and removed perl call -mgt
+#
+# Revision 1.3  2004/07/10 01:54:35  mgt
+# sync with kirk -mgt
+#
+#########################################################################
+
+#####################################################
+## Copyright (c) 2008 Kirk Bauer
+## Covered under the included MIT/X-Consortium License:
+##    http://www.opensource.org/licenses/mit-license.php
+## All modifications and contributions by other persons to
+## this script are assumed to have been donated to the
+## Logwatch project and thus assume the above copyright
+## and licensing terms.  If you want to make contributions
+## under your own copyright or a different license this
+## must be explicitly stated in the contribution an the
+## Logwatch project reserves the right to not accept such
+## contributions.  If you have made significant
+## contributions to this script and want to claim
+## copyright please contact logwatch-devel@logwatch.org.
+#########################################################
+
+use Logwatch ':ip';
+
+
+#$DoLookup = ValueOrDefault($ENV{'named_ip_lookup'}, 0);
+$Debug = ValueOrDefault($ENV{'LOGWATCH_DEBUG'}, 0);
+$Detail = ValueOrDefault($ENV{'LOGWATCH_DETAIL_LEVEL'}, 0);
+
+# Avoid "Use of uninitialized value" warning messages.
+sub ValueOrDefault {
+    my ($value, $default) = @_;
+    return ($value ? $value : $default);
+}
+
+if ( $Debug >= 5 ) {
+    print STDERR "\n\nDEBUG: Inside NAMED Filter \n\n";
+    $DebugCounter = 1;
+}
+
+
+while (defined($ThisLine = <STDIN>)) {
+ if ( $Debug >= 30 ) {
+        print STDERR "DEBUG($DebugCounter): $ThisLine";
+        $DebugCounter++;
+    }
+
+   if (
+      ($ThisLine =~ /RR negative cache entry/) or
+      ($ThisLine =~ /ns_....: .* NS points to CNAME/) or
+      ($ThisLine =~ /accept: connection reset by peer/) or
+      ($ThisLine =~ /Connection reset by peer/) or
+      # typo fixed in 2004 release
+      ($ThisLine =~ /transfer(r)?ed serial/) or
+      ($ThisLine =~ /There may be a name server already running/) or
+      ($ThisLine =~ /exiting/) or
+      ($ThisLine =~ /running/) or
+      ($ThisLine =~ /NSTATS /) or
+      ($ThisLine =~ /Cleaned cache of \d+ RRs/) or
+      ($ThisLine =~ /USAGE \d+ \d+ CPU=\d+.*/) or
+      ($ThisLine =~ /XSTATS /) or
+      ($ThisLine =~ /Ready to answer queries/) or
+      ($ThisLine =~ /Forwarding source address is/) or
+      ($ThisLine =~ /bad referral/) or
+      ($ThisLine =~ /prerequisite not satisfied/) or
+      ($ThisLine =~ /(rcvd|Sent) NOTIFY/) or
+      ($ThisLine =~ /ns_resp: TCP truncated/) or
+      ($ThisLine =~ /No possible A RRs/) or
+      ($ThisLine =~ /points to a CNAME/) or
+      ($ThisLine =~ /dangling CNAME pointer/) or
+      ($ThisLine =~ /listening on/) or
+      ($ThisLine =~ /unrelated additional info/) or
+      ($ThisLine =~ /Response from unexpected source/) or
+      ($ThisLine =~ /No root nameservers for class IN/) or
+      ($ThisLine =~ /recvfrom: No route to host/) or
+      ($ThisLine =~ /Connection refused/) or
+      ($ThisLine =~ /lame server resolving/) or
+      ($ThisLine =~ /network unreachable resolving/) or
+      ($ThisLine =~ /transfer of/) or
+      ($ThisLine =~ /using \d+ CPU/) or
+      ($ThisLine =~ /loading configuration/) or
+      ($ThisLine =~ /command channel listening/) or
+      ($ThisLine =~ /no IPv6 interfaces found/) or
+      ($ThisLine =~ /^running/) or
+      ($ThisLine =~ /^exiting/) or
+      ($ThisLine =~ /no longer listening/) or
+      ($ThisLine =~ /the default for the .* option is now/) or
+      ($ThisLine =~ /stopping command channel on \S+/) or
+      ($ThisLine =~ /Malformed response from/) or
+      ($ThisLine =~ /client .+#\d+: query:/) or
+      # Do we really want to ignore these?
+      #($ThisLine =~ /unknown logging category/) or
+      ($ThisLine =~ /could not open entropy source/) or
+      ($ThisLine =~ /\/etc\/rndc.key: file not found/) or
+      ($ThisLine =~ /sending notifies/) or
+      # file syntax error get reported twice and are already caught below
+      ($ThisLine =~ /loading master file/) or
+      ($ThisLine =~ /^ succeeded$/) or
+      ($ThisLine =~ /\*\*\* POKED TIMER \*\*\*/) or
+      # The message about the end of transfer is the interesting one
+      ($ThisLine =~ /: Transfer started./) or
+      ($ThisLine =~ /D-BUS service (disabled|enabled)./) or
+      ($ThisLine =~ /D-BUS dhcdbd subscription disabled./) or
+      ($ThisLine =~ /automatic empty zone/) or
+      ($ThisLine =~ /binding TCP socket: address in use/) or
+      ($ThisLine =~ /dbus_mgr initialization failed. D-BUS service is disabled./) or
+      ($ThisLine =~ /dbus_svc_add_filter failed/) or
+      ($ThisLine =~ /isc_log_open 'named.run' failed: permission denied/) or 
+      ($ThisLine =~ /weak RSASHA1 \(5\) key found \(exponent=3\)/) or 
+      ($ThisLine =~ /Bad file descriptor/) or 
+      ($ThisLine =~ /open: .*: file not found/) or
+      ($ThisLine =~ /queries: client [0-9.#:]* view localhost_resolver: query: .* IN .*/) or
+      ($ThisLine =~ /zone .*: NS '.*' is a CNAME \(illegal\)/) or
+      ($ThisLine =~ /zone .*: zone serial unchanged. zone may fail to transfer to slaves/) or
+      ($ThisLine =~ /zone .*: loading from master file .* failed/) or
+      ($ThisLine =~ /zone .*: NS '.*' has no address records/) or
+      ($ThisLine =~ /.*: not a valid number$/) or
+      ($ThisLine =~ /.*: unexpected end of input/) or
+      ($ThisLine =~ /too many timeouts resolving '.*' .*: disabling EDNS/) or
+      ($ThisLine =~ /reloading zones succeeded/)
+      # too many timeouts resolving 'ns-ext.nrt1.isc.org/AAAA' (in '.'?): disabling EDNS: 3 Time(s)
+   ) {
+      # Don't care about these...
+   } elsif (
+      ($ThisLine =~ /starting\..*named/) or
+      ($ThisLine =~ /starting BIND/) or
+      ($ThisLine =~ /named startup succeeded/)
+   ) {
+      $StartNamed++;
+   } elsif ( $ThisLine =~ /(reloading nameserver|named reload succeeded)/ ) {
+      $ReloadNamed++;
+   } elsif (
+      ($ThisLine =~ /shutting down/) or
+      ($ThisLine =~ /named shutting down/ ) or
+      ($ThisLine =~ /named shutdown succeeded/ )
+   ) {
+      $ShutdownNamed++;
+   } elsif ( $ThisLine =~ /named shutdown failed/ ) {
+      $ShutdownNamedFail++;
+   } elsif ( ($Host, $Zone) = ( $ThisLine =~ /client ([^\#]+)#[^\:]+: zone transfer '(.+)' denied/ ) ) {
+      $DeniedZoneTransfers{$Host}{$Zone}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /cache zone \"(.*)\" loaded/ ) ) {
+      $ZoneLoaded{"cache $Zone"}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /cache zone \"(.*)\" .* loaded/ ) ) {
+      $ZoneLoaded{"cache $Zone"}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /automatic empty zone: (.*)/ ) ) {
+      $ZoneLoaded{"automatic empty zone $Zone"}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /primary zone \"(.+)\" loaded/ ) ) {
+      $ZoneLoaded{$Zone}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /master zone \"(.+)\" .* loaded/ ) ) {
+      $ZoneLoaded{$Zone}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /secondary zone \"(.+)\" loaded/ ) ) {
+      $ZoneLoaded{"secondary $Zone"}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /slave zone \"(.+)\" .* loaded/ ) ) {
+      $ZoneLoaded{"secondary $Zone"}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /zone (.+)\: loaded serial/ ) ) {
+      $ZoneLoaded{$Zone}++;
+   } elsif ( (undef,$Addr,undef,$Server) = ( $ThisLine =~ /ame server (on|resolving) '(.+)' \(in .+\):\s+(\[.+\]\.\d+)?\s*'?(.+)'?:?/ ) ) {
+      $LameServer{"$Addr ($Server)"}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /Zone \"(.+)\" was removed/ ) ) {
+      $ZoneRemoved{$Zone}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /received notify for zone '(.*)'/ ) ) {
+      $ZoneReceivedNotify{$Zone}++;
+   } elsif ( ($Zone) = ( $ThisLine =~ /zone (.*): notify from .* up to date/ ) ) {
+      $ZoneReceivedNotify{$Zone}++;
+   } elsif ( ($Host) = ( $ThisLine =~ /([^ ]+) has CNAME and other data \(invalid\)/ ) ) {
+      push @CNAMEAndOther, $Host;
+   } elsif ( ($File,$Line,$Entry,$Error) = ( $ThisLine =~ /dns_master_load: ([^:]+):(\d+): ([^ ]+): (.+)$/ ) ) {
+      $ZoneFileErrors{$File}{"$Entry: $Error"}++;
+   } elsif ( ($File,$Line,$Entry,$Error) = ( $ThisLine =~ /warning: ([^:]+):(\d+): (.+)$/ ) ) {
+      $ZoneFileErrors{$File}{"file does not end with newline: $Error"}++;
+   } elsif ( ($Way,$Host) = ( $ThisLine =~ /([^ ]+): sendto\(\[([^ ]+)\].+\): Network is unreachable/ ) ) {
+      $FullHost = LookupIP ($Host);
+      $NetworkUnreachable{$Way}{$FullHost}++;
+   } elsif ( ($Zone,$Message) = ( $ThisLine =~ /client [^\#]+#[^\:]+: (?:view \w+: )?updating zone '([^\:]+)': (.*)$/ ) ) {
+      $ZoneUpdates{$Zone}{$Message}++;
+   } elsif ( ($Host,$Zone) = ( $ThisLine =~ /approved AXFR from \[(.+)\]\..+ for \"(.+)\"/ ) ) {
+      $FullHost = LookupIP ($Host);
+      $AXFR{$Zone}{$FullHost}++;
+   } elsif ( ($Client) = ( $ThisLine =~ /warning: client (.*) no more TCP clients/ ) ) {
+      $FullClient = LookupIP ($Client);
+      $DeniedTCPClient{$FullClient}++;
+   } elsif ( ($Client) = ( $ThisLine =~ /client (.*)#\d+: query \(cache\) denied/ ) ) {
+      $FullClient = LookupIP ($Client);
+      $DeniedQuery{$FullClient}++;
+   } elsif ( ($Rhost, $ViewName, $Ldom) = ($ThisLine =~ /client ([\d\.]+)#\d+:(?: view ([^ ]+):)? update '(.*)' denied/)) {
+      $ViewName = ($ViewName ? "/$ViewName" : "");
+      $UpdateDenied{"$Rhost ($Ldom$ViewName)"}++;
+   } elsif ( ($Rhost, $Ldom) = ($ThisLine =~ /client ([\d\.]+)#\d+: update forwarding '(.*)' denied/)) {
+      $UpdateForwardingDenied{"$Rhost ($Ldom)"}++;
+   } elsif ( ($Zone) = ($ThisLine =~ /zone '([0-9a-zA-Z.-]+)' allows updates by IP address, which is insecure/)) {
+      $InsecUpdate{$Zone}++;
+   } elsif ( ($Zone) = ($ThisLine =~ /zone ([0-9a-zA-Z.\/-]+): journal rollforward failed: journal out of sync with zone/)) {
+      $JournalFail{$Zone}++;
+   } elsif ( ($Channel,$Reason) = ($ThisLine =~ /couldn't add command channel (.+#\d+): (.*)$/)) {
+      $ChannelAddFail{$Channel}{$Reason}++;
+   } elsif ( ($Zone,$Host,$Reason) = ($ThisLine =~ /zone ([^ ]*)\/IN: refresh: failure trying master ([^ ]*)#\d+: (.*)/) ) {
+      $MasterFailure{"$Zone from $Host"}{$Reason}++;
+   } elsif ( ($Zone,$Reason,$Host) = ($ThisLine =~ /zone ([^ ]*)\/IN: refresh: unexpected rcode \((.*)\) from master ([^ ]*)#\d+/) ) {
+      $MasterFailure{"$Zone from $Host"}{$Reason}++;
+   } elsif ( ($Zone) = ($ThisLine =~ /zone ([^\/]+)\/.+: refresh: non-authoritative answer from master/)) {
+      $NonAuthoritative{$Zone}++;
+   } elsif ( ($ThisLine =~ /unexpected RCODE \((.*)\) resolving/) ){
+      $UnexpRCODE{$1}++;
+   } elsif ( ($ThisLine =~ /FORMERR resolving '[^ ]+: [0-9.#]+/) ) {
+      chomp($ThisLine);
+      $FormErr{$ThisLine}++;
+   } elsif ( ($ThisLine =~ /found [0-9]* CPU(s)?, using [0-9]* worker thread(s)?/) ) {
+      chomp($ThisLine);
+      $StartLog{$ThisLine}++;
+   } elsif ( (($File,$Line,$Problem) = ($ThisLine =~ /\/etc\/(rndc.key|named.conf):([0-9]+): (unknown option '[^ ]*')/)) or
+	     (($File,$Line,$Problem) = ($ThisLine =~ /\/etc\/(rndc.key|named.conf):([0-9]+): ('[^ ]' expected near end of file)/)) or
+	     (($File,$Line,$Problem) = ($ThisLine =~ /\/etc\/(named.*.conf):([0-9]+): (.*)/)) or
+	     (($File,$Line,$Problem) = ($ThisLine =~ /()()(could not configure root hints from '.*': file not found)/))) {
+       $ConfProb{$File}{"$Line,$Problem"}++;
+   } elsif ( (($ErrorText) = ($ThisLine =~ /^(RUNTIME_CHECK.*)/))or
+	     (($ErrorText) = ($ThisLine =~ /^(.* REQUIRE.* failed.*)$/)) or
+	     (($ErrorText) = ($ThisLine =~ /(.*: fatal error)/)) ) {
+      $NError{$ErrorText}++;
+   } elsif ( ($From,$Log) = ($ThisLine =~ /invalid command from ([.0-9]*)#[0-9]*: (.*)/) ) {
+      $CCMessages{"$From,$Log"}++;
+   } elsif ( (($Log) = ($ThisLine =~ /(freezing .*zone.*)/)) or
+	     (($Log) = ($ThisLine =~ /(thawing .*zone.*)/)) ) {
+      $CCMessages2{$Log}++;
+   } elsif (($CCC) = ($ThisLine =~ /unknown control channel command '(.*)'/)) {
+      $UnknownCCCommands{$CCC}++;
+   } elsif (($CCC) = ($ThisLine =~ /received control channel command '(.*)'/)) {
+      $CCCommands{$CCC}++;
+   } elsif ( ($ThisLine =~ /too many timeouts resolving .*: reducing the advertised EDNS UDP packet size to 512 octets/) ) {
+      #chomp($ThisLine);
+      $EDNSReduce++;
+   } else {
+      # Report any unmatched entries...
+      # remove PID from named messages
+      $ThisLine =~ s/(client [.0-9]+)\S+/$1/;
+      chomp($ThisLine);
+      $OtherList{$ThisLine}++;
+   }
+}
+
+#######################################
+
+if ( ( $Detail >= 5 ) and ($StartNamed) ) {
+   print "Named started: $StartNamed Time(s)\n";
+}
+
+if ( ( $Detail >= 5 ) and ($ReloadNamed) ) {
+   print "Named reloaded: $ReloadNamed Time(s)\n";
+}
+
+if ( ( $Detail >= 5 ) and ($ShutdownNamed) ) {
+   print "Named shutdown: $ShutdownNamed Time(s)\n";
+}
+
+if ( ( $Detail >= 5 ) and ($ShutdownNamedFail) ) {
+   print "Named shutdown failed: $ShutdownNamedFail Time(s)\n";
+}
+
+if ( ( $Detail >= 5 ) and (keys %ZoneLoaded) ) {
+   print "\nLoaded Zones:\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %ZoneLoaded) {
+      print "   $ThisOne: $ZoneLoaded{$ThisOne} Time(s)\n";
+   }
+}
+
+if ( ( $Detail >= 5 ) and (keys %ZoneReceivedNotify) ) {
+   print "\nZones receiving notify:\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %ZoneReceivedNotify) {
+      print "   $ThisOne: $ZoneReceivedNotify{$ThisOne} Time(s)\n";
+   }
+}
+
+if ( ($Detail >= 5) and (keys %ChannelAddFail) ) {
+   print "\nCan't add command channel:\n";
+   foreach $Channel (sort {$a cmp $b} keys %ChannelAddFail) {
+      print "   $Channel:\n";
+      foreach $Reason (sort {$a cmp $b} keys %{$ChannelAddFail{$Channel}}) {
+         print "      $Reason: $ChannelAddFail{$Channel}{$Reason} Time(s)\n";
+      }
+   }
+}
+
+if ( ($Detail >= 5) and (keys %MasterFailure) ) {
+   print "\nFailure trying to refresh zone:\n";
+   foreach $Zone (sort {$a cmp $b} keys %MasterFailure) {
+      print "   $Zone:\n";
+      foreach $Reason (sort {$a cmp $b} keys %{$MasterFailure{$Zone}}) {
+         print "      $Reason: $MasterFailure{$Zone}{$Reason}++ Time(s)\n";
+      }
+   }
+}
+
+if ( ( $Detail >= 5 ) and (keys %DeniedZoneTransfers) ) {
+   print "\nDenied Zone Transfers:\n";
+   foreach my $Host (keys %DeniedZoneTransfers) {
+      print "   $Host:\n";
+      foreach my $Zone (keys %{$DeniedZoneTransfers{$Host}}) {
+         print "      $Zone: $DeniedZoneTransfers{$Host}{$Zone} Time(s)\n";
+      }
+      print "\n";
+   }
+}
+
+if ( ( $Detail >= 5 ) and (keys %ZoneRemoved) ) {
+   print "\nRemoved Zones:\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %ZoneRemoved) {
+      print "   $ThisOne: $ZoneRemoved{$ThisOne} Time(s)\n";
+   }
+}
+
+if ( ( $Detail >= 5 ) and (keys %AXFR) ) {
+   print "\nZone Transfers:\n";
+   foreach $ThisOne (keys %AXFR) {
+      print "   Zone: $ThisOne\n";
+      foreach $Temp (keys %{$AXFR{$ThisOne}}) {
+         print "      by $Temp: $AXFR{$ThisOne}{$Temp} Time(s)\n";
+      }
+   }
+}
+
+if ( ( $Detail >= 5 ) and (keys %DeniedTCPClient) ) {
+   print "\nno more TCP clients warning:\n";
+   foreach $ThisOne (keys %DeniedTCPClient) {
+      print "   from $ThisOne: $DeniedTCPClient{$ThisOne} Time(s)\n";
+   }
+}
+
+if ( ( $Detail >= 5 ) and (keys %DeniedQuery) ) {
+   print "\nQueries (cache) that were denied:\n";
+   foreach $ThisOne (keys %DeniedQuery) {
+      print "   from $ThisOne: $DeniedQuery{$ThisOne} Time(s)\n";
+   }
+}
+
+if ( ( $Detail >= 10 ) and (@CNAMEAndOther) ) {
+   print "\nThese hosts have CNAME and other data (invalid):\n";
+   foreach $ThisOne (@CNAMEAndOther) {
+      print "   $ThisOne\n";
+   }
+}
+
+if ( ( $Detail >= 5 ) and (keys %ZoneFileErrors) ) {
+   print "\nSyntax errors in zone files:\n";
+   for $File (keys %ZoneFileErrors) {
+      print "   $File\n";
+      for $Error ( keys %{$ZoneFileErrors{$File}} ) {
+         print "      \"$Error\" " . $ZoneFileErrors{$File}{$Error} . " Time(s)\n";
+      }
+   }
+}
+
+if ( ( $Detail >= 10 ) and (keys %LameServer) ) {
+   print "\nThese addresses had lame server references:\n";
+   foreach $ThisOne (keys %LameServer) {
+      print "   $ThisOne: $LameServer{$ThisOne} Time(s)\n";
+   }
+}
+
+if ( ( $Detail >= 10 ) and (keys %NonAuthoritative) ) {
+   print "\nNon-authoritative answer from master for these zones:\n";
+   foreach $ThisOne (keys %NonAuthoritative) {
+      print "   " . $ThisOne . ": " . $NonAuthoritative{$ThisOne} . " Time(s)\n";
+   }
+}
+
+if ( ( $Detail >= 10 ) and (keys %NetworkUnreachable) ) {
+   print "\nNetwork is unreachable for:\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %NetworkUnreachable) {
+      print "   $ThisOne:\n";
+      foreach $Host (sort {$a cmp $b} keys %{$NetworkUnreachable{$ThisOne}}) {
+         print "      $Host: $NetworkUnreachable{$ThisOne}{$Host} Time(s)\n";
+      } 
+   }
+}
+
+if ( ( $Detail >= 5 ) and (keys %ZoneUpdates) ) {
+   print "\nZone Updates:\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %ZoneUpdates) {
+      print "   $ThisOne:\n";
+      foreach $Message (sort {$a cmp $b} keys %{$ZoneUpdates{$ThisOne}}) {
+         print "      $Message: $ZoneUpdates{$ThisOne}{$Message} Time(s)\n";
+      } 
+   }
+}
+
+if ( keys %UpdateDenied ) {
+   print "\nZone update refused:\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %UpdateDenied) {
+      print "   $ThisOne: $UpdateDenied{$ThisOne} Time(s)\n";
+   }
+}
+
+if ( keys %UpdateForwardingDenied ) {
+   print "\nZone update forwarding refused:\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %UpdateForwardingDenied) {
+      print "   $ThisOne: $UpdateForwardingDenied{$ThisOne} Time(s)\n";
+   }
+}
+
+if ( keys %InsecUpdate ) {
+   print "\nInsecure zones (dynamic update allowed by IP address):\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %InsecUpdate) {
+      print "   " . $ThisOne . ": " . $InsecUpdate{$ThisOne} . " Time(s)\n";
+   }
+}
+
+if ( keys %JournalFail ) {
+   print "\nJournall rollforward failed:\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %JournalFail) {
+      print "   " . $ThisOne . ": " . $JournalFail{$ThisOne} . " Time(s)\n";
+   }
+}
+
+if (keys %ConfProb) {
+   print "\n Errors in configuration files\n";
+   foreach $File (sort keys %ConfProb) {
+      if ($File =~ /.+/) {
+        print "   file " . $File . "\n";
+        foreach (keys %{$ConfProb{$File}}) {
+           ($Line,$Problem) = split ",";
+           print "      " . $File . ":" . "$Line" . ": " . $Problem . ": " . $ConfProb{$File}{"$Line,$Problem"} . " Time(s)\n";
+        }
+      }
+      else {
+        foreach (keys %{$ConfProb{$File}}) {
+           ($Line,$Problem) = split ",";
+            print "   " . $Problem . ": " . $ConfProb{$File}{"$Line,$Problem"} . " Time(s)\n";
+        }
+      }
+   }
+}
+
+if (($Detail >= 5) and (keys %UnexpRCODE)) {
+   print "\n Unexpected DNS RCODEs:\n";
+   foreach $ThisOne (keys %UnexpRCODE) {
+      print "   " . $ThisOne . ": " . $UnexpRCODE{$ThisOne} . " Time(s)\n";
+   }
+}
+
+if (($Detail >= 5) and (keys %FormErr)) {
+   print "\n Incorrect response format:\n";
+   foreach $ThisOne (keys %FormErr) {
+      print "   " . $ThisOne . ": " . $FormErr{$ThisOne} . " Time(s)\n";
+   }
+}
+
+if (($Detail >= 10) and (keys %StartLog)) {
+   print "\n Named startup logs:\n";
+   foreach $ThisOne (keys %StartLog) {
+      print "   " . $ThisOne . ": " . $StartLog{$ThisOne} . " Time(s)\n";
+   }
+}
+
+if (keys %NError) {
+   print "\n Errors:\n";
+   foreach $ThisOne (keys %NError) {
+      print "   " . $ThisOne . ": " . $NError{$ThisOne} . " Time(s)\n";
+   }
+}
+
+if ((keys %CCMessages) or (keys %CCMessages2)){
+   print "\n Messages from control channel\n";
+   foreach (keys %CCMessages) {
+      ($From,$Log) = split ",";
+      print "   " . $From . ": " . $Log . ": " . $CCMessages{"$From,$Log"} . " Time(s)\n";
+   }
+   foreach $ThisOne (keys %CCMessages2) {
+      print "   " . $ThisOne . ": " . $CCMessages2{$ThisOne} . " Time(s)\n";
+   }
+}
+
+if ((keys %CCCommands) or (keys %UnknownCCCommands)) {
+   print "\n Received control channel commands\n";
+   foreach $ThisOne (keys %CCCommands) {
+      print "   " . $ThisOne . ": " . $CCCommands{$ThisOne} . " Time(s)\n";
+   }
+   foreach $ThisOne (keys %UnknownCCCommands) {
+      print "   " . $ThisOne . "(unknown command): " . $CCCommands{$ThisOne} . " Time(s)\n";
+   }               
+}
+
+if ($EDNSReduce) {
+      print "   $EDNSReduce EDNS packet size reductions due to timeouts\n";
+}
+
+if (keys %OtherList) {
+   print "\n**Unmatched Entries**\n";
+   foreach $line (sort {$a cmp $b} keys %OtherList) {
+      print "   $line: $OtherList{$line} Time(s)\n";
+   }
+}
+
+exit(0);
+
+# vi: shiftwidth=3 tabstop=3 syntax=perl et
+

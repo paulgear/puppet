@@ -1,0 +1,24 @@
+--- orig/scripts/services/http	2008-12-31 21:31:12.000000000 +1000
++++ hosts/web/scripts/services/http	2010-04-21 07:42:03.000000000 +1000
+@@ -160,6 +160,11 @@
+ my %hacks =();
+ my %hack_success =();
+ my %needs_exam =();
++my %ignore_exam = (
++    403	=> 1,
++    404 => 1,
++    405 => 1,
++);
+ my %users_logged =();
+ my %ban_ip =();
+ my %robots =();
+@@ -582,7 +587,8 @@
+          $fmt_url = substr($field{url},0,42) . " ... " .
+                     substr($field{url},-15,15);
+       }	
+-      $needs_exam{$field{http_rc}}{$fmt_url}++;
++      $needs_exam{$field{http_rc}}{$fmt_url}++
++	unless (exists $ignore_exam{$field{http_rc}});
+    }
+    if (defined $field{userid} && $field{userid} ne "-" &&
+          (eval $user_display) &&
