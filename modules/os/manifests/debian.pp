@@ -141,6 +141,10 @@ class os::debian::lenny {
 
 	$packages = [ "sysvconfig" ]
 	package { $packages: ensure => installed }
+
+	if $architecture == "armv5tel" {
+		include tbm
+	}
 }
 
 class os::debian::squeeze {
