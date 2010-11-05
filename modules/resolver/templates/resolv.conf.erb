@@ -1,0 +1,7 @@
+# CONFIGURED BY PUPPET - edit on puppetmaster server
+<% if !domainname.empty? %>domain <%= domainname %>
+<% end -%>
+<% if !searchpath.empty? %>search <%= searchpath.join(" ") %>
+<% end -%>
+<% nameservers.each do |ns| %>nameserver <%= ns %>
+<% end -%>
