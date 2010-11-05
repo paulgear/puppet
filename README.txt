@@ -2,6 +2,7 @@ LICENSE
 -------
 
 This is a collection of puppet modules focused on support of remote office Linux servers.
+The collection is tested only on Debian, CentOS, and Ubuntu Linux at present.
 
     Copyright (c) 2010 Gear Consulting Pty Ltd <http://libertysys.com.au/>
 
@@ -37,4 +38,8 @@ NOTES
     which are not included in the repository.  These files should be supplied after the
     repository is cloned.
 
+-   The modules contained here may or may not adhere to best practices for the software in
+    question.  In some cases this may be intentional; in others it may be due simply to
+    ignorance or inattention to detail.  All suggestions for improvement will be gratefully
+    accepted.
 
