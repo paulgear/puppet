@@ -1,38 +1,20 @@
 #
 # base-level operating system checks for puppet
 #
-# DONE: Edited for Ubuntu compatibility
-#
 
 class os {
-    case $operatingsystem {
-	"centos": {
-	    info( "Operating system distribution for $fqdn is $operatingsystem" )
-	    include centos::yumrepo
-	    include os::packages::centos
-	}
-	"ubuntu": {
-	    info( "Operating system distribution for $fqdn is $operatingsystem" )
-	    include os::packages::ubuntu
-	}
-	default: {
-	    fail( "Puppet configuration not tested with $operatingsystem, failing host $fqdn" )
-	}
-    }
-}
 
-class os::packages::centos {
-	$packages = [ 'lsscsi', 'screen', 'strace', 'wireshark', ]
+	case $operatingsystem {
 
-	package { $packages:
-		ensure	=> installed,
-	}
-}
+	    "centos", "debian", "ubuntu": {
+		    info( "OS distro for $fqdn is $operatingsystem, codename $lsbdistcodename" )
+		    include os::$operatingsystem
+		    include os::$operatingsystem::packages
+	    }
 
-class os::packages::ubuntu {
-	$packages = [ 'byobu', 'lsscsi', 'screen', 'strace', 'wireshark', ]
+	    default: {
+		    fail( "This puppet configuration not tested with $operatingsystem, failing host $fqdn" )
+	    }
 
-	package { $packages:
-		ensure	=> installed,
 	}
 }
