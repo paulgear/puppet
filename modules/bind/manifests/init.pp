@@ -1,53 +1,67 @@
 #
 # puppet class to manage bind name servers
 #
-# FIXME - Ubuntu: package, module, and configuration file names
-#
 
 class bind {
 
-	$pkg = "bind"
-	$svc = "named"
-	$mod = "bind"
-
-	$chroot = "/var/named/chroot"
-
-	package { [ $pkg, "caching-nameserver" ]:
-		ensure	=> installed,
+	$pkg = $operatingsystem ? {
+		default		=> "bind",
+		debian		=> "bind9",
+	}
+	$svc = $operatingsystem ? {
+		default		=> "named",
+		debian		=> "bind9",
 	}
 
-	service { "$svc":
+	package { $pkg:
+		ensure		=> installed,
+	}
+
+	service { $svc:
 		enable		=> true,
-		hasstatus	=> true,
 		hasrestart	=> true,
+		hasstatus	=> true,
+		require		=> Package[$pkg],
 	}
 
-	file { "$chroot/etc":
-		ensure	=> directory,
-		owner	=> root,
-		group	=> named,
-		mode	=> 750,
-	}
+	if $operatingsystem == "CentOS" {
+		$mod = "bind"
+		$chroot = "/var/named/chroot"
 
-	# definitions for files in chroot/etc
-	$etc_files = [
-		"rndc.conf",
-		"rndc.key",
-		"named.conf",
-		"named.slave.zones",
-	]
-	define named_etc_file () {
-		file { "$chroot/etc/$name":
-			ensure		=> file,
-			owner		=> root,
-			group		=> named,
-			mode		=> 640,
-			source		=> "puppet:///modules/$mod/$name",
-			require		=> Package[$pkg],
-			notify		=> Service[$svc],
+		package { "caching-nameserver":
+			ensure	=> installed,
 		}
+
+		file { "$chroot/etc":
+			ensure	=> directory,
+			owner	=> root,
+			group	=> named,
+			mode	=> 750,
+		}
+
+		# definitions for files in chroot/etc
+		$etc_files = [
+			"rndc.conf",
+			"rndc.key",
+			"named.conf",
+			"named.slave.zones",
+		]
+		define named_etc_file () {
+			file { "$chroot/etc/$name":
+				ensure		=> file,
+				owner		=> root,
+				group		=> named,
+				mode		=> 640,
+				source		=> "puppet:///modules/$mod/$name",
+				require		=> Package[$pkg],
+				notify		=> Service[$svc],
+			}
+		}
+		named_etc_file { $etc_files: }
 	}
-	named_etc_file { $etc_files: }
+	else {
+		# No extra setup on Debian & Ubuntu for now
+	}
 
 }
 
