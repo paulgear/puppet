@@ -10,4 +10,7 @@ class os::ubuntu::packages {
 	package { $packages:
 		ensure	=> installed,
 	}
+
+	include sysstat
+
 }
