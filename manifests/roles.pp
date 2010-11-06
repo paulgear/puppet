@@ -2,6 +2,12 @@
 # Example roles for puppet nodes
 ######################################################################
 
+class role::internetfacing {
+        $pkgs = [ "rkhunter", "snort" ]
+	package { $pkgs: ensure => installed }
+}
+
+
 class role::mailrelay {
 	include amavis
 	include clamav
