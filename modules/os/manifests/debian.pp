@@ -124,6 +124,7 @@ class os::debian::packages {
 	]
 	package { $removepackages: ensure => purged }
 
+	include etckeeper
 	include sysstat
 
 }

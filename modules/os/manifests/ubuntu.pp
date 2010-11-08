@@ -11,6 +11,7 @@ class os::ubuntu::packages {
 		ensure	=> installed,
 	}
 
+	include etckeeper
 	include sysstat
 
 }
