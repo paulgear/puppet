@@ -1,7 +1,7 @@
 set hlsearch
 set ignorecase
-set showmode
 set nowrap
+set showmode
 set wrapmargin=4
 let loaded_matchparen = 1
 map <F2> :w
