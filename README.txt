@@ -43,3 +43,16 @@ NOTES
     ignorance or inattention to detail.  All suggestions for improvement will be gratefully
     accepted.
 
+-   Some third-party code is used in the modules.  These modules are covered under a separate
+    license - see the documentation in each module for details.  Directories currently
+    containing code covered under separate licenses are:
+    	modules/aptitude
+	modules/backup/files/rsnapgraph-0.6
+	modules/logwatch
+	modules/puppet-concat
+	modules/resolver
+	modules/sysctl
+	modules/text
+	modules/vmware
+
+
