@@ -15,8 +15,8 @@ class sysstat {
 	# enable sysstat startup
 	text::replace_lines { "/etc/default/sysstat":
 		file	=> "/etc/default/sysstat",
-		pattern	=> "^ENABLE=.*",
-		replace => "ENABLE=true",
+		pattern	=> "^ENABLED=.*",
+		replace => "ENABLED=true",
 		notify	=> Service["sysstat"],
 	}
 
