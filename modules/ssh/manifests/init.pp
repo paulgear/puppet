@@ -51,7 +51,7 @@ class ssh {
 			ensure		=> file,
 			owner		=> puppet,
 			mode		=> 640,
-			require		=> File[ $storedir ],
+			require		=> [ File[ $storedir ], Exec[ "ssh-keygen-$name" ], ],
 		}
 	}
 
