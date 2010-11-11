@@ -41,7 +41,7 @@ class ssh {
 	}
 
 	# installs a key from the puppet master to the client
-	define authorized_key( $user = "root", $type = "rsa", $storedir = "$ssh:storedir" ) {
+	define authorized_key( $user = "root", $type = "rsa", $storedir = "$ssh::storedir" ) {
 		ssh_authorized_key { "$name":
 			ensure	=> present,
 			key	=> generate("/usr/bin/awk", "{printf \"%s\", \$2}", "$storedir/id_$type.$name.pub"),
