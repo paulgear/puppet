@@ -63,7 +63,7 @@ class os::debian {
 		}
 	}
 
-	include os::debian::$lsbdistcodename
+	include "os::debian::$lsbdistcodename"
 
 }
 
