@@ -9,7 +9,7 @@ The collection is tested only on Debian, CentOS, and Ubuntu Linux at present.
     Written by Paul Gear <github@libertysys.com.au>
 
     The latest version of these modules may be found at
-    <http://github.com/paulgear/puppet-modules>
+    <http://github.com/paulgear/puppet>
 
 This program is free software: you can redistribute it and/or modify it under the terms
 of the GNU General Public License as published by the Free Software Foundation, either
