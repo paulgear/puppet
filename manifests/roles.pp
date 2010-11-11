@@ -23,6 +23,10 @@ class role::mailserver {
 	include vacation
 }
 
+class role::ntpserver {
+	include ntp::server
+}
+
 class role::squid_standard {
 	include squid
 	squid::squid_conf { "$fqdn squid": }
@@ -43,3 +47,4 @@ class role::puppet {
 class role::puppetmaster {
 	include puppet::server_conf
 }
+
