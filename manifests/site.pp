@@ -55,5 +55,6 @@ define cron_job( $enable = "true", $interval = "daily", $script = "" ) {
 }
 
 import "roles"
+import "sites"
 import "nodes"
 
