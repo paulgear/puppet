@@ -6,7 +6,7 @@ class os {
 
 	case $operatingsystem {
 
-	    "centos", "debian", "ubuntu": {
+	    centos, debian, ubuntu: {
 		    info( "OS distro for $fqdn is $operatingsystem, codename $lsbdistcodename" )
 		    include os::$operatingsystem
 		    include os::$operatingsystem::packages
@@ -17,4 +17,5 @@ class os {
 	    }
 
 	}
+
 }
