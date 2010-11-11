@@ -31,6 +31,7 @@ class text {
 	exec { "sed -i -r -e 's/$pattern/$replace/' $file":
 	    path	=> "/bin",
 	    onlyif	=> "/bin/grep -E '$pattern' '$file'",
+	    unless	=> "/bin/grep -E '$replace' '$file'",
 	}
     }
 
