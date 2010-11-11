@@ -29,9 +29,7 @@ class webmin {
 			}
 		}
 
-		"ubuntu": {
-			include aptitude
-
+		"debian", "ubuntu": {
 			aptitude::source { $pkg:
 				uri             => "http://download.webmin.com/download/repository",
 				comment		=> "Webmin apt repository",
