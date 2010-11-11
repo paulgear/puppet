@@ -41,7 +41,7 @@ class ssh {
 	# only do this on your puppet master
 	define create_key( $user = "root", $type = "rsa", $storedir = "$ssh::storedir", $bits = 2048
 			) {
-		exec { "ssh-keygen":
+		exec { "ssh-keygen-$name":
 			command		=> "ssh-keygen -C $name -f $storedir/id_$type.$name -N '' -t $type -b $bits -v",
 			creates		=> "$storedir/id_$type.$name.pub",
 			logoutput	=> on_failure,
