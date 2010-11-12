@@ -90,13 +90,13 @@ define fail2ban::jail (
 		$filter = "$name",
 		$findtime = "",
 		$ignoreip = "",
-		$jailname = "$name",
 		$logpath = "",
 		$maxretry = "",
 		$port = "http,https"
 		) {
 	include fail2ban
 	$banaction = ""
+	$jailname = $name
 	file { "${fail2ban::jail_d}/fragments/$name.local":
 		ensure	=> file,
 		owner	=> root,
