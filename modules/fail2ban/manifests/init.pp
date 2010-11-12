@@ -21,7 +21,7 @@ class fail2ban {
 
 	# enable service
 	service { $svc:
-		ensure		=> enabled,
+		enable		=> true,
 		hasstatus	=> true,
 		hasrestart	=> true,
 		require		=> Package[$pkg],
