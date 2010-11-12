@@ -110,7 +110,7 @@ ignoreregex	= $ignoreregex
 			$ignoreip = $default_ignoreip,
 			$logpath = "",
 			$maxretry = "",
-			$port = "",
+			$port = ""
 			) {
 		file { "DEFAULT":
 			path	=> "$fail2ban::dir/jail.d/000-DEFAULT",
@@ -120,7 +120,7 @@ ignoreregex	= $ignoreregex
 			mode	=> 640,
 			content	=> template("modules/fail2ban/jaildef.erb"),
 			# if fail2ban ever supports jail.d, change this to
-			#	notify	=> Exec[$fail2ban::service],
+			#	notify	=> Service[$fail2ban::svc],
 			# as per the filters & actions above.
 			notify	=> Exec[$fail2ban::exec],
 		}
