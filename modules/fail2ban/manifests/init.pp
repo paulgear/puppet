@@ -12,8 +12,10 @@ class fail2ban {
 	$dir = "/etc/fail2ban"
 	$jail_local = "$dir/jail.local"
 	$jail_d = "$dir/jail.d"
-	$dirs = [ "$dir", "$dir/action.d", "$dir/filter.d", "$jail_d", ]
-	$exec = "create fail2ban jails"
+	$action_d = "$dir/action.d"
+	$filter_d = "$dir/filter.d"
+	$dirs = [ "$dir", "$action_d", "$filter_d", "$jail_d", ]
+	$exec = "create-fail2ban-jails"
 	$default_ignoreip = "127.0.0.1\n\t10.0.0.0/8\n\t192.168.0.0/16\n\t172.16.0.0/12"
 
 	# install package
@@ -46,7 +48,7 @@ class fail2ban {
 define fail2ban::action ( $actionstart = "", $actionstop = "", $actioncheck = "",
 		$actionban = "", $actionunban = "" ) {
 	include fail2ban
-	file { "$fail2ban::dir/action.d/$name.local":
+	file { "${fail2ban::action_d}/$name.local":
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
@@ -94,7 +96,7 @@ define fail2ban::jail (
 		) {
 	include fail2ban
 	$banaction = ""
-	file { "$fail2ban::dir/jail.d/$name.local":
+	file { "${fail2ban::jail_d}/fragments/$name.local":
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
@@ -122,7 +124,7 @@ define fail2ban::setup (
 	$action = ""
 	file { "DEFAULT":
 		name	=> "DEFAULT",
-		path	=> "${fail2ban::dir}/jail.d/000-DEFAULT",
+		path	=> "${fail2ban::jail_d}/fragments/000-DEFAULT",
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
