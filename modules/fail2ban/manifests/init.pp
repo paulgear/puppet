@@ -96,7 +96,7 @@ define fail2ban::jail (
 		) {
 	include fail2ban
 	$banaction = ""
-	$jailname = $name
+	$jailname = "$name"
 	file { "${fail2ban::jail_d}/fragments/$name.local":
 		ensure	=> file,
 		owner	=> root,
