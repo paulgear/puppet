@@ -112,8 +112,9 @@ ignoreregex	= $ignoreregex
 			$maxretry = "",
 			$port = ""
 			) {
+		include fail2ban
 		file { "DEFAULT":
-			path	=> "$fail2ban::dir/jail.d/000-DEFAULT",
+			path	=> "${fail2ban::dir}/jail.d/000-DEFAULT",
 			ensure	=> file,
 			owner	=> root,
 			group	=> root,
