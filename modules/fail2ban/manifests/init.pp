@@ -45,6 +45,7 @@ class fail2ban {
 # NOTE: action $name must not contain spaces - see fail2ban::actions::* for examples
 define action ( $actionstart = "", $actionstop = "", $actioncheck = "",
 		$actionban = "", $actionunban = "" ) {
+	include fail2ban
 	file { "$fail2ban::dir/action.d/$name.local":
 		ensure	=> file,
 		owner	=> root,
@@ -64,6 +65,7 @@ actionunban	= $actionunban
 
 # NOTE: filter $name must not contain spaces - see fail2ban::filters::* for examples
 define filter ( $failregex, $ignoreregex = "" ) {
+	include fail2ban
 	file { "$fail2ban::dir/filter.d/$name.local":
 		ensure	=> file,
 		owner	=> root,
@@ -90,6 +92,7 @@ define jail (
 		$maxretry = "",
 		$port = "http,https"
 		) {
+	include fail2ban
 	file { "$fail2ban::dir/jail.d/$name.local":
 		ensure	=> file,
 		owner	=> root,
