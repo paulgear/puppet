@@ -48,3 +48,10 @@ class fail2ban::filters::postfix {
 	}
 }
 
+class fail2ban::filters::winbind_remote_error {
+	# find winbind remote errors in logs
+	fail2ban::filter { "winbind-remote-error":
+		failregex	=> 'rpc_api_pipe: Remote machine .*returned critical error.',
+	}
+}
+

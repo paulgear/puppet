@@ -79,3 +79,13 @@ class fail2ban::jails::ssh {
 	fail2ban::jail { "ssh-ddos": }
 }
 
+class fail2ban::jails::winbind {
+	fail2ban::jail { "winbind":
+		findtime	=> 60,
+		logpath		=> '/var/log/messages',
+		maxretry	=> 2,
+		filter		=> 'winbind-remote-error',
+		action		=> 'winbind-restart',
+	}
+}
+

@@ -2,6 +2,12 @@
 # Example roles for puppet nodes
 ######################################################################
 
+class role::fail2ban::winbind {
+	include fail2ban::actions::winbind_restart
+	include fail2ban::filters::winbind_remote_error
+	include fail2ban::jails::winbind
+}
+
 class role::internetfacing {
         $pkgs = [ "rkhunter", "snort" ]
 	package { $pkgs: ensure => installed }
