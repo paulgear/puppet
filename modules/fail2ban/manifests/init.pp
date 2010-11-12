@@ -93,6 +93,7 @@ define fail2ban::jail (
 		$port = "http,https"
 		) {
 	include fail2ban
+	$banaction = ""
 	file { "$fail2ban::dir/jail.d/$name.local":
 		ensure	=> file,
 		owner	=> root,
@@ -118,6 +119,7 @@ define fail2ban::setup (
 		$port = ""
 		) {
 	include fail2ban
+	$action = ""
 	file { "DEFAULT":
 		name	=> "DEFAULT",
 		path	=> "${fail2ban::dir}/jail.d/000-DEFAULT",
