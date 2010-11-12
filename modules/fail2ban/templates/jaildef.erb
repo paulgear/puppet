@@ -18,9 +18,7 @@
     :logpath	=> logpath,
     :maxretry	=> maxretry,
 }.each do |k, v|
-%>
-<%= k %> = <%= v %>
-<%
+	puts "#{k} = #{v}"
 	#unless v.empty?
 end
 %>
