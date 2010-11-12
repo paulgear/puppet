@@ -90,6 +90,7 @@ define fail2ban::jail (
 		$filter = "$name",
 		$findtime = "",
 		$ignoreip = "",
+		$jailname = "$name",
 		$logpath = "",
 		$maxretry = "",
 		$port = "http,https"
@@ -122,8 +123,8 @@ define fail2ban::setup (
 		) {
 	include fail2ban
 	$action = ""
+	$jailname = "DEFAULT"
 	file { "DEFAULT":
-		name	=> "DEFAULT",
 		path	=> "${fail2ban::jail_d}/fragments/000-DEFAULT",
 		ensure	=> file,
 		owner	=> root,
