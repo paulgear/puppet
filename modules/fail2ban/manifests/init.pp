@@ -86,7 +86,7 @@ ignoreregex	= $ignoreregex
 			$ignoreip = "",
 			$logpath = "",
 			$maxretry = "",
-			$port = "http,https",
+			$port = "http,https"
 			) {
 		file { "$fail2ban::dir/jail.d/$name.local":
 			ensure	=> file,
