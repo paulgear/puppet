@@ -40,16 +40,18 @@ class fail2ban {
 		refreshonly	=> true,
 	}
 
-	# NOTE: action $name must not contain spaces - see fail2ban::actions::* for examples
-	define action ( $actionstart = "", $actionstop = "", $actioncheck = "",
-			$actionban = "", $actionunban = "" ) {
-		file { "$fail2ban::dir/action.d/$name.local":
-			ensure	=> file,
-			owner	=> root,
-			group	=> root,
-			mode	=> 640,
-			notify	=> Service["$fail2ban::svc"],
-			content	=> "# fail2ban action managed by puppet
+}
+
+# NOTE: action $name must not contain spaces - see fail2ban::actions::* for examples
+define action ( $actionstart = "", $actionstop = "", $actioncheck = "",
+		$actionban = "", $actionunban = "" ) {
+	file { "$fail2ban::dir/action.d/$name.local":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 640,
+		notify	=> Service["$fail2ban::svc"],
+		content	=> "# fail2ban action managed by puppet
 [Definition]
 actionstart	= $actionstart
 actionstop	= $actionstop
@@ -57,75 +59,73 @@ actioncheck	= $actioncheck
 actionban	= $actionban
 actionunban	= $actionunban
 ",
-		}
 	}
+}
 
-	# NOTE: filter $name must not contain spaces - see fail2ban::filters::* for examples
-	define filter ( $failregex, $ignoreregex = "" ) {
-		file { "$fail2ban::dir/filter.d/$name.local":
-			ensure	=> file,
-			owner	=> root,
-			group	=> root,
-			mode	=> 640,
-			notify	=> Service["$fail2ban::svc"],
-			content	=> "# fail2ban filter managed by puppet
+# NOTE: filter $name must not contain spaces - see fail2ban::filters::* for examples
+define filter ( $failregex, $ignoreregex = "" ) {
+	file { "$fail2ban::dir/filter.d/$name.local":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 640,
+		notify	=> Service["$fail2ban::svc"],
+		content	=> "# fail2ban filter managed by puppet
 [Definition]
 failregex	= $failregex
 ignoreregex	= $ignoreregex
 ",
-		}
 	}
+}
 
-	# NOTE: jail $name must not contain spaces - see fail2ban::jails::* for examples
-	define jail (	
-			$action = "",
-			$bantime = "",
-			$enabled = "true",
-			$filter = "$name",
-			$findtime = "",
-			$ignoreip = "",
-			$logpath = "",
-			$maxretry = "",
-			$port = "http,https"
-			) {
-		file { "$fail2ban::dir/jail.d/$name.local":
-			ensure	=> file,
-			owner	=> root,
-			group	=> root,
-			mode	=> 640,
-			content	=> template("fail2ban/jaildef.erb"),
-			# if fail2ban ever supports jail.d, change this to
-			#	notify	=> Service["$fail2ban::svc"],
-			# as per the filters & actions above.
-			notify	=> Exec["$fail2ban::exec"],
-		}
+# NOTE: jail $name must not contain spaces - see fail2ban::jails::* for examples
+define jail (	
+		$action = "",
+		$bantime = "",
+		$enabled = "true",
+		$filter = "$name",
+		$findtime = "",
+		$ignoreip = "",
+		$logpath = "",
+		$maxretry = "",
+		$port = "http,https"
+		) {
+	file { "$fail2ban::dir/jail.d/$name.local":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 640,
+		content	=> template("fail2ban/jaildef.erb"),
+		# if fail2ban ever supports jail.d, change this to
+		#	notify	=> Service["$fail2ban::svc"],
+		# as per the filters & actions above.
+		notify	=> Exec["$fail2ban::exec"],
 	}
+}
 
-	define setup (
-			$banaction = "",
-			$bantime = "",
-			$enabled = "",
-			$filter = "",
-			$findtime = "",
-			$ignoreip = "${fail2ban::default_ignoreip}",
-			$logpath = "",
-			$maxretry = "",
-			$port = ""
-			) {
-		include fail2ban
-		file { "DEFAULT":
-			path	=> "${fail2ban::dir}/jail.d/000-DEFAULT",
-			ensure	=> file,
-			owner	=> root,
-			group	=> root,
-			mode	=> 640,
-			content	=> template("fail2ban/jaildef.erb"),
-			# if fail2ban ever supports jail.d, change this to
-			#	notify	=> Service["$fail2ban::svc"],
-			# as per the filters & actions above.
-			notify	=> Exec["$fail2ban::exec"],
-		}
+define setup (
+		$banaction = "",
+		$bantime = "",
+		$enabled = "",
+		$filter = "",
+		$findtime = "",
+		$ignoreip = "${fail2ban::default_ignoreip}",
+		$logpath = "",
+		$maxretry = "",
+		$port = ""
+		) {
+	include fail2ban
+	file { "DEFAULT":
+		path	=> "${fail2ban::dir}/jail.d/000-DEFAULT",
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 640,
+		content	=> template("fail2ban/jaildef.erb"),
+		# if fail2ban ever supports jail.d, change this to
+		#	notify	=> Service["$fail2ban::svc"],
+		# as per the filters & actions above.
+		notify	=> Exec["$fail2ban::exec"],
 	}
-
 }
 
