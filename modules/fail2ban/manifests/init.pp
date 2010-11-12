@@ -138,3 +138,7 @@ define fail2ban::setup (
 	}
 }
 
+# include standard defitions
+include "fail2ban/actions"
+include "fail2ban/filters"
+include "fail2ban/jails"
