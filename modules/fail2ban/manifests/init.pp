@@ -137,3 +137,8 @@ define fail2ban::setup (
 		notify	=> Exec["$fail2ban::exec"],
 	}
 }
+
+# include standard defitions
+include "actions"
+include "filters"
+include "jails"
