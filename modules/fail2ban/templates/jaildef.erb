@@ -16,6 +16,6 @@
     'maxretry',
 ].each do |v|
 unless scope.lookupvar(v).empty? then %>
-<%= "#{k}=#{scope.lookupvar(v)}" %>
+<%= "#{v}=#{scope.lookupvar(v)}" %>
 <% end
 end %>
