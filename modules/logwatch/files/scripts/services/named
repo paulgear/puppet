@@ -277,6 +277,7 @@ while (defined($ThisLine = <STDIN>)) {
    } elsif ( ($Rhost, $ViewName, $Ldom) = ($ThisLine =~ /client ([\d\.]+)#\d+:(?: view ([^ ]+):)? update '(.*)' denied/)) {
       $ViewName = ($ViewName ? "/$ViewName" : "");
       $UpdateDenied{"$Rhost ($Ldom$ViewName)"}++;
+      $UpdateDenied++;
    } elsif ( ($Rhost, $Ldom) = ($ThisLine =~ /client ([\d\.]+)#\d+: update forwarding '(.*)' denied/)) {
       $UpdateForwardingDenied{"$Rhost ($Ldom)"}++;
    } elsif ( ($Zone) = ($ThisLine =~ /zone '([0-9a-zA-Z.-]+)' allows updates by IP address, which is insecure/)) {
@@ -475,9 +476,13 @@ if ( ( $Detail >= 5 ) and (keys %ZoneUpdates) ) {
 }
 
 if ( keys %UpdateDenied ) {
-   print "\nZone update refused:\n";
-   foreach $ThisOne (sort {$a cmp $b} keys %UpdateDenied) {
-      print "   $ThisOne: $UpdateDenied{$ThisOne} Time(s)\n";
+   if ( $Detail >= 5 ) {
+      print "\nZone update refused:\n";
+      foreach $ThisOne (sort {$a cmp $b} keys %UpdateDenied) {
+	 print "   $ThisOne: $UpdateDenied{$ThisOne} Time(s)\n";
+      }
+   } else {
+      print "\n$UpdateDenied zone updates refused\n";
    }
 }
 
