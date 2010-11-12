@@ -119,6 +119,7 @@ define fail2ban::setup (
 		) {
 	include fail2ban
 	file { "DEFAULT":
+		name	=> "DEFAULT",
 		path	=> "${fail2ban::dir}/jail.d/000-DEFAULT",
 		ensure	=> file,
 		owner	=> root,
