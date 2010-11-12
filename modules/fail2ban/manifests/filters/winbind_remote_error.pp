@@ -5,7 +5,7 @@
 
 class fail2ban::filters::winbind_remote_error {
 	fail2ban::filter { "winbind-remote-error":
-		failregex	=> 'rpc_api_pipe: Remote machine .*returned critical error.',
+		failregex	=> 'rpc_api_pipe: Remote machine <HOST>.*returned critical error.',
 	}
 }
 
