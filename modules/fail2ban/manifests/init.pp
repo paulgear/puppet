@@ -43,7 +43,7 @@ class fail2ban {
 }
 
 # NOTE: action $name must not contain spaces - see fail2ban::actions::* for examples
-define action ( $actionstart = "", $actionstop = "", $actioncheck = "",
+define fail2ban::action ( $actionstart = "", $actionstop = "", $actioncheck = "",
 		$actionban = "", $actionunban = "" ) {
 	include fail2ban
 	file { "$fail2ban::dir/action.d/$name.local":
@@ -64,7 +64,7 @@ actionunban	= $actionunban
 }
 
 # NOTE: filter $name must not contain spaces - see fail2ban::filters::* for examples
-define filter ( $failregex, $ignoreregex = "" ) {
+define fail2ban::filter ( $failregex, $ignoreregex = "" ) {
 	include fail2ban
 	file { "$fail2ban::dir/filter.d/$name.local":
 		ensure	=> file,
@@ -81,7 +81,7 @@ ignoreregex	= $ignoreregex
 }
 
 # NOTE: jail $name must not contain spaces - see fail2ban::jails::* for examples
-define jail (	
+define fail2ban::jail (	
 		$action = "",
 		$bantime = "",
 		$enabled = "true",
@@ -106,7 +106,7 @@ define jail (
 	}
 }
 
-define setup (
+define fail2ban::setup (
 		$banaction = "",
 		$bantime = "",
 		$enabled = "",
