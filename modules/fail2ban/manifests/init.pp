@@ -48,7 +48,7 @@ class fail2ban {
 			owner	=> root,
 			group	=> root,
 			mode	=> 640,
-			notify	=> Service[$fail2ban::svc],
+			notify	=> Service["$fail2ban::svc"],
 			content	=> "# fail2ban action managed by puppet
 [Definition]
 actionstart	= $actionstart
@@ -67,7 +67,7 @@ actionunban	= $actionunban
 			owner	=> root,
 			group	=> root,
 			mode	=> 640,
-			notify	=> Service[$fail2ban::svc],
+			notify	=> Service["$fail2ban::svc"],
 			content	=> "# fail2ban filter managed by puppet
 [Definition]
 failregex	= $failregex
@@ -95,9 +95,9 @@ ignoreregex	= $ignoreregex
 			mode	=> 640,
 			content	=> template("fail2ban/jaildef.erb"),
 			# if fail2ban ever supports jail.d, change this to
-			#	notify	=> Service[$fail2ban::svc],
+			#	notify	=> Service["$fail2ban::svc"],
 			# as per the filters & actions above.
-			notify	=> Exec[$fail2ban::exec],
+			notify	=> Exec["$fail2ban::exec"],
 		}
 	}
 
@@ -120,9 +120,9 @@ ignoreregex	= $ignoreregex
 			mode	=> 640,
 			content	=> template("fail2ban/jaildef.erb"),
 			# if fail2ban ever supports jail.d, change this to
-			#	notify	=> Service[$fail2ban::svc],
+			#	notify	=> Service["$fail2ban::svc"],
 			# as per the filters & actions above.
-			notify	=> Exec[$fail2ban::exec],
+			notify	=> Exec["$fail2ban::exec"],
 		}
 	}
 
