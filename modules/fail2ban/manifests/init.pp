@@ -14,7 +14,7 @@ class fail2ban {
 	$jail_d = "$dir/jail.d"
 	$action_d = "$dir/action.d"
 	$filter_d = "$dir/filter.d"
-	$dirs = [ "$dir", "$action_d", "$filter_d", "$jail_d", ]
+	$dirs = [ "$dir", "$action_d", "$filter_d", "$jail_d", "$jail_d/fragments" ]
 	$exec = "create-fail2ban-jails"
 	$default_ignoreip = "127.0.0.1\n\t10.0.0.0/8\n\t192.168.0.0/16\n\t172.16.0.0/12"
 
