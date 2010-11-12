@@ -137,8 +137,3 @@ define fail2ban::setup (
 		notify	=> Exec["$fail2ban::exec"],
 	}
 }
-
-# include other files
-require "actions.pp"
-require "filters.pp"
-require "jails.pp"
