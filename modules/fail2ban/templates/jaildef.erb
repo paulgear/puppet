@@ -1,6 +1,6 @@
 # fail2ban jail fragment file managed by puppet
 [<%= jailname %>]
-<%=
+<%
 # Author:	Paul Gear <puppet@libertysys.com.au>
 # License:	GPLv3
 # Copyright:	(c) 2010 Gear Consulting Pty Ltd <http://libertysys.com.au/>
@@ -18,7 +18,9 @@
     :logpath	=> logpath,
     :maxretry	=> maxretry,
 }.each do |k, v|
-	puts "#{k} = #{v}"
+%>
+<%= k %> = <%= v %>
+<%
 	#unless v.empty?
 end
 %>
