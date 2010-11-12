@@ -36,22 +36,23 @@ class spamassassin {
 		content		=> template("spamassassin/local.cf.erb"),
 	}
 
-	if $operatingsystem == "CentOS" {
-		cron_job { "spamassassin-rule-update":
-			interval	=> daily,
-			script		=> '#!/bin/sh
+	# enable nightly spamassassin rule updates
+	case $operatingsystem {
+		centos: {
+			cron_job { "spamassassin-rule-update":
+				interval	=> daily,
+				script		=> '#!/bin/sh
 /usr/share/spamassassin/sa-update.cron
 ',
+			}
 		}
-	
-	}
-
-	if $operatingsystem == "Ubuntu" {
-		$default_file = "/etc/default/spamassassin"
-		exec { "Enable spamd startup and nightly rule updates":
-			command	=> "sed -i.BAK -e 's/\\(CRON\\|ENABLED\\)=0/\\1=1/' $default_file",
-			onlyif	=> "grep -e CRON=0 -e ENABLED=0 $default_file",
-			notify	=> Service[$spamassassin_svc],
+		debian, ubuntu: {
+			$default_file = "/etc/default/spamassassin"
+			exec { "spamassassin-rule-update":
+				command	=> "sed -i.BAK -e 's/\\(CRON\\|ENABLED\\)=0/\\1=1/' $default_file",
+				onlyif	=> "grep -e CRON=0 -e ENABLED=0 $default_file",
+				notify	=> Service[$spamassassin_svc],
+			}
 		}
 	}
 
