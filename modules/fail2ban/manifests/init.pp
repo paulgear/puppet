@@ -138,7 +138,7 @@ define fail2ban::setup (
 	}
 }
 
-# include standard defitions
-include "actions"
-include "filters"
-include "jails"
+# include other files
+require "actions.pp"
+require "filters.pp"
+require "jails.pp"
