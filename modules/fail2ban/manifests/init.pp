@@ -40,6 +40,7 @@ class fail2ban {
 	exec { $exec:
 		command		=> "/usr/local/bin/concatfragments.sh -o $jail_local -d $jail_d",
 		refreshonly	=> true,
+		notify		=> Service[$svc],
 	}
 
 }
