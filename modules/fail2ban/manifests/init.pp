@@ -93,7 +93,7 @@ ignoreregex	= $ignoreregex
 			owner	=> root,
 			group	=> root,
 			mode	=> 640,
-			content	=> template("modules/fail2ban/jaildef.erb"),
+			content	=> template("fail2ban/jaildef.erb"),
 			# if fail2ban ever supports jail.d, change this to
 			#	notify	=> Service[$fail2ban::svc],
 			# as per the filters & actions above.
@@ -118,7 +118,7 @@ ignoreregex	= $ignoreregex
 			owner	=> root,
 			group	=> root,
 			mode	=> 640,
-			content	=> template("modules/fail2ban/jaildef.erb"),
+			content	=> template("fail2ban/jaildef.erb"),
 			# if fail2ban ever supports jail.d, change this to
 			#	notify	=> Service[$fail2ban::svc],
 			# as per the filters & actions above.
