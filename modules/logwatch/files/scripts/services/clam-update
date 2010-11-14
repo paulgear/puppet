@@ -112,6 +112,9 @@ while (defined(my $ThisLine = <STDIN>)) {
    if (
        # separator of 38 dashes
        ($ThisLine =~ /^\-{38}$/) or
+       # progress messages
+       ($ThisLine =~ /^Downloading daily-\d+\.cdiff/) or
+       ($ThisLine =~ /^Clamd successfully notified about the update/) or
        # the following failure is also recorded with ERROR later on
        ($ThisLine =~ /^Giving up/) or
        # SIGALRM, SIGUSR1, and SIGHIP signals
