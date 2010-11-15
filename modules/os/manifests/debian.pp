@@ -129,6 +129,11 @@ class os::debian::packages {
 
 }
 
+class os::debian::desktop {
+	$packages = [ "gnome-core", "xserver-xorg" ]
+	package { $packages: ensure => installed }
+}
+
 class os::debian::physical {
 	$packages = "pciutils"
 	package { $packages: ensure => installed }
