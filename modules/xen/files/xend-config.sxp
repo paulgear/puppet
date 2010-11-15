@@ -16,7 +16,7 @@
 (vif-script vif-bridge)
 #(vif-script     vif-nat)
 #(vif-script     vif-route)
-#(vnc-listen '127.0.0.1')
+(vnc-listen '127.0.0.1')
 (vncpasswd '')
 # (vnc-tls 1)
 # (vnc-x509-cert-dir /etc/xen/vnc)
