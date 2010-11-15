@@ -83,6 +83,8 @@ class os::debian::packages {
 		"debsums",
 		"file",
 		"ftp",
+		"iftop",
+		"iptraf",
 		"less",
 		"lsb-release",
 		"lsof",
