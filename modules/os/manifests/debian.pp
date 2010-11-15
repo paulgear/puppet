@@ -130,7 +130,7 @@ class os::debian::packages {
 }
 
 class os::debian::desktop {
-	$packages = [ "gnome-core", "xserver-xorg" ]
+	$packages = [ "gdm", "gnome-core", "xserver-xorg" ]
 	package { $packages: ensure => installed }
 }
 
