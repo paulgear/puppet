@@ -160,7 +160,7 @@ class os::debian::lenny {
 class os::debian::squeeze {
 	os::debian::base	{ "squeeze": }
 	os::debian::security	{ "squeeze": }
-	os::debian::volatile	{ "squeeze": }
+	os::debian::volatile	{ "squeeze": ensure => absent }
 	os::debian::backports	{ "squeeze": ensure => absent }
 }
 
