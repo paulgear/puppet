@@ -52,7 +52,10 @@ class xen::libvirt {
 		],
 		default	=> [ "libvirt-bin", "virt-manager", ],
 	}
-	$pkg = "libvirt-bin"
+	$pkg = $lsbdistcodename ? {
+		lenny	=> "libvirt-bin/$lsbdistcodename-backports"
+		default	=> "libvirt-bin"
+	}
 
 	package { $pkgs:
 		ensure		=> installed,
