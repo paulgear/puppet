@@ -318,6 +318,8 @@ while (defined($ThisLine = <STDIN>)) {
       $UnknownCCCommands{$CCC}++;
    } elsif (($CCC) = ($ThisLine =~ /received control channel command '(.*)'/)) {
       $CCCommands{$CCC}++;
+   } elsif ( ($ThisLine =~ /success resolving .* after reducing the advertised EDNS UDP packet size to 512 octets/) ) {
+      $EDNSReduceSuccess++;
    } elsif ( ($ThisLine =~ /too many timeouts resolving .*: reducing the advertised EDNS UDP packet size to 512 octets/) ) {
       #chomp($ThisLine);
       $EDNSReduce++;
@@ -577,6 +579,10 @@ if ((keys %CCCommands) or (keys %UnknownCCCommands)) {
 
 if ($EDNSReduce) {
       print "   $EDNSReduce EDNS packet size reductions due to timeouts\n";
+}
+
+if ($EDNSReduceSuccess) {
+      print "   $EDNSReduceSuccess successful name resolutions after reducing EDNS packet size\n";
 }
 
 if (keys %OtherList) {
