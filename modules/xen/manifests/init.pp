@@ -47,7 +47,10 @@ class xen::libvirt {
 
 	$pkgs = $lsbdistcodename ? {
 		lenny	=> [
+			"libvirt0/$lsbdistcodename-backports",
 			"libvirt-bin/$lsbdistcodename-backports",
+			"python-libvirt/$lsbdistcodename-backports",
+			"virtinst/$lsbdistcodename-backports",
 			"virt-manager/$lsbdistcodename-backports",
 		],
 		default	=> [ "libvirt-bin", "virt-manager", ],
