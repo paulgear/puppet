@@ -45,7 +45,13 @@ class xen::xend {
 
 class xen::libvirt {
 
-	$pkgs = [ "libvirt-bin", "virt-manager", ]
+	$pkgs = $lsbdistcodename ? {
+		lenny	=> [
+			"libvirt-bin/$lsbdistcodename-backports",
+			"virt-manager/$lsbdistcodename-backports",
+		],
+		default	=> [ "libvirt-bin", "virt-manager", ],
+	}
 	$pkg = "libvirt-bin"
 
 	package { $pkgs:
