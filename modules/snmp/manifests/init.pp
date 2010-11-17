@@ -64,8 +64,8 @@ class snmp {
 					# remove the loopback bind from the startup configuration
 					text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-startup": 
 					    	file	=> $snmp::defaults,
-						pattern	=> " 127\.0\.0\.1",
-						replace	=> "",
+						pattern	=> ' 127\.0\.0\.1',
+						replace	=> '',
 						notify	=> Service[$snmp::svc],
 					}
 				}
