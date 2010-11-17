@@ -7,6 +7,7 @@
 
 class snmp {
 
+	$conf = "/etc/snmp/snmpd.conf"
 	$svc = "snmpd"
 	$pkg = $operatingsystem ? {
 		centos		=> "net-snmp",
@@ -25,7 +26,7 @@ class snmp {
 			$snmp_servers = $snmp::servers
 			) {
 		# configuration file
-		file { "/etc/snmp/snmpd.conf":
+		file { $snmp::conf:
 			ensure	=> file,
 			owner	=> root,
 			group	=> root,
@@ -39,8 +40,26 @@ class snmp {
 	service { $svc:
 		enable		=> true,
 		require		=> Package[$pkg],
-		subscribe	=> File["/etc/snmp/snmpd.conf"],
+		subscribe	=> File[$conf],
 		hasrestart	=> true,
+	}
+
+	# operating system-specific customisations
+	case $operatingsystem {
+		debian: {
+			case $lsbdistcodename {
+				squeeze: {
+					# reduce debugging noise in syslog per bug #559109
+					# otherwise, snmpd produces lots of errors like this:
+					# snmpd[22218]: error on subcontainer 'ia_addr' insert (-1)
+					text::replace_lines { "$fqdn-snmpd-squeeze-logging":
+						file	=> $snmp::conf,
+						pattern	=> "-Lsd",
+						replace	=> "-Ls6d",
+					}
+				}
+			}
+		}
 	}
 
 }
