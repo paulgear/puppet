@@ -56,6 +56,7 @@ class snmp {
 						file	=> $snmp::conf,
 						pattern	=> "-Lsd",
 						replace	=> "-Ls6d",
+						notify	=> Service[$snmp::svc],
 					}
 				}
 			}
