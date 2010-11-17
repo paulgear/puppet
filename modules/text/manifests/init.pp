@@ -21,7 +21,7 @@ class text {
     }
 
     define comment_lines($file, $pattern) {
-	exec { "sed -i -r -e 's/($pattern)/##Commented out by puppet## \1/' $file":
+	exec { "sed -i -r -e 's/($pattern)/##Commented out by puppet## \\1/' $file":
 	    path	=> "/bin",
 	    onlyif	=> "/bin/grep -E '$pattern' '$file'",
 	}
