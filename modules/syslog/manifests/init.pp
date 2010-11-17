@@ -130,7 +130,8 @@ class rsyslog {
         delaycompress
         sharedscripts
         postrotate
-                reload rsyslog >/dev/null 2>&1 || true
+		/etc/init.d/rsyslog reload >/dev/null 2>&1 || true
+                #reload rsyslog >/dev/null 2>&1 || true
         endscript
 }
 ",
