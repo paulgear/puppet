@@ -124,7 +124,10 @@ class os::debian::packages {
 		"vim-tiny",
 
 	]
-	package { $removepackages: ensure => purged }
+	package { $removepackages:
+		ensure	=> purged,
+		require	=> Package["postfix"],
+	}
 
 	include etckeeper
 	include sysstat
