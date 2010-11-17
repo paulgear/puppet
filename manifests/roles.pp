@@ -11,6 +11,7 @@ class role::fail2ban::winbind {
 class role::internetfacing {
         $pkgs = [ "rkhunter", "snort" ]
 	package { $pkgs: ensure => installed }
+	include logwatch
 }
 
 
