@@ -17,7 +17,7 @@ class squid {
 	}
 
 	service { $svc:
-		enabl		=> true,
+		enable		=> true,
 		hasrestart	=> true,
 		hasstatus	=> true,
 		require		=> Package[$pkg],
