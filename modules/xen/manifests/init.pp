@@ -3,12 +3,18 @@
 class xen {
 
 	include xen::xend
-	include xen::libvirt
-	include xen::virtualmin
+	#include xen::libvirt
+	#include xen::virtualmin
 
 	$pkgs = $lsbdistcodename ? {
-		lenny		=> [ "linux-image-xen-amd64", "xen-hypervisor-3.2-1-amd64" ],
-		squeeze		=> [ "xen-hypervisor-3.4-amd64" ],
+		lenny		=> [
+			"linux-image-xen-$architecture",
+			"xen-hypervisor-3.2-1-$architecture"
+		],
+		squeeze		=> [
+			"xen-hypervisor-4.0-$architecture",
+			"xen-tools",
+		],
 	}
 
 	package { $pkgs:
@@ -53,7 +59,10 @@ class xen::libvirt {
 			"virtinst/$lsbdistcodename-backports",
 			"virt-manager/$lsbdistcodename-backports",
 		],
-		default	=> [ "libvirt-bin", "virt-manager", ],
+		default	=> [
+			"libvirt-bin",
+			"virt-manager",
+		],
 	}
 	$pkg = $lsbdistcodename ? {
 		lenny	=> "libvirt-bin/$lsbdistcodename-backports",
