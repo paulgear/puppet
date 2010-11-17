@@ -8,6 +8,7 @@
 class snmp {
 
 	$conf = "/etc/snmp/snmpd.conf"
+	$defaults = "/etc/default/snmpd"
 	$svc = "snmpd"
 	$pkg = $operatingsystem ? {
 		centos		=> "net-snmp",
@@ -52,10 +53,19 @@ class snmp {
 					# reduce debugging noise in syslog per bug #559109
 					# otherwise, snmpd produces lots of errors like this:
 					# snmpd[22218]: error on subcontainer 'ia_addr' insert (-1)
-					text::replace_lines { "$fqdn-snmpd-squeeze-logging":
+					text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-logging":
 						file	=> $snmp::conf,
 						pattern	=> "-Lsd",
 						replace	=> "-Ls6d",
+						notify	=> Service[$snmp::svc],
+					}
+				}
+				lenny: {
+					# remove the loopback bind from the startup configuration
+					text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-startup": 
+					    	file	=> $snmp::defaults,
+						pattern	=> " 127\.0\.0\.1",
+						replace	=> "",
 						notify	=> Service[$snmp::svc],
 					}
 				}
