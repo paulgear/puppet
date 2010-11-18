@@ -1,6 +1,6 @@
 
 def include_header( title )
-	servername = "your_server_name_here"
+	servername = scope.lookupvar("servername")
 	header = <<HEADER
 ##############################################################################
 # #{title}
