@@ -18,6 +18,7 @@ class sysstat {
 		pattern	=> "^ENABLED=.*",
 		replace => "ENABLED=true",
 		notify	=> Service["sysstat"],
+		optimise=> true,
 	}
 
 	# change sysstat history keep period
@@ -26,6 +27,7 @@ class sysstat {
 		pattern	=> "^HISTORY=.*",
 		replace => "HISTORY=28",
 		notify	=> Service["sysstat"],
+		optimise=> true,
 	}
 
 }
