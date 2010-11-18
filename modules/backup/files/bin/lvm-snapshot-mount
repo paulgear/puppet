@@ -2,18 +2,19 @@
 #
 # Author:	Paul Gear
 # Created:	2010-10-12
-# Description:	Prepare a filesystem for backup using LVM snapshots
+# Modified:	2010-11-18
+# Description:	Prepare an LV for backup using LVM snapshots
 #
 # Overall flow of script:
 #	- run preremove (e.g. to show LV state)
-#	- umount snapshot dir
+#	- umount snapshot dir (if required)
 #	- delete snapshot lv
-#	- run preexec (e.g. to shut down processes)
-#	- umount original lv
+#	- run preexec (e.g. to shut down processes or pause a VM running on the LV)
+#	- umount original lv (if required)
 #	- create snapshot lv
-#	- mount original lv
-#	- run post-exec (e.g. to start processes back up again)
-#	- mount snapshot lv in read-only mode
+#	- mount original lv (if required)
+#	- run post-exec (e.g. to start processes back up or resume a VM)
+#	- mount snapshot lv in read-only mode (if required)
 #
 
 set -e
@@ -32,22 +33,41 @@ PRE_REMOVE=""
 PRE_SNAP=""
 POST_SNAP=""
 
+CONF="/usr/local/etc/$PROG.conf"
 JUST_UMOUNT=0
 JUST_MOUNT=0
-if [ "$#" -gt 0 ]; then
+
+# if the program name ends in -mount, default to mounting the LV, otherwise leave it unmounted
+if [ ${PROG%%"-mount"} = $PROG ]; then
+	MOUNT=0
+else
+	MOUNT=1
+fi
+
+# process command line
+while [ "$#" -gt 0 ]; do
 	case "$1" in
-	mount)
+	--just-mount)
 		JUST_MOUNT=1
 		;;
-	umount)
+	--just-umount)
 		JUST_UMOUNT=1
 		;;
+	--mount)
+		MOUNT=1
+		;;
+	--no-mount)
+		MOUNT=0
+		;;
+	--conf)
+		CONF="$2"
+		shift
 	*)
 		;;
 	esac
-fi
+	shift
+done
 
-CONF="/usr/local/etc/$PROG.conf"
 if [ -r $CONF ]; then
 	. $CONF
 fi
@@ -75,7 +95,12 @@ islv()
 }
 
 # check for the variables being set
-for i in ORIGINAL_DIR ORIGINAL_LV SNAPSHOT_DIR SNAPSHOT_LV SNAPSHOT_SIZE; do
+if [ "$MOUNT" -eq 1 ]; then
+	VARLIST="ORIGINAL_DIR ORIGINAL_LV SNAPSHOT_DIR SNAPSHOT_LV SNAPSHOT_SIZE"
+else
+	VARLIST="ORIGINAL_LV SNAPSHOT_LV SNAPSHOT_SIZE"
+fi
+for i in $VARLIST; do
 	if [ -z "${!i}" ]; then
 		fatal "$i not set"
 	fi
@@ -94,7 +119,7 @@ elif [ $JUST_MOUNT -ne 0 ]; then
 	fi
 	exit 0
 else
-	# otherwise continue on to recreating the snapshot and mounting it
+	# otherwise continue on to recreating the snapshot and mounting it (if required)
 	:
 fi
 
@@ -106,10 +131,12 @@ fi
 
 LV=`basename $SNAPSHOT_LV`
 
-if ismounted $SNAPSHOT_DIR; then
-	umount $SNAPSHOT_DIR
-else
-	mkdir -p $SNAPSHOT_DIR
+if [ "$MOUNT" -eq 1 ]; then
+	if ismounted $SNAPSHOT_DIR; then
+		umount $SNAPSHOT_DIR
+	else
+		mkdir -p $SNAPSHOT_DIR
+	fi
 fi
 
 if islv $SNAPSHOT_LV; then
@@ -122,15 +149,19 @@ if [ -n "${PRE_SNAP:-''}" ]; then
 	set -e
 fi
 
-if ismounted $ORIGINAL_DIR; then
-	# ignore errors if we can't unmount original
-	umount $ORIGINAL_DIR || true
+if [ "$MOUNT" -eq 1 ]; then
+	if ismounted $ORIGINAL_DIR; then
+		# ignore errors if we can't unmount original
+		umount $ORIGINAL_DIR || true
+	fi
 fi
 
 lvcreate --size $SNAPSHOT_SIZE --name $LV --snapshot $ORIGINAL_LV
 
-if ! ismounted $ORIGINAL_DIR; then
-	mount $ORIGINAL_LV $ORIGINAL_DIR
+if [ "$MOUNT" -eq 1 ]; then
+	if ! ismounted $ORIGINAL_DIR; then
+		mount $ORIGINAL_LV $ORIGINAL_DIR
+	fi
 fi
 
 if [ -n "$POST_SNAP" ]; then
@@ -139,4 +170,7 @@ if [ -n "$POST_SNAP" ]; then
 	set -e
 fi
 
-mount -o ro $SNAPSHOT_LV $SNAPSHOT_DIR
+if [ "$MOUNT" -eq 1 ]; then
+	mount -o ro $SNAPSHOT_LV $SNAPSHOT_DIR
+fi
+
