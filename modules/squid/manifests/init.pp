@@ -36,8 +36,13 @@ class squid {
 	}
 
 	# call this with appropriate parameters to define squid.conf
-	define squid_conf( $visible_hostname = $fqdn, $emulate_httpd_log = "on",
-			$cache_size = "256", $squiddir = "/etc/puppet/modules/squid") {
+	define squid_conf(
+			$basic_auth = "on",
+			$cache_size = "256",
+			$emulate_httpd_log = "on",
+			$squiddir = "/etc/puppet/modules/squid",
+			$visible_hostname = $fqdn
+				) {
 		file { "/etc/squid/squid.conf":
 			ensure	=> file,
 			owner	=> root,
