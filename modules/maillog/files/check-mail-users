@@ -29,7 +29,7 @@ while (<>) {
 		($start) = /^(\S+\s+\d+\s+[\d:]+)\s/;
 	}
 	++$i;
-	
+
 	if (/dovecot: POP3.*: Disconnected:/) {
 
 		my ($user, $retr, $size) = /dovecot: POP3\((.*)\): Disconnected: Logged out top=.* retr=(\d+)\/\d+, del=\d+\/\d+, size=(\d+)/;

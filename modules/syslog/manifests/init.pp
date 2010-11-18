@@ -131,6 +131,7 @@ class rsyslog {
         sharedscripts
         postrotate
 		/etc/init.d/rsyslog reload >/dev/null 2>&1 || true
+		kill -HUP `cat /var/run/rsyslogd.pid`
                 #reload rsyslog >/dev/null 2>&1 || true
         endscript
 }
