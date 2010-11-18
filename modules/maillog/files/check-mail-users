@@ -1,0 +1,91 @@
+#!/usr/bin/perl -Tw
+#
+# Author:	Paul Gear
+# Created:	2010-06-04
+# Modified:	2010-11-18
+# Description:	Parses syslog lines like this into statistics:
+#		Jun  4 22:57:58 linserv dovecot: POP3(accounts): Disconnected: Logged out top=0/0, retr=1/2454, del=1/1, size=2437
+#		Nov 14 22:06:55 linserv dovecot: imap-login: Login: user=<george>, method=PLAIN, rip=::ffff:1.2.3.4, lip=::ffff:192.168.1.1
+#
+
+use strict;
+
+my ($connections, %users, %messages, %sizes);
+my ($imapconns, %imapusers, %imapmethods, %imapips);
+
+if ($#ARGV < 0) {
+	push @ARGV, "/var/log/maillog";
+}
+
+my $i = 0;
+my $start;
+
+$connections = 0;
+$imapconns = 0;
+
+while (<>) {
+	# find the date at which the log begins
+	if ($i == 0) {
+		($start) = /^(\S+\s+\d+\s+[\d:]+)\s/;
+	}
+	++$i;
+	
+	if (/dovecot: POP3.*: Disconnected:/) {
+
+		my ($user, $retr, $size) = /dovecot: POP3\((.*)\): Disconnected: Logged out top=.* retr=(\d+)\/\d+, del=\d+\/\d+, size=(\d+)/;
+
+		++$connections;
+		++$users{$user};
+		$messages{$user} += $retr;
+		$sizes{$user} += $size;
+
+		next;
+	}
+	if (/imap-login: Login: user=/) {
+
+		my ($user, $method, $remoteip) = /dovecot: imap-login: Login: user=<(\S+)>, method=(\S+), rip=(?:::ffff:)?([\d\.]+), lip=/;
+
+		++$imapconns;
+		++$imapusers{$user};
+		++$imapmethods{$method};
+		++$imapips{$remoteip};
+
+		next;
+	}
+
+}
+
+printf "%d POP logins since %s\n\n", $connections, $start;
+my $headformat = "%-25s %12s %10s %10s %13s\n";
+my $lineformat = "%-25s %12d %10d %10d %13d\n";
+if ($connections > 0) {
+	printf $headformat, "User", "Connections", "Messages", "Size (Kb)", "Average (Kb)";
+	printf $headformat, "----", "-----------", "--------", "---------", "------------";
+	for my $user (sort { $users{$b} <=> $users{$a} } keys %users) {
+		printf $lineformat, $user, $users{$user}, $messages{$user}, $sizes{$user} / 1024, $messages{$user} > 0 ? $sizes{$user} / 1024 / $messages{$user} : -1;
+	}
+}
+
+printf "\n%d IMAP logins since %s\n\n", $imapconns, $start;
+
+$headformat = "%-25s %16s\n";
+$lineformat = "%-25s %16d\n";
+if ($imapconns > 0) {
+	printf $headformat, "User", "IMAP Connections";
+	printf $headformat, "----", "----------------";
+	for my $user (sort { $imapusers{$b} <=> $imapusers{$a} } keys %imapusers) {
+		printf $lineformat, $user, $imapusers{$user};
+	}
+}
+
+printf "\n";
+$headformat = "%-25s %16s\n";
+$lineformat = "%-25s %16d\n";
+if ($imapconns > 0) {
+	printf $headformat, "IP Address", "IMAP Connections";
+	printf $headformat, "----------", "----------------";
+	for my $ip (sort { $imapips{$b} <=> $imapips{$a} } keys %imapips) {
+		printf $lineformat, $ip, $imapips{$ip};
+	}
+}
+
