@@ -11,7 +11,7 @@
 set -u
 
 PATH="/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH"
-VG=/etc/vm00
+VG=/dev/vm00
 XENDIR=/var/lib/xen/images
 SLEEP=5
 DIVISOR=10
