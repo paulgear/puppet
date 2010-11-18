@@ -17,6 +17,14 @@ class backup::lvm {
 		ensure	=> "/usr/local/bin/lvm-snapshot-mount",
 	}
 
+	file { "/usr/local/bin/xen-backup":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 755,
+		source	=> "puppet:///modules/backup/bin/xen-backup",
+	}
+
 	# define lvm snapshot withOUT mount
 	define lvm_snapshot( $original_lv, $snapshot_lv, $snapshot_size, $pre_remove = "", $pre_snap = "", $post_snap = "" ) {
 		file { "/usr/local/etc/lvm-snapshot.conf":
