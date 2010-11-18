@@ -10,6 +10,7 @@
 #set -e
 set -u
 
+PATH="/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH"
 VG=/etc/vm00
 XENDIR=/var/lib/xen/images
 SLEEP=5
@@ -63,7 +64,7 @@ ORIGINAL_LV=$LV
 SNAPSHOT_LV=$LV-snap
 SNAPSHOT_SIZE=$SNAPSIZE
 EOF
-		lvm-snapshot-backup --conf $TMP --no-mount
+		lvm-snapshot --conf $TMP --no-mount
 	else
 		# file-based backup
 		rsync -SHax $XENDIR/$domain/ $XENDIR/$domain.bak/
