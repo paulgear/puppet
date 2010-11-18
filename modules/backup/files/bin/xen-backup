@@ -55,7 +55,7 @@ for domain in $DOMAINS; do
 	if islv "$LV"; then
 		# snapshot is a portion of the original LV size - this may need tuning above
 		LVSIZE=`lvs -o lv_name,lv_size --units m $VG 2>/dev/null|awk -v LV=$LV_SHORT '$1 == LV {print $2}'| cut -d. -f1`
-		(( SNAPSIZE = LVSIZE / DIVISOR ))
+		(( SNAPSIZE=LVSIZE / DIVISOR ))
 
 		# create LVM snapshot configuration file and back up using that
 		TMPFILE=`mktemp`
@@ -64,7 +64,7 @@ ORIGINAL_LV=$LV
 SNAPSHOT_LV=$LV-snap
 SNAPSHOT_SIZE=$SNAPSIZE
 EOF
-		lvm-snapshot --conf $TMP --no-mount
+		lvm-snapshot --conf $TMPFILE --no-mount
 	else
 		# file-based backup
 		rsync -SHax $XENDIR/$domain/ $XENDIR/$domain.bak/
