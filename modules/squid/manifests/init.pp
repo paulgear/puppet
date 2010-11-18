@@ -40,6 +40,7 @@ class squid {
 			$basic_auth = "on",
 			$cache_size = "256",
 			$emulate_httpd_log = "on",
+			$local_networks = [ "192.168.0.0/255.255.0.0" ],
 			$squiddir = "/etc/puppet/modules/squid",
 			$visible_hostname = $fqdn
 				) {
