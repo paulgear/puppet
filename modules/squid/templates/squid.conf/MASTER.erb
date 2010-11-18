@@ -59,10 +59,6 @@ acl Safe_ports port 2187		# elluminate
 acl Safe_ports port 777		# multiling http
 acl CONNECT method CONNECT
 
-#################################
-# Conditional nopasswordsite file inclusion
-#################################
-
 <% local_networks.each do |lan| -%>
 acl LAN_SRC src <%= lan %>
 <% end -%>
