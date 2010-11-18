@@ -4,12 +4,15 @@ LICENSE
 This is a collection of puppet modules focused on support of remote office Linux servers.
 The collection is tested only on Debian, CentOS, and Ubuntu Linux at present.
 
-    Copyright (c) 2010 Gear Consulting Pty Ltd <http://libertysys.com.au/>
+    Copyright (c) 2010 Gear Consulting Pty Ltd http://libertysys.com.au/
 
     Written by Paul Gear <github@libertysys.com.au>
 
     The latest version of these modules may be found at
-    <http://github.com/paulgear/puppet>
+	http://github.com/paulgear/puppet
+
+Unless otherwise stated, all code and configuration in this repository ("this program"
+below) is licensed under the GNU GPL v3:
 
 This program is free software: you can redistribute it and/or modify it under the terms
 of the GNU General Public License as published by the Free Software Foundation, either
@@ -20,13 +23,13 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 A copy of the GNU General Public License may be found in the file COPYING.txt at the top
-of this repository.  See also <http://www.gnu.org/licenses/gpl.html> for full license
+of this repository.  See also http://www.gnu.org/licenses/gpl.html for full license
 details.
 
 ACKNOWLEDGEMENT
 ---------------
 
-The kind support of Queensland Baptist Care <http://www.qbc.com.au/> ICT Services
+The kind support of Queensland Baptist Care http://www.qbc.com.au/ ICT Services
 Manager, Rick Saul, in the development of these is gratefully acknowledged.  Without
 Rick's encouragement and commitment, most of this code would never have been
 possible.
