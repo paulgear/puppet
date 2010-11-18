@@ -27,10 +27,15 @@ class text {
 	}
     }
 
-    define replace_lines($file, $pattern, $replace) {
+    define replace_lines($file, $pattern, $replace, $optimise = 1) {
+	$unless = $optimise ? {
+	    /(no|off|false|0)/	=> "/bin/true",
+	    default		=> "/bin/grep -E '$replace' '$file'",
+	}
 	exec { "sed -i -r -e 's/$pattern/$replace/' $file":
 	    path	=> "/bin",
 	    onlyif	=> "/bin/grep -E '$pattern' '$file'",
+	    unless	=> $unless,
 	}
     }
 
