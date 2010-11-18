@@ -63,14 +63,8 @@ acl CONNECT method CONNECT
 # Conditional nopasswordsite file inclusion
 #################################
 
-acl NoPasswordSites url_regex "/etc/squid/nopasswordsites.txt"
-http_access allow NoPasswordSites
 <% local_networks.each do |lan| -%>
 acl LAN_SRC src <%= lan %>
-<% end -%>
-
-<% if basic_auth == "on" then -%>
-acl passwd proxy_auth REQUIRED
 <% end -%>
 
 #
@@ -94,6 +88,9 @@ http_access deny manager
 http_access deny !Safe_ports
 http_access deny CONNECT !SSL_ports
 <% if basic_auth == "on" then -%>
+acl NoPasswordSites url_regex "/etc/squid/nopasswordsites.txt"
+http_access allow NoPasswordSites
+acl passwd proxy_auth REQUIRED
 http_access allow passwd
 <% end -%>
 http_access allow LAN_SRC
