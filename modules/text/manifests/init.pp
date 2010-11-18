@@ -27,9 +27,11 @@ class text {
 	}
     }
 
-    define replace_lines($file, $pattern, $replace, $optimise = 1) {
+    # Use $optimise to reduce the noise of running this exec when there is no need.
+    # The main reason you might use this is if the pattern matches the replace.
+    define replace_lines($file, $pattern, $replace, $optimise = 0) {
 	$unless = $optimise ? {
-	    /(no|off|false|0)/	=> "/bin/true",
+	    /(no|off|false|0)/	=> "/bin/false",
 	    default		=> "/bin/grep -E '$replace' '$file'",
 	}
 	exec { "sed -i -r -e 's/$pattern/$replace/' $file":
