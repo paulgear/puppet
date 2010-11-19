@@ -36,6 +36,7 @@ class ntp::server {
 			group   => root,
 			mode    => 644,
 			content => template("ntp/ntp.conf.puppet.erb"),
+			require	=> Package[$ntp::ntpd_pkg],
 		}
 	}
 
