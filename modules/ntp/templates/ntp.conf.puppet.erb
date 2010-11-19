@@ -2,8 +2,10 @@
 
 <%= include_header( "NTP configuration" ) -%>
 
+<% if scope.lookupvar('uselocalclock') == "1" then -%>
 server	127.127.1.0	# local clock
 fudge	127.127.1.0 stratum 13	
+<% end -%>
 
 driftfile /var/lib/ntp/drift
 keys /etc/ntp/keys
@@ -22,4 +24,7 @@ restrict <%= localnet %> nomodify notrap
 <% end -%>
 # End local networks
 
-<%= ntp_peers.join("\n") %>
+# Peers
+<%= default_peers.join("\n") %>
+<%= custom_peers.join("\n") %>
+# End peers

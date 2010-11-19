@@ -29,8 +29,14 @@ class ntp::server {
 	# create ntpd configuration file from template (requires the server list)
 	# localnetworks should be a list of the form:
 	#	[ "10.0.0.0 mask 255.255.0.0", "192.168.20.0 mask 255.255.255.0", ]
-	# ntp_peers is just a list of strings which are put verbatim into the file.
-	define conf( $ntp_peers = $ntp::default_ntp_peers, $localnetworks = [] ) {
+	# custom_peers and default_peers are just lists of strings which are put verbatim
+	# into the file.  See $ntp::default_ntp_peers for examples of the format.
+	define conf(
+			$custom_peers = [],
+			$default_peers = $ntp::default_ntp_peers,
+			$localnetworks = [],
+			$uselocalclock = 1
+				) {
 		file { $ntp::ntp_conf:
 			owner   => root,
 			group   => root,
