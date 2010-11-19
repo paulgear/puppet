@@ -33,6 +33,7 @@ export VISUAL=vim
 function paul
 {
 	alias dir='ls -Fabl'
+	alias df='df -m'
 	alias more=less
 	set -o vi
 	export LESS=-eiMRX
