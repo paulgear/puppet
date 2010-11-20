@@ -14,7 +14,7 @@ PATH="/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH"
 VG=/dev/vm00
 XENDIR=/var/lib/xen/images
 SLEEP=5
-DIVISOR=10
+DIVISOR=8
 
 if [ "$#" -gt 0 ]; then
 	DOMAINS="$@"
