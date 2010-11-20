@@ -38,6 +38,11 @@ islv()
 # information.
 export LVM_SUPPRESS_FD_WARNINGS=1
 
+# save lvs output
+TMPDIR=`mktemp -d`
+LVS="lvs --units m"
+$LVS > $TMPDIR/before
+
 for domain in $DOMAINS; do
 	log "Start backup of $domain"
 	xm pause $domain
@@ -80,4 +85,9 @@ EOF
 	log "Finish backup of $domain"
 	xm unpause $domain
 done
+
+log "Changes in LV use:"
+$LVS > $TMPDIR/after
+diff -u $TMPDIR/before $TMPDIR/after
+rm -rf $TMPDIR/
 
