@@ -32,6 +32,12 @@ islv()
 	lvdisplay "$@" >/dev/null 2>&1
 }
 
+# Ignore LVM warnings, which happen when run from cron.daily on Debian squeeze
+# (and perhaps elsewhere as well).
+# See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=558712 for further
+# information.
+export LVM_SUPPRESS_FD_WARNINGS=1
+
 for domain in $DOMAINS; do
 	log "Start backup of $domain"
 	xm pause $domain
