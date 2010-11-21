@@ -88,6 +88,6 @@ done
 
 log "Changes in LV use:"
 $LVS > $TMPDIR/after
-diff -u $TMPDIR/before $TMPDIR/after
+diff -u $TMPDIR/before $TMPDIR/after | grep -Eve '^(\+\+\+|---|@@)'
 rm -rf $TMPDIR/
 

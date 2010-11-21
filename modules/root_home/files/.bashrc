@@ -7,8 +7,8 @@ fi
 # User specific aliases and functions
 alias ckp='git commit -a -m"Checkpoint"'
 alias cp='cp -i'
-alias duh='du -h --max-depth=1 |sort -n'
-alias dum='du -m --max-depth=1 |sort -n'
+alias duh='du -hx --max-depth=1 |sort -n'
+alias dum='du -mx --max-depth=1 |sort -n'
 alias lg='lm | grep '
 alias ll='ls -la'
 alias lm='ls -la --color=always | more'
