@@ -207,9 +207,8 @@ while (defined($ThisLine = <STDIN>)) {
       ($ThisLine =~ /zone .*: NS '.*' has no address records/) or
       ($ThisLine =~ /.*: not a valid number$/) or
       ($ThisLine =~ /.*: unexpected end of input/) or
-      ($ThisLine =~ /too many timeouts resolving '.*' .*: disabling EDNS/) or
+      ($ThisLine =~ /(connection refused|host unreachable) resolving '.*'/) or
       ($ThisLine =~ /reloading zones succeeded/)
-      # too many timeouts resolving 'ns-ext.nrt1.isc.org/AAAA' (in '.'?): disabling EDNS: 3 Time(s)
    ) {
       # Don't care about these...
    } elsif (
@@ -318,6 +317,8 @@ while (defined($ThisLine = <STDIN>)) {
       $UnknownCCCommands{$CCC}++;
    } elsif (($CCC) = ($ThisLine =~ /received control channel command '(.*)'/)) {
       $CCCommands{$CCC}++;
+   } elsif ( ($ThisLine =~ /success resolving .* after disabling EDNS/) ) {
+      $EDNSDisableSuccess++;
    } elsif ( ($ThisLine =~ /success resolving .* after reducing the advertised EDNS UDP packet size to 512 octets/) ) {
       $EDNSReduceSuccess++;
    } elsif ( ($ThisLine =~ /too many timeouts resolving .*: reducing the advertised EDNS UDP packet size to 512 octets/) ) {
@@ -583,6 +584,10 @@ if ($EDNSReduce) {
 
 if ($EDNSReduceSuccess) {
       print "   $EDNSReduceSuccess successful name resolutions after reducing EDNS packet size\n";
+}
+
+if ($EDNSDisableSuccess) {
+      print "   $EDNSDisableSuccess successful name resolutions after disabling EDNS\n";
 }
 
 if (keys %OtherList) {
