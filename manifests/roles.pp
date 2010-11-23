@@ -18,15 +18,13 @@ class role::mailrelay {
 	include amavis
 	include clamav
 	include mailgraph
+	include postfix
+	include postgrey
 	include spamassassin
 }
 
 class role::mailserver {
-	include clamav
-	include procmail
-	include maillog
-	include spamassassin
-	include vacation
+	include role::mailrelay
 }
 
 class role::ntpserver {
