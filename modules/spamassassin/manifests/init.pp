@@ -26,9 +26,12 @@ class spamassassin {
 		require		=> Package[$pkg],
 	}
 
+	$trusted_networks = [
+	]
 	$whitelist_from = [
 	]
 
+	$templatedir = "/etc/puppet/modules/spamassassin/templates"
 	file { "$dir/local.cf":
 		require		=> Package[$pkg],	# make sure the package is installed before creating this file
 		notify		=> Service[$svc],	# make sure the service is restarted after changing this file

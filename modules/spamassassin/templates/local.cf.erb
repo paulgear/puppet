@@ -1,12 +1,13 @@
-# These values can be overridden by editing ~/.spamassassin/user_prefs.cf
-# (see spamassassin(1) for details)
-
-# These should be safe assumptions and allow for simple visual sifting
-# without risking lost emails.
+<% require '/etc/puppet/include/puppetutils.rb' -%>
+<%= include_header( "SpamAssassin local configuration file" ) -%>
 
 required_hits 5
 report_safe 0
 rewrite_header Subject [*SPAM*]
+
+<% trusted_networks.each do |net| -%>
+trusted_networks <%= net %>
+<% end -%>
 
 # http://wiki.apache.org/spamassassin/ManualWhitelist
 
@@ -16,3 +17,4 @@ rewrite_header Subject [*SPAM*]
 whitelist_from <%= wlf %>
 <% end -%>
 
+<%= include_file(fqdn + "-local.cf") %>
