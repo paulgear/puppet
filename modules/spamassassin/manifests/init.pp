@@ -26,6 +26,9 @@ class spamassassin {
 		require		=> Package[$pkg],
 	}
 
+	$whitelist_from = [
+	]
+
 	file { "$dir/local.cf":
 		require		=> Package[$pkg],	# make sure the package is installed before creating this file
 		notify		=> Service[$svc],	# make sure the service is restarted after changing this file
