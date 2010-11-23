@@ -163,7 +163,7 @@ class dansguardian::files {
 		source	=> "puppet:///modules/dansguardian/bypasstemplate.html",
 	}
 
-	file { "/usr/share/dansguardian/languages/ukenglish/nobypasstemplate.html":
+	file { "${dansguardian::langdir}/ukenglish/nobypasstemplate.html":
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
