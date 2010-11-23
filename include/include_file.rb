@@ -1,16 +1,25 @@
 
 def include_file( name )
-	# add the path separator if it's not already there
+	# find templatedir variable; ensure it's set
 	templatedir = scope.lookupvar("templatedir")
+	if templatedir.empty? then
+		Puppet.warning( "Template directory not set" )
+		return nil
+	end
+
+	# add the path separator if it's not already there
 	templatedir.concat("/") unless templatedir.endswith("/")
 
-	includeheader = "#####\n# Included file: \n# " + templatedir + name + "\n#####\n"
-	includefooter = "#####\n# End of included file: \n# " + templatedir + name + "\n#####\n"
+	filename = templatedir + name
 
-	if File.exists?( templatedir + name ) then
-		return includeheader + IO.read( templatedir + name ) + includefooter
+	includeheader = "#####\n# Included file: \n# " + filename + "\n#####\n"
+	includefooter = "#####\n# End of included file: \n# " + filename + "\n#####\n"
+
+	if File.exists?( filename ) then
+		return includeheader + IO.read( filename ) + includefooter
 	else
-		Puppet.notice( templatedir + name + " not found" )
+		Puppet.notice( filename + " not found" )
+		return nil
 	end
 end
 
