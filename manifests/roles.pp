@@ -2,6 +2,14 @@
 # Example roles for puppet nodes
 ######################################################################
 
+class role::fail2ban::postfix {
+	include shorewall
+	include fail2ban::actions::route
+	include fail2ban::actions::shorewall
+	include fail2ban::filters::postfix
+	include fail2ban::jails::postfix
+}
+
 class role::fail2ban::winbind {
 	include fail2ban::filters::winbind_remote_error
 	include fail2ban::actions::winbind_restart
@@ -21,6 +29,7 @@ class role::mailrelay {
 	include postfix
 	include postgrey
 	include spamassassin
+	include role::fail2ban::postfix
 }
 
 class role::mailserver {

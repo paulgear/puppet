@@ -96,7 +96,6 @@ class os::debian::packages {
 		"openssl",
 		"patch",
 		"perl",
-		"postfix",
 		"psmisc",
 		"rsync",
 		"screen",
@@ -114,19 +113,11 @@ class os::debian::packages {
 
 	# packages to remove
 	$removepackages = [
-
-		"exim4",
-		"exim4-base",
-		"exim4-config",
-		"exim4-daemon-light",
-		"nano",
 		"nvi",
 		"vim-tiny",
-
 	]
 	package { $removepackages:
 		ensure	=> purged,
-		require	=> Package["postfix"],
 	}
 
 	include etckeeper

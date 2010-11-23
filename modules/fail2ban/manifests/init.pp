@@ -5,7 +5,7 @@
 
 class fail2ban {
 
-	require concat::setup
+	include concat::setup
 
 	$pkg = "fail2ban"
 	$svc = "fail2ban"
@@ -138,3 +138,4 @@ define fail2ban::setup (
 		notify	=> Exec["$fail2ban::exec"],
 	}
 }
+
