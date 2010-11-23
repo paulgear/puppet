@@ -31,7 +31,7 @@ class snmp {
 			ensure	=> file,
 			owner	=> root,
 			group	=> root,
-			mode	=> 644,
+			mode	=> 640,
 			content	=> template("snmp/snmpd.conf"),
 			require	=> Package[$snmp::pkg],
 		}
