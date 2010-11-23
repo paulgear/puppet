@@ -54,7 +54,7 @@ class spamassassin {
 			exec { "spamassassin-rule-update":
 				command	=> "sed -i.BAK -e 's/\\(CRON\\|ENABLED\\)=0/\\1=1/' $default_file",
 				onlyif	=> "grep -e CRON=0 -e ENABLED=0 $default_file",
-				notify	=> Service[$spamassassin_svc],
+				notify	=> Service[$svc],
 			}
 		}
 	}
