@@ -14,6 +14,7 @@ class dansguardian {
 	$notify = "dansguardian reload"
 	$user = "nobody"
 
+	include utils
 	include dansguardian::package
 	include dansguardian::files
 	include dansguardian::directories
@@ -133,7 +134,7 @@ class dansguardian::directories {
 		group		=> nobody,
 		mode		=> 755,
 		recurse		=> true,
-		require		=> [ Package[$dansguardian::pkg], File["/usr/local/bin/randomsleep"] ],
+		require		=> Package[$dansguardian::pkg],
 	}
 
 }
