@@ -20,6 +20,10 @@ class dansguardian {
 		centos	=> "nobody",
 		default	=> "dansguardian",
 	}
+	$langdir = $operatingsystem ? {
+		centos	=> "/usr/share/dansguardian/languages",
+		default	=> "$basedir/languages",
+	}
 
 	include utils
 	include dansguardian::package
@@ -86,7 +90,7 @@ class dansguardian {
 			ensure	=> file,
 			owner	=> root,
 			group	=> root,
-			mode	=> 644,
+			mode	=> 640,
 			require	=> Package[$dansguardian::pkg],
 			notify	=> Exec[$dansguardian::notify],
 			content	=> template("dansguardian/dansguardian.conf.erb"),
@@ -98,7 +102,7 @@ class dansguardian {
 			ensure	=> file,
 			owner	=> root,
 			group	=> root,
-			mode	=> 644,
+			mode	=> 640,
 			require	=> Package[$dansguardian::pkg],
 			notify	=> Exec[$dansguardian::notify],
 			content	=> template("dansguardian/filtergroupslist.erb"),
@@ -127,7 +131,7 @@ class dansguardian::directories {
 		ensure		=> directory,
 		owner		=> root,
 		group		=> root,
-		mode		=> 755,
+		mode		=> 750,
 		require		=> Package[$dansguardian::pkg],
 		recurse		=> true,
 		ignore		=> [ ".*.swp" ],
@@ -139,7 +143,7 @@ class dansguardian::directories {
 		ensure		=> directory,
 		owner		=> $dansguardian::user,
 		group		=> $dansguardian::group,
-		mode		=> 755,
+		mode		=> 750,
 		recurse		=> true,
 		require		=> Package[$dansguardian::pkg],
 	}
@@ -149,7 +153,7 @@ class dansguardian::directories {
 class dansguardian::files {
 
 	# the template file for the page which is displayed when a site is blocked
-	file { "/usr/share/dansguardian/languages/ukenglish/bypasstemplate.html":
+	file { "${dansguardian::langdir}/ukenglish/bypasstemplate.html":
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
@@ -173,7 +177,7 @@ class dansguardian::files {
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
-		mode	=> 644,
+		mode	=> 640,
 		require	=> Package[$dansguardian::pkg],
 		source	=> "puppet:///modules/dansguardian/clamdscan.conf",
 	}
@@ -229,7 +233,7 @@ class dansguardian::groups {
 			ensure	=> file,
 			owner	=> root,
 			group	=> root,
-			mode	=> 644,
+			mode	=> 640,
 			require	=> Package[$dansguardian::pkg],
 			notify	=> Exec[$dansguardian::notify],
 			content	=> template("dansguardian/list-master.erb"),
@@ -250,7 +254,7 @@ class dansguardian::groups {
 			ensure	=> file,
 			owner	=> root,
 			group	=> root,
-			mode	=> 644,
+			mode	=> 640,
 			require	=> Package[$dansguardian::pkg],
 			notify	=> Exec[$dansguardian::notify],
 			content	=> template("dansguardian/dansguardianf1.conf.erb"),
