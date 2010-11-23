@@ -20,5 +20,10 @@ whitelist_from <%= wlf %>
 end -%>
 
 # fqdn: <%= fqdn %>
+# servername: <%= servername %>
 # templatedir: <%= templatedir %>
-<%= include_file(fqdn + "-local.cf") %>
+
+# Include file
+<%= include_file(fqdn + "-local.cf") -%>
+# End include file
+
