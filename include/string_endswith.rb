@@ -3,7 +3,7 @@
 class String
 
 	def endswith( otherstring )
-		return rindex(checkstring) == length() - 1
+		return rindex(otherstring) == length() - 1
 	end
 
 end
