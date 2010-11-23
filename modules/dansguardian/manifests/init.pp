@@ -133,6 +133,7 @@ class dansguardian::directories {
 		group		=> root,
 		mode		=> 750,
 		require		=> Package[$dansguardian::pkg],
+		notify		=> Exec[$dansguardian::notify],
 		recurse		=> true,
 		ignore		=> [ ".*.swp" ],
 		source		=> "puppet:///modules/dansguardian/lists",
@@ -146,6 +147,7 @@ class dansguardian::directories {
 		mode		=> 750,
 		recurse		=> true,
 		require		=> Package[$dansguardian::pkg],
+		notify		=> Exec[$dansguardian::notify],
 	}
 
 }
@@ -179,6 +181,7 @@ class dansguardian::files {
 		group	=> root,
 		mode	=> 640,
 		require	=> Package[$dansguardian::pkg],
+		notify	=> Exec[$dansguardian::notify],
 		source	=> "puppet:///modules/dansguardian/clamdscan.conf",
 	}
 
