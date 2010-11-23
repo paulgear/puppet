@@ -12,7 +12,14 @@ class dansguardian {
 	$pkg = "dansguardian"
 	$svc = "dansguardian"
 	$notify = "dansguardian reload"
-	$user = "nobody"
+	$user = $operatingsystem ? {
+		centos	=> "nobody",
+		default	=> "dansguardian",
+	}
+	$group = $operatingsystem ? {
+		centos	=> "nobody",
+		default	=> "dansguardian",
+	}
 
 	include utils
 	include dansguardian::package
@@ -130,8 +137,8 @@ class dansguardian::directories {
 	# manage permissions on the dansguardian blacklists directory
 	file { "$dansguardian::listdir/blacklists":
 		ensure		=> directory,
-		owner		=> nobody,
-		group		=> nobody,
+		owner		=> $dansguardian::user,
+		group		=> $dansguardian::group,
 		mode		=> 755,
 		recurse		=> true,
 		require		=> Package[$dansguardian::pkg],
