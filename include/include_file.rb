@@ -18,7 +18,7 @@ def include_file( name )
 	if File.exists?( filename ) then
 		return includeheader + IO.read( filename ) + includefooter
 	else
-		Puppet.notice( filename + " not found" )
+#		Puppet.notice( filename + " not found" )
 		return nil
 	end
 end
