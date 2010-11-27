@@ -44,7 +44,7 @@ class dansguardian {
 		$filtergroups_description = "
 # filter1 = default keyword weighted phrase limit, blanket IP block active, bypass NOT allowed
 # filter2 = unfiltered system users and computers (not terminal servers)
-# filter3 = blanket IP block INACTIVE allows Skype, default filtering (gotomeeting), bypass allowed
+# filter3 = blanket IP block INACTIVE (allows Skype, gotomeeting, etc.), default filtering, bypass allowed
 # filter4 = higher weighted phrase limit, blanket IP block active, bypass allowed
 # filter5 = blanket block active, allowed sites only, bypass NOT allowed
 "
