@@ -2,10 +2,12 @@
 #
 # Author:	Paul Gear
 # Created:	2010-06-04
-# Modified:	2010-11-18
-# Description:	Parses syslog lines like this into statistics:
-#		Jun  4 22:57:58 linserv dovecot: POP3(accounts): Disconnected: Logged out top=0/0, retr=1/2454, del=1/1, size=2437
-#		Nov 14 22:06:55 linserv dovecot: imap-login: Login: user=<george>, method=PLAIN, rip=::ffff:1.2.3.4, lip=::ffff:192.168.1.1
+# Modified:	2010-12-03
+# Description:
+# - Parses syslog lines like this into statistics:
+#	Jun  4 22:57:58 linserv dovecot: POP3(accounts): Disconnected: Logged out top=0/0, retr=1/2454, del=1/1, size=2437
+#	Nov 14 22:06:55 linserv dovecot: imap-login: Login: user=<george>, method=PLAIN, rip=::ffff:1.2.3.4, lip=::ffff:192.168.1.1
+# - Reports overall size usage of each user's Maildir.
 #
 
 use strict;
@@ -55,6 +57,10 @@ while (<>) {
 
 }
 
+#####
+# report POP logins
+#####
+
 printf "%d POP logins since %s\n\n", $connections, $start;
 my $headformat = "%-25s %12s %10s %10s %13s\n";
 my $lineformat = "%-25s %12d %10d %10d %13d\n";
@@ -65,6 +71,10 @@ if ($connections > 0) {
 		printf $lineformat, $user, $users{$user}, $messages{$user}, $sizes{$user} / 1024, $messages{$user} > 0 ? $sizes{$user} / 1024 / $messages{$user} : -1;
 	}
 }
+
+#####
+# report IMAP logins
+#####
 
 printf "\n%d IMAP logins since %s\n\n", $imapconns, $start;
 
@@ -88,4 +98,30 @@ if ($imapconns > 0) {
 		printf $lineformat, $ip, $imapips{$ip};
 	}
 }
+
+#####
+# Get the top maildir sizes
+#####
+
+# Reset PATH to keep perl happy in taint mode
+$ENV{"PATH"} = "/usr/bin:/bin:/usr/sbin:/sbin";
+
+open PIPE, "cd /home; du -ms Maildir/* */Maildir 2>/dev/null | sort -nr |" ||
+	die "Cannot open pipe: $!";
+
+printf "\n";
+$headformat = "%-20s %12s\n";
+$lineformat = "%-20s %12d\n";
+
+printf $headformat, "User", "Mailbox size";
+printf $headformat, "----", "------------";
+
+while (<PIPE>) {
+	chomp;
+	my ($size, $dir) = split(/\s+/, $_, 2);
+	my $user = $dir;
+	$user =~ s/\/?Maildir\/?//;
+	printf $lineformat, $user, $size;
+}
+close PIPE || warn "Cannot close pipe: $!";
 
