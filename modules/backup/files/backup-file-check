@@ -42,20 +42,29 @@ DF=1
 INTERVAL_1=1
 INTERVAL_2=7
 INTERVAL_3=31
+NOW=`date +%s`
+RRD_HEADER=0
 
 report_stats()
 {
 	find "$@" -type f -printf "%T@\t%p\n" 2>/dev/null | \
-	rrd=$RRD findpath="$@" \
+	rrd=$RRD findpath="$@" now="$NOW" \
 	interval1="$INTERVAL_1" interval2="$INTERVAL_2" interval3="$INTERVAL_3" \
 	perl -we '
+
+sub debugfile ($$$) {
+	my ($file, $interval, $time) = @_;
+	printf STDERR "%s: newer than %s (%d): %s (%d)\n", $file, scalar localtime($interval),
+		$interval, scalar localtime($time), $time;
+}
+
 	# initialise counters
 	my $dayfiles = 0;
 	my $weekfiles = 0;
 	my $monthfiles = 0;
 	my $totalfiles = 0;
 
-	my $now = time();
+	my $now = $ENV{"now"};
 
 	# set cutoff dates
 	my $day   = $now - (86400 * $ENV{"interval1"});
@@ -68,54 +77,69 @@ report_stats()
 		my ($time, $path) = split(/\s+/, $_, 2);
 		if ($time > $day) {
 			++$dayfiles;
-			print STDERR "$path: newer than $day: $time\n" if -t 0;
+			debugfile($path, $day, $time) if -t 1;
 		}
 		if ($time > $week) {
 			++$weekfiles;
-			print STDERR "$path: newer than $week: $time\n" if -t 0;
+			debugfile($path, $week, $time) if -t 1;
 		}
 		if ($time > $month) {
 			++$monthfiles;
-			print STDERR "$path: newer than $month: $time\n" if -t 0;
+			debugfile($path, $month, $time) if -t 1;
 		}
 		++$totalfiles;
 	}
 
 	# print summary
 	if ($ENV{"rrd"} != 0) {
-		print "$now:$dayfiles:$weekfiles:$monthfiles:$totalfiles";
+		print ":$dayfiles:$weekfiles:$monthfiles:$totalfiles";
 	}
 	else {
 		print "$dayfiles\t$weekfiles\t$monthfiles\t$totalfiles\t" . $ENV{"findpath"} . "\n";
 	}
 	'
-
 	if [ "$DF" != "0" ]; then
 		df --block-size=1M --portability "$@" | tail -1 | tr -d "%" | \
 			awk '{printf ":%s:%s:%s:%s", $2, $3, $4, $5}'
 	fi
-
-	# add a newline if we are in RRD mode
-	if [ "$RRD" -ne 0 ]; then
-		echo ""
-	fi
-
 }
 
 for i in "$@"; do
 	case "$i" in
+	--df)
+		DF=1
+		;;
 	--no-df)
 		DF=0
 		;;
 	--fortnight*)
 		INTERVAL_2=14
 		;;
+	--rrd)
+		RRD=1
+		;;
+	--no-rrd)
+		RRD=0
+		;;
+	--week*)
+		INTERVAL_2=7
+		;;
 	-*)
 		echo "$PROG: Invalid option ($i) specified - ignored" >&2
 		;;
 	*)
+		# print the RRD header if needed
+		if [ "$RRD" -ne 0  -a "$RRD_HEADER" -eq 0 ]; then
+			echo -n "$NOW"
+			RRD_HEADER=1
+		fi
 		report_stats "$i"
 		;;
 	esac
 done
+
+# add a newline if we are in RRD mode
+if [ "$RRD" -ne 0 ]; then
+	echo ""
+fi
 
