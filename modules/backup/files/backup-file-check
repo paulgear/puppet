@@ -44,18 +44,19 @@ INTERVAL_2=7
 INTERVAL_3=31
 NOW=`date +%s`
 RRD_HEADER=0
+DEBUG=0
 
 report_stats()
 {
 	find "$@" -type f -printf "%T@\t%p\n" 2>/dev/null | \
-	rrd=$RRD findpath="$@" now="$NOW" \
+	rrd=$RRD findpath="$@" now="$NOW" debug="$DEBUG" \
 	interval1="$INTERVAL_1" interval2="$INTERVAL_2" interval3="$INTERVAL_3" \
 	perl -we '
 
 sub debugfile ($$$) {
 	my ($file, $interval, $time) = @_;
 	printf STDERR "%s: newer than %s (%d): %s (%d)\n", $file, scalar localtime($interval),
-		$interval, scalar localtime($time), $time;
+		$interval, scalar localtime($time), $time if $ENV{"debug"} != 0;
 }
 
 	# initialise counters
@@ -77,15 +78,15 @@ sub debugfile ($$$) {
 		my ($time, $path) = split(/\s+/, $_, 2);
 		if ($time > $day) {
 			++$dayfiles;
-			debugfile($path, $day, $time) if -t 1;
+			debugfile($path, $day, $time);
 		}
 		if ($time > $week) {
 			++$weekfiles;
-			debugfile($path, $week, $time) if -t 1;
+			debugfile($path, $week, $time);
 		}
 		if ($time > $month) {
 			++$monthfiles;
-			debugfile($path, $month, $time) if -t 1;
+			debugfile($path, $month, $time);
 		}
 		++$totalfiles;
 	}
@@ -104,8 +105,12 @@ sub debugfile ($$$) {
 	fi
 }
 
-for i in "$@"; do
-	case "$i" in
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--debug)
+		DEBUG=1
+		RRD=0
+		;;
 	--df)
 		DF=1
 		;;
@@ -124,6 +129,10 @@ for i in "$@"; do
 	--week*)
 		INTERVAL_2=7
 		;;
+	--now)
+		NOW=$2
+		shift
+		;;
 	-*)
 		echo "$PROG: Invalid option ($i) specified - ignored" >&2
 		;;
@@ -133,9 +142,10 @@ for i in "$@"; do
 			echo -n "$NOW"
 			RRD_HEADER=1
 		fi
-		report_stats "$i"
+		report_stats "$1"
 		;;
 	esac
+	shift
 done
 
 # add a newline if we are in RRD mode
