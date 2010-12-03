@@ -257,7 +257,7 @@ class dansguardian::groups {
 			ensure	=> file,
 			owner	=> root,
 			group	=> $dansguardian::group,
-			mode	=> 640,
+			mode	=> 644,
 			require	=> Package[$dansguardian::pkg],
 			notify	=> Exec[$dansguardian::notify],
 			content	=> template("dansguardian/dansguardianf1.conf.erb"),
