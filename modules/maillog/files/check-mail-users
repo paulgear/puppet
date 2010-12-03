@@ -110,11 +110,11 @@ open PIPE, "cd /home; du -ms Maildir/* */Maildir 2>/dev/null | sort -nr |" ||
 	die "Cannot open pipe: $!";
 
 printf "\n";
-$headformat = "%-25s %16s\n";
-$lineformat = "%-25s %16d\n";
+$headformat = "%-24s %17s\n";
+$lineformat = "%-24s %17d\n";
 
-printf $headformat, "User", "Mailbox size";
-printf $headformat, "----", "------------";
+printf $headformat, "User", "Mailbox size (MB)";
+printf $headformat, "----", "-----------------";
 
 while (<PIPE>) {
 	chomp;
