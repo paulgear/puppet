@@ -89,7 +89,7 @@ class dansguardian {
 		file { "$dansguardian::basedir/dansguardian.conf":
 			ensure	=> file,
 			owner	=> root,
-			group	=> root,
+			group	=> $dansguardian::group,
 			mode	=> 640,
 			require	=> Package[$dansguardian::pkg],
 			notify	=> Exec[$dansguardian::notify],
@@ -101,7 +101,7 @@ class dansguardian {
 		file { "$dansguardian::listdir/filtergroupslist":
 			ensure	=> file,
 			owner	=> root,
-			group	=> root,
+			group	=> $dansguardian::group,
 			mode	=> 640,
 			require	=> Package[$dansguardian::pkg],
 			notify	=> Exec[$dansguardian::notify],
@@ -130,7 +130,7 @@ class dansguardian::directories {
 	file { "$dansguardian::listdir":
 		ensure		=> directory,
 		owner		=> root,
-		group		=> root,
+		group		=> $dansguardian::group,
 		mode		=> 750,
 		require		=> Package[$dansguardian::pkg],
 		notify		=> Exec[$dansguardian::notify],
@@ -178,7 +178,7 @@ class dansguardian::files {
 	file { "$dansguardian::basedir/contentscanners/clamdscan.conf":
 		ensure	=> file,
 		owner	=> root,
-		group	=> root,
+		group	=> $dansguardian::group,
 		mode	=> 640,
 		require	=> Package[$dansguardian::pkg],
 		notify	=> Exec[$dansguardian::notify],
@@ -235,7 +235,7 @@ class dansguardian::groups {
 		file { "$dansguardian::listdir/$name":
 			ensure	=> file,
 			owner	=> root,
-			group	=> root,
+			group	=> $dansguardian::group,
 			mode	=> 640,
 			require	=> Package[$dansguardian::pkg],
 			notify	=> Exec[$dansguardian::notify],
@@ -256,7 +256,7 @@ class dansguardian::groups {
 		file { "$dansguardian::basedir/dansguardianf$filtergroup.conf":
 			ensure	=> file,
 			owner	=> root,
-			group	=> root,
+			group	=> $dansguardian::group,
 			mode	=> 640,
 			require	=> Package[$dansguardian::pkg],
 			notify	=> Exec[$dansguardian::notify],
