@@ -42,12 +42,11 @@ DF=1
 INTERVAL_1=1
 INTERVAL_2=7
 INTERVAL_3=31
-NOW=`date +%s`
 
 report_stats()
 {
 	find "$@" -type f -printf "%T@\t%p\n" 2>/dev/null | \
-	rrd=$RRD findpath="$@" now="$NOW" \
+	rrd=$RRD findpath="$@" \
 	interval1="$INTERVAL_1" interval2="$INTERVAL_2" interval3="$INTERVAL_3" \
 	perl -we '
 	# initialise counters
@@ -56,39 +55,52 @@ report_stats()
 	my $monthfiles = 0;
 	my $totalfiles = 0;
 
+	my $now = time();
+
 	# set cutoff dates
-	my $day   = $ENV{"now"} - (60 * 60 * 24 * $ENV{"interval1"});
-	my $week  = $ENV{"now"} - (60 * 60 * 24 * $ENV{"interval2"});
-	my $month = $ENV{"now"} - (60 * 60 * 24 * $ENV{"interval3"});
+	my $day   = $now - (86400 * $ENV{"interval1"});
+	my $week  = $now - (86400 * $ENV{"interval2"});
+	my $month = $now - (86400 * $ENV{"interval3"});
 
 	# determine file counts
 	while (<>) {
 		chomp;
 		my ($time, $path) = split(/\s+/, $_, 2);
-		++$dayfiles   if ($time > $day);
-		++$weekfiles  if ($time > $week);
-		++$monthfiles if ($time > $month);
+		if ($time > $day) {
+			++$dayfiles;
+			print STDERR "$path: newer than $day: $time\n" if -t 0;
+		}
+		if ($time > $week) {
+			++$weekfiles;
+			print STDERR "$path: newer than $week: $time\n" if -t 0;
+		}
+		if ($time > $month) {
+			++$monthfiles;
+			print STDERR "$path: newer than $month: $time\n" if -t 0;
+		}
 		++$totalfiles;
 	}
 
 	# print summary
 	if ($ENV{"rrd"} != 0) {
-		print ":$dayfiles:$weekfiles:$monthfiles:$totalfiles";
+		print "$now:$dayfiles:$weekfiles:$monthfiles:$totalfiles";
 	}
 	else {
 		print "$dayfiles\t$weekfiles\t$monthfiles\t$totalfiles\t" . $ENV{"findpath"} . "\n";
 	}
 	'
+
 	if [ "$DF" != "0" ]; then
 		df --block-size=1M --portability "$@" | tail -1 | tr -d "%" | \
 			awk '{printf ":%s:%s:%s:%s", $2, $3, $4, $5}'
 	fi
-}
 
-# print the RRD header
-if [ "$RRD" -ne 0 ]; then
-	echo -n "$NOW"
-fi
+	# add a newline if we are in RRD mode
+	if [ "$RRD" -ne 0 ]; then
+		echo ""
+	fi
+
+}
 
 for i in "$@"; do
 	case "$i" in
@@ -106,9 +118,4 @@ for i in "$@"; do
 		;;
 	esac
 done
-
-# add a newline if we are in RRD mode
-if [ "$RRD" -ne 0 ]; then
-	echo ""
-fi
 

@@ -11,8 +11,9 @@
 set -u
 
 PATH="/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH"
-VG=/dev/vm00
-XENDIR=/var/lib/xen/images
+VG="vm00"
+BACKUPVOL="/media/vmbackup"
+XENDIR="/var/lib/xen/images"
 SLEEP=5
 DIVISOR=8
 
@@ -30,6 +31,11 @@ log()
 islv()
 {
 	lvdisplay "$@" >/dev/null 2>&1
+}
+
+ismounted()
+{
+	mount | awk -v DEV="$@" 'BEGIN { FOUND=1 } $1 == DEV || $3 == DEV { FOUND=0 } END { exit FOUND }'
 }
 
 # Ignore LVM warnings, which happen when run from cron.daily on Debian squeeze
@@ -62,7 +68,7 @@ for domain in $DOMAINS; do
 
 	# check what sort of backup to do
 	LV_SHORT="$domain-disk"
-	LV="$VG/$LV_SHORT"
+	LV="/dev/$VG/$LV_SHORT"
 	if islv "$LV"; then
 		# snapshot is a portion of the original LV size - this may need tuning above
 		LVSIZE=`lvs -o lv_name,lv_size --units m $VG 2>/dev/null|awk -v LV=$LV_SHORT '$1 == LV {print $2}'| cut -d. -f1`
@@ -90,4 +96,16 @@ log "Changes in LV use:"
 $LVS > $TMPDIR/after
 diff -u $TMPDIR/before $TMPDIR/after | grep -Eve '^(\+\+\+|---|@@)'
 rm -rf $TMPDIR/
+
+# save snapshots to external media
+if ismounted $BACKUPVOL; then
+	log "Backing up snapshots to $BACKUPVOL"
+	mkdir -p $BACKUPVOL/images
+	for i in /dev/$VG/*-snap; do
+		base=`basename $i`
+		log "Starting backup of $base"
+		dd if=$i bs=1024k conv=noerror | gzip --fast > $BACKUPVOL/images/$base.img.gz
+	done
+	log "Finished snapshot backups to $BACKUPVOL"
+fi
 
