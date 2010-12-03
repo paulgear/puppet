@@ -49,7 +49,6 @@ TMPDIR=`mktemp -d`
 LVS="lvs --units m"
 $LVS > $TMPDIR/before
 
-SNAPSHOT_LIST=""
 for domain in $DOMAINS; do
 	log "Start backup of $domain"
 	xm pause $domain
@@ -84,7 +83,6 @@ SNAPSHOT_LV=$LV-snap
 SNAPSHOT_SIZE=$SNAPSIZE
 EOF
 		lvm-snapshot --conf $TMPFILE --no-mount
-		SNAPSHOT_LIST="$SNAPSHOT_LIST $LV-snap"
 	else
 		# file-based backup
 		rsync -SHax $XENDIR/$domain/ $XENDIR/$domain.bak/
@@ -103,7 +101,7 @@ rm -rf $TMPDIR/
 if ismounted $BACKUPVOL; then
 	log "Backing up snapshots to $BACKUPVOL"
 	mkdir -p $BACKUPVOL/images
-	for i in $SNAPSHOT_LIST; do
+	for i in /dev/$VG/*-snap; do
 		base=`basename $i`
 		log "Starting backup of $base"
 		dd if=$i bs=1024k conv=noerror | gzip --fast > $BACKUPVOL/images/$base.img.gz
