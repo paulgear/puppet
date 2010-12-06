@@ -64,12 +64,23 @@ while (<>) {
 printf "%d POP logins since %s\n\n", $connections, $start;
 my $headformat = "%-25s %12s %10s %10s %13s\n";
 my $lineformat = "%-25s %12d %10d %10d %13d\n";
+my $totalformat = "%25d %12d %10d %10d %13d\n";
+my $totalconns = 0;
+my $totalmesgs = 0;
+my $totalsize  = 0;
 if ($connections > 0) {
 	printf $headformat, "User", "Connections", "Messages", "Size (Kb)", "Average (Kb)";
 	printf $headformat, "----", "-----------", "--------", "---------", "------------";
 	for my $user (sort { $users{$b} <=> $users{$a} } keys %users) {
-		printf $lineformat, $user, $users{$user}, $messages{$user}, $sizes{$user} / 1024, $messages{$user} > 0 ? $sizes{$user} / 1024 / $messages{$user} : -1;
+		printf $lineformat, $user, $users{$user}, $messages{$user}, $sizes{$user} / 1024,
+			$messages{$user} > 0 ? $sizes{$user} / 1024 / $messages{$user} : -1;
+		$totalconns += $users{$user};
+		$totalmesgs += $messages{$user};
+		$totalsize  += $sizes{$user};
 	}
+	printf $headformat, "----", "-----------", "--------", "---------", "------------";
+	printf $totalformat, $#{keys %users} + 1, $totalconns, $totalmesgs, $totalsize,
+		$totalmesgs > 0 ? $totalsize / 1024 / $totalmesgs : -1;
 }
 
 #####
@@ -80,23 +91,33 @@ printf "\n%d IMAP logins since %s\n\n", $imapconns, $start;
 
 $headformat = "%-25s %16s\n";
 $lineformat = "%-25s %16d\n";
+$totalformat = "%25d %16d\n";
+$totalconns = 0;
 if ($imapconns > 0) {
 	printf $headformat, "User", "IMAP Connections";
 	printf $headformat, "----", "----------------";
 	for my $user (sort { $imapusers{$b} <=> $imapusers{$a} } keys %imapusers) {
 		printf $lineformat, $user, $imapusers{$user};
+		$totalconns += $imapusers{$user};
 	}
+	printf $headformat, "----", "----------------";
+	printf $totalformat, $#{keys %imapusers} + 1, $totalconns;
 }
 
 printf "\n";
 $headformat = "%-25s %16s\n";
 $lineformat = "%-25s %16d\n";
+$totalformat = "%25d %16d\n";
+$totalconns = 0;
 if ($imapconns > 0) {
 	printf $headformat, "IP Address", "IMAP Connections";
 	printf $headformat, "----------", "----------------";
 	for my $ip (sort { $imapips{$b} <=> $imapips{$a} } keys %imapips) {
 		printf $lineformat, $ip, $imapips{$ip};
+		$totalconns += $imapips{$ip};
 	}
+	printf $headformat, "----------", "----------------";
+	printf $totalformat, $#{keys %imapips} + 1, $totalconns;
 }
 
 #####
@@ -116,12 +137,16 @@ $lineformat = "%-24s %17d\n";
 printf $headformat, "User", "Mailbox size (MB)";
 printf $headformat, "----", "-----------------";
 
+$totalsize = 0;
 while (<PIPE>) {
 	chomp;
 	my ($size, $dir) = split(/\s+/, $_, 2);
 	my $user = $dir;
 	$user =~ s/\/?Maildir\/?//;
 	printf $lineformat, $user, $size;
+	$totalsize += $size;
 }
+printf $lineformat, "-----", "-----------------";
+printf $lineformat, "TOTAL", $totalsize;
 close PIPE || warn "Cannot close pipe: $!";
 
