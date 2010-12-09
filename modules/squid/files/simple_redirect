@@ -1,0 +1,9 @@
+#!/usr/bin/perl -wT
+
+# turn off buffering on output
+$|=1;
+
+while (<>) {
+	s@http://sss-web-01:8081/@http://www.sssaustralia.com.au/@;
+        print;
+}
