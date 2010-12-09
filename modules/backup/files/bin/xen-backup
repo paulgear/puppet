@@ -54,6 +54,8 @@ for domain in $DOMAINS; do
 	log "Start backup of $domain"
 	xm pause $domain
 
+	sleep $SLEEP
+
 	# wait for domain to pause
 	tries=0
 	while [ -z "`xm list $domain | awk '$5 ~ /^--p/ {print $1}'`" ]; do
@@ -76,6 +78,8 @@ for domain in $DOMAINS; do
 		SNAPSIZE=$LVSIZE
 		(( SNAPSIZE /= DIVISOR ))
 
+		sleep $SLEEP
+
 		# create LVM snapshot configuration file and back up using that
 		TMPFILE=`mktemp`
 		cat > $TMPFILE <<EOF
@@ -96,7 +100,7 @@ done
 
 log "Changes in LV use:"
 $LVS > $TMPDIR/after
-diff -u $TMPDIR/before $TMPDIR/after | grep -Eve '^(\+\+\+|---|@@)'
+diff $TMPDIR/before $TMPDIR/after | grep -Eve '^(\+\+\+|---|@@)'
 rm -rf $TMPDIR/
 
 # save snapshots to external media
