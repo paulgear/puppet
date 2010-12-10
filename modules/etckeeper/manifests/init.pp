@@ -3,6 +3,7 @@
 class etckeeper {
 
 	$pkg		= "etckeeper"
+	$pkgs		= [ $pkg, "git-core", ]
 	$dir		= "/etc/$pkg"
 	$cfgfile	= "$dir/$pkg.conf"
 	$init		= "$pkg init"
@@ -27,7 +28,7 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 ',
 	}
 
-	package { $pkg:
+	package { $pkgs:
 		ensure	=> installed,
 		require	=> File[$cfgfile],
 		notify	=> Exec[$init],
