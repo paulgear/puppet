@@ -4,6 +4,7 @@
 
 class shorewall {
 
+	$email = "root@localhost"
 	$pkg = "shorewall"
 
 	package { $pkg:
@@ -31,4 +32,21 @@ class shorewall {
 		}
 	}
 
+	file { "/usr/local/bin/shorewall-send-dump":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 750,
+		content	=> "#!/bin/bash
+PATH=/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin
+shorewall reset
+shorewall dump > /root/shorewall-before.txt
+shorewall restart
+shorewall reset
+shorewall dump > /root/shorewall-after.txt
+diff -u /root/shorewall-before.txt /root/shorewall-after.txt | mail -s 'Shorewall diagnostic' $email
+",
+	}
+
 }
+
