@@ -11,6 +11,13 @@ class shorewall {
 		ensure	=> installed,
 	}
 
+	service { $svc:
+		enable		=> true,
+		hasrestart	=> true,
+		hasstatus	=> true,
+		require		=> Package[$pkg],
+	}
+
 	case $lsbdistcodename {
 		lenny: {
 			# if Debian lenny, add extra repo
