@@ -6,6 +6,7 @@ class shorewall {
 
 	$email = "root@localhost"
 	$pkg = "shorewall"
+	$svc = "shorewall"
 
 	package { $pkg:
 		ensure	=> installed,
