@@ -5,7 +5,12 @@
 class shorewall {
 
 	$email = "root@localhost"
-	$pkg = "shorewall"
+	$pkg = $operatingsystem ? {
+		centos	=> "shorewall-perl",
+		debian	=> "shorewall",
+		ubuntu	=> "shorewall",
+		default	=> undef,
+	}
 	$svc = "shorewall"
 
 	package { $pkg:
