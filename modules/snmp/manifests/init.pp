@@ -51,28 +51,43 @@ class snmp {
 		debian: {
 			case $lsbdistcodename {
 				squeeze: {
-					# reduce debugging noise in syslog per bug #559109
-					# otherwise, snmpd produces lots of errors like this:
-					# snmpd[22218]: error on subcontainer 'ia_addr' insert (-1)
-					text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-logging":
-						file	=> $snmp::conf,
-						pattern	=> "-Lsd",
-						replace	=> "-Ls6d",
-						notify	=> Service[$snmp::svc],
-					}
+					include snmpd::set_debug_level
 				}
 				lenny: {
-					# remove the loopback bind from the startup configuration
-					text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-startup": 
-					    	file	=> $snmp::defaults,
-						pattern	=> ' 127\.0\.0\.1',
-						replace	=> '',
-						notify	=> Service[$snmp::svc],
-					}
+					include snmpd::no_loopback
+				}
+			}
+		}
+		ubuntu: {
+			case $lsbdistcode {
+				lucid: {
+					include snmpd::no_loopback
 				}
 			}
 		}
 	}
 
+}
+
+# remove the loopback bind from the startup configuration
+class snmpd::no_loopback {
+	text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-startup": 
+		file	=> $snmp::defaults,
+		pattern	=> '(SNMPDOPTS=.*) 127\.0\.0\.1',
+		replace	=> '\1',
+		notify	=> Service[$snmp::svc],
+	}
+}
+
+# reduce debugging noise in syslog per bug #559109
+# otherwise, snmpd produces lots of errors like this:
+# snmpd[22218]: error on subcontainer 'ia_addr' insert (-1)
+class snmpd::set_debug_level {
+	text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-logging":
+		file	=> $snmp::conf,
+		pattern	=> "-Lsd",
+		replace	=> "-Ls6d",
+		notify	=> Service[$snmp::svc],
+	}
 }
 
