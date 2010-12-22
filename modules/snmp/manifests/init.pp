@@ -51,17 +51,17 @@ class snmp {
 		debian: {
 			case $lsbdistcodename {
 				squeeze: {
-					include snmpd::set_debug_level
+					include snmp::set_debug_level
 				}
 				lenny: {
-					include snmpd::no_loopback
+					include snmp::no_loopback
 				}
 			}
 		}
 		ubuntu: {
-			case $lsbdistcode {
+			case $lsbdistcodename {
 				lucid: {
-					include snmpd::no_loopback
+					include snmp::no_loopback
 				}
 			}
 		}
@@ -70,7 +70,7 @@ class snmp {
 }
 
 # remove the loopback bind from the startup configuration
-class snmpd::no_loopback {
+class snmp::no_loopback {
 	text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-startup": 
 		file	=> $snmp::defaults,
 		pattern	=> '(SNMPDOPTS=.*) 127\.0\.0\.1',
@@ -82,7 +82,7 @@ class snmpd::no_loopback {
 # reduce debugging noise in syslog per bug #559109
 # otherwise, snmpd produces lots of errors like this:
 # snmpd[22218]: error on subcontainer 'ia_addr' insert (-1)
-class snmpd::set_debug_level {
+class snmp::set_debug_level {
 	text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-logging":
 		file	=> $snmp::conf,
 		pattern	=> "-Lsd",
