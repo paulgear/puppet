@@ -55,7 +55,7 @@ class snmp {
 define snmpd::snmpd_conf(
 		$location = "Unknown",
 		$contact = "Unknown",
-		$snmp_servers = $snmp::servers,
+		$snmp_servers = $snmp::servers
 		) {
 	$templatedir = "/etc/puppet/modules/snmp/templates"
 	# configuration file
