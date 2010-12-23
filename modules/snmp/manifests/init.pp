@@ -28,7 +28,7 @@ class snmp {
 			) {
 		$templatedir = "/etc/puppet/modules/snmp/templates"
 		# configuration file
-		file { $snmp::conf:
+		file { "$snmp::conf":
 			ensure	=> file,
 			owner	=> root,
 			group	=> root,
