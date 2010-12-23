@@ -20,24 +20,6 @@ class snmp {
 	# ensure package is installed
 	package { $pkg: ensure => installed }
 
-	# call this with appropriate parameters to define snmpd.conf
-	define snmpd_conf(
-			$location = "Unknown",
-			$contact = "Unknown",
-			$snmp_servers = $snmp::servers
-			) {
-		$templatedir = "/etc/puppet/modules/snmp/templates"
-		# configuration file
-		file { "$snmp::conf":
-			ensure	=> file,
-			owner	=> root,
-			group	=> root,
-			mode	=> 640,
-			content	=> template("snmp/snmpd.conf"),
-			require	=> Package[$snmp::pkg],
-		}
-	}
-
 	# reload snmp when the configuration file changes
 	service { $svc:
 		enable		=> true,
@@ -67,6 +49,24 @@ class snmp {
 		}
 	}
 
+}
+
+# call this with appropriate parameters to define snmpd.conf
+define snmpd::snmpd_conf(
+		$location = "Unknown",
+		$contact = "Unknown",
+		$snmp_servers = $snmp::servers,
+		) {
+	$templatedir = "/etc/puppet/modules/snmp/templates"
+	# configuration file
+	file { "$snmp::conf":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 640,
+		content	=> template("snmp/snmpd.conf"),
+		require	=> Class["snmp"],
+	}
 }
 
 # remove the loopback bind from the startup configuration
