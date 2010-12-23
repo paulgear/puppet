@@ -58,13 +58,13 @@ define snmp::snmpd_conf(
 		) {
 	include snmp
 	$templatedir = "/etc/puppet/modules/snmp/templates"
-	file { "$snmp::conf":
+	file { $snmp::conf:
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
 		mode	=> 640,
 		content	=> template("snmp/snmpd.conf"),
-		require	=> Class["snmp"],
+		require	=> Package[$snmp::pkg],
 	}
 }
 
