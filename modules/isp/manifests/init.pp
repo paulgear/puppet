@@ -12,13 +12,13 @@ class isp {
 		"netspace": {
 			$mirrorbase = "http://ftp.netspace.net.au"
 			$debianbase = "$mirrorbase/pub/debian"
-			$debianbackports = "http://mirror.linux.org.au/backports.org/"
+			$debianbackports = "http://mirror.linux.org.au/backports.org"
 		}
 
 		default: {
 			$mirrorbase = "http://ftp.au.debian.org"
 			$debianbase = "$mirrorbase/debian"
-			$debianbackports = "http://mirror.linux.org.au/backports.org/"
+			$debianbackports = "$mirrorbase/backports.org"
 		}
 
 	}
