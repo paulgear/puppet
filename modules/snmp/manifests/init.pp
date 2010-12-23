@@ -1,9 +1,6 @@
 #
 # puppet class to manage snmpd.conf and snmpd service
 #
-# TODO: other OSes (e.g. Debian) require /etc/{default,sysconfig}/snmpd* to
-# be modified to allow snmpd to listen on a non-loopback interface.
-#
 
 class snmp {
 
