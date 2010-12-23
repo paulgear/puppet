@@ -15,7 +15,6 @@ class snmp {
 		ubuntu		=> "snmpd",
 		debian		=> "snmpd",
 	}
-	$servers = [ "127.0.0.1", ]
 
 	# ensure package is installed
 	package { $pkg: ensure => installed }
@@ -52,13 +51,13 @@ class snmp {
 }
 
 # call this with appropriate parameters to define snmpd.conf
-define snmpd::snmpd_conf(
+define snmp::snmpd_conf(
 		$location = "Unknown",
 		$contact = "Unknown",
-		$snmp_servers = $snmp::servers
+		$snmp_servers = [ "127.0.0.1", ]
 		) {
+	include snmp
 	$templatedir = "/etc/puppet/modules/snmp/templates"
-	# configuration file
 	file { "$snmp::conf":
 		ensure	=> file,
 		owner	=> root,
