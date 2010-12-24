@@ -157,6 +157,9 @@ class os::debian::squeeze {
 	os::debian::security	{ "squeeze": }
 	os::debian::volatile	{ "squeeze": ensure => absent }
 	os::debian::backports	{ "squeeze": ensure => absent }
+
+	$packages = [ "byobu" ]
+	package { $packages: ensure => installed }
 }
 
 class os::debian::sid {
