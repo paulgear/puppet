@@ -100,8 +100,9 @@ Acquire::http::Proxy \"$proxy\";\n",
 # empty the sources.list file and save the original
 define aptitude::sources_list () {
 
-	# create empty sources.list file
 	$sources_file = "$aptitude::apt_dir/sources.list"
+	$sources_file_save = "$sources_file.pre-puppet"
+
 	file { $sources_file:
 		ensure		=> file,
 		owner		=> root,
@@ -113,8 +114,6 @@ define aptitude::sources_list () {
 		notify		=> Exec[$aptitude::refresh],
 	}
 
-	# save the original sources.list file
-	$sources_file_save = "$sources_file.pre-puppet"
 	exec { $sources_file_save:
 		command		=> "cp -af $sources_file $sources_file_save",
 		creates		=> $sources_file_save,
