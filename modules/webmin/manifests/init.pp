@@ -52,5 +52,14 @@ class webmin {
 
 	}
 
+	# for systems which use git for /etc (e.g. via etckeeper)
+	$ignfile = "/etc/.gitignore"
+	exec { "ignore webmin status directory":
+		command		=> "echo webmin/system-status >> $ignfile",
+		onlyif		=> "test -t $ignfile",
+		unless		=> "grep -q '^webmin/system-status' $ignfile",
+		logoutput	=> true,
+	}
+
 }
 
