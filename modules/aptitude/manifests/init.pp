@@ -101,7 +101,7 @@ Acquire::http::Proxy \"$proxy\";\n",
 define aptitude::sources_list () {
 
 	# create empty sources.list file
-	$sources_file = "$apt_dir/sources.list"
+	$sources_file = "$aptitude::apt_dir/sources.list"
 	file { $sources_file:
 		ensure		=> file,
 		owner		=> root,
@@ -110,7 +110,7 @@ define aptitude::sources_list () {
 		content		=> '# This file intentionally left blank - see /etc/apt/sources.list.d/*
 ',
 		require		=> Exec[$sources_file_save],
-		notify		=> Exec[$refresh],
+		notify		=> Exec[$aptitude::refresh],
 	}
 
 	# save the original sources.list file
