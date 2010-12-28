@@ -97,3 +97,29 @@ Acquire::http::Proxy \"$proxy\";\n",
 
 }
 
+# empty the sources.list file and save the original
+define aptitude::sources_list () {
+
+	# create empty sources.list file
+	$sources_file = "$apt_dir/sources.list"
+	file { $sources_file:
+		ensure		=> file,
+		owner		=> root,
+		group		=> root,
+		mode		=> 644,
+		content		=> '# This file intentionally left blank - see /etc/apt/sources.list.d/*
+',
+		require		=> Exec[$sources_file_save],
+		notify		=> Exec[$refresh],
+	}
+
+	# save the original sources.list file
+	$sources_file_save = "$sources_file.pre-puppet"
+	exec { $sources_file_save:
+		command		=> "cp -af $sources_file $sources_file_save",
+		creates		=> $sources_file_save,
+		logoutput	=> true,
+	}
+
+}
+
