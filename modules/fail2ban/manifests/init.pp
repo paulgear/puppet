@@ -88,7 +88,7 @@ define fail2ban::jail (
 		$action = "",
 		$bantime = "",
 		$enabled = "true",
-		$filter = "$name",
+		$filtername = "",
 		$findtime = "",
 		$ignoreip = "",
 		$logpath = "",
@@ -98,6 +98,12 @@ define fail2ban::jail (
 	include fail2ban
 	$banaction = ""
 	$jailname = "$name"
+	if $filtername == "" {
+		$filter = $name
+	}
+	else {
+		$filter = $filtername
+	}
 	file { "${fail2ban::jail_d}/fragments/$name.local":
 		ensure	=> file,
 		owner	=> root,
