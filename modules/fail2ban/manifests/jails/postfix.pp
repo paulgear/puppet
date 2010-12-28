@@ -20,7 +20,7 @@ class fail2ban::jails::postfix {
 		maxretry	=> 2,
 		port		=> 'smtp,ssmtp',
 	}
-	fail2ban::jail { "postgrey":
+	fail2ban::jail { "postfix-postgrey":
 		findtime	=> 3600,
 		logpath		=> '/var/log/mail.log',
 		maxretry	=> 5,
