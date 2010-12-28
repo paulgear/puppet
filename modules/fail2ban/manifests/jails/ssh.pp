@@ -4,7 +4,11 @@
 # Copyright:	(c) 2010 Gear Consulting Pty Ltd <http://libertysys.com.au/>
 
 class fail2ban::jails::ssh {
-	fail2ban::jail { "ssh": }
-	fail2ban::jail { "ssh-ddos": }
+	fail2ban::jail { "ssh":
+		port	=> 'ssh',
+	}
+	fail2ban::jail { "ssh-ddos":
+		port	=> 'ssh',
+	}
 }
 
