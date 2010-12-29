@@ -15,7 +15,14 @@ alias lm='ls -la --color=always | more'
 alias lr='lm | grep rpm'
 alias lrpm='ls --color=always | grep rpm | more'
 alias mv='mv -i'
-alias kp='killall -USR1 puppetd'
+case "`puppet agent --version 2>/dev/null`" in
+2.6*)
+	alias kp='kill -USR1 $(cat /var/run/puppet/agent.pid)'
+	;;
+*)
+	alias kp='killall -USR1 puppetd'
+	;;
+esac
 alias pt='kp; tme -n 1|grep puppetd'
 alias rm='rm -i'
 alias td='tail --follow=name /var/log/dansguardian/access.log'
