@@ -5,12 +5,14 @@
 class bind {
 
 	$pkg = $operatingsystem ? {
-		default		=> "bind",
 		debian		=> "bind9",
+		ubuntu		=> "bind9",
+		default		=> "bind",
 	}
 	$svc = $operatingsystem ? {
-		default		=> "named",
 		debian		=> "bind9",
+		ubuntu		=> "bind9",
+		default		=> "named",
 	}
 
 	package { $pkg:
