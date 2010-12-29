@@ -2,7 +2,7 @@
 
 class xen {
 
-	include xen::xend
+	#include xen::xend
 	#include xen::libvirt
 	#include xen::virtualmin
 
@@ -12,6 +12,7 @@ class xen {
 			"xen-hypervisor-3.2-1-$architecture"
 		],
 		squeeze		=> [
+			"linux-image-xen-amd64",
 			"xen-hypervisor-4.0-$architecture",
 			"xen-tools",
 		],
