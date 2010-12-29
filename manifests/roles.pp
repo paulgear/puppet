@@ -40,6 +40,14 @@ class role::ntpserver {
 	include ntp::server
 }
 
+class role::puppet {
+	include puppet::client
+}
+
+class role::puppetmaster {
+	include puppet::server_conf
+}
+
 class role::squid_standard {
 	include squid
 	squid::squid_conf { "$fqdn squid": }
@@ -53,11 +61,11 @@ class role::vmware_host {
 	include vmware::server
 }
 
-class role::puppet {
-	include puppet::client
-}
-
-class role::puppetmaster {
-	include puppet::server_conf
+class role::xen_guest {
+	include network::interfaces
+	package { "ethtool":
+		ensure  => installed,
+		notify  => File["/etc/network/interfaces"],
+	}
 }
 
