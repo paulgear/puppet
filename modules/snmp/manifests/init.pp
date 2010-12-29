@@ -80,7 +80,7 @@ class snmp::no_loopback {
 # snmpd[22218]: error on subcontainer 'ia_addr' insert (-1)
 class snmp::set_debug_level {
 	text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-logging":
-		file	=> $snmp::conf,
+		file	=> $snmp::defaults,
 		pattern	=> "-Lsd",
 		replace	=> "-Ls6d",
 		notify	=> Service[$snmp::svc],
