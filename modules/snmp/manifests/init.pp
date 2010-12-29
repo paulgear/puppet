@@ -81,8 +81,8 @@ class snmp::no_loopback {
 class snmp::set_debug_level {
 	text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-logging":
 		file	=> $snmp::defaults,
-		pattern	=> 'SNMPDOPTS=-Lsd',
-		replace	=> 'SNMPDOPTS=-Ls6d',
+		pattern	=> "SNMPDOPTS='-Lsd",
+		replace	=> "SNMPDOPTS='-Ls6d",
 		notify	=> Service[$snmp::svc],
 	}
 }
