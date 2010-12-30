@@ -7,7 +7,6 @@ class ssh {
 
 	include ssh::package
 	include ssh::service
-	include ssh::without_password
 
 	# include this only once on your puppetmaster
 	define storedir( $storedir = "$ssh::storedir" ) {
@@ -105,7 +104,7 @@ class ssh::service {
 	}
 }
 
-class ssh::without_password {
+define ssh::without_password () {
 	$file = "/etc/ssh/sshd_config"
 	text::replace_lines { $file:
 		file		=> $file,
