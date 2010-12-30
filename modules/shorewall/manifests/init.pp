@@ -37,6 +37,7 @@ class shorewall {
 			}
 
 			aptitude::key { "B2B97BB1": }
+			aptitude::key { "DDA7B20F": }
 
 			# add this source to the requires for the package
 			Package[$pkg] {
