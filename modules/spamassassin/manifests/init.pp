@@ -24,7 +24,7 @@ class spamasssassin::ruleupdate {
 # Created by puppet - do not edit here
 /usr/share/spamassassin/sa-update.cron
 ',
-				require		=> Class[spamassassin::package],	# I wonder if there's a way to set this once for the whole class...
+				require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
 			}
 		}
 		debian, ubuntu: {
@@ -34,7 +34,7 @@ class spamasssassin::ruleupdate {
 				pattern		=> "^CRON=.*",
 				replace		=> "CRON=1",
 				optimise	=> true,
-				require		=> Class[spamassassin::package],	# I wonder if there's a way to set this once for the whole class...
+				require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
 			}
 		}
 	}
@@ -47,7 +47,7 @@ class spamassassin::service {
 		enable		=> true,
 		hasrestart	=> true,
 		hasstatus	=> true,
-		require		=> Class[spamassassin::package],	# I wonder if there's a way to set this once for the whole class...
+		require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
 	}
 	# on these operating systems, there is no standardised way to enable/disable a service :-(
 	case $operatingsystem {
@@ -59,7 +59,7 @@ class spamassassin::service {
 				replace		=> "ENABLED=1",
 				optimise	=> true,
 				notify		=> Service[$svc],
-				require		=> Class[spamassassin::package],	# I wonder if there's a way to set this once for the whole class...
+				require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
 			}
 		}
 	}
@@ -78,8 +78,8 @@ define spamassassin::config (
 		default		=> "/etc/spamassassin",
 	}
 	file { "$dir/local.cf":
-		require		=> Class[spamassassin::package],
-		notify		=> Class[spamassassin::service],
+		require		=> Class["spamassassin::package"],
+		notify		=> Class["spamassassin::service"],
 		ensure		=> file,
 		owner		=> root,
 		group		=> root,
