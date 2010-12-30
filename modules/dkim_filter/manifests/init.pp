@@ -39,7 +39,7 @@ define dkim_filter::config (
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
-		mod	=> 644,
+		mode	=> 644,
 		content	=> "# Managed by puppet - do not edit here
 Canonicalization	$canonicalization
 Domain			$domain
