@@ -2,24 +2,22 @@
 # puppet class to install ocsinventory
 #
 
-class ocsinventory {
-
+class ocsinventory::package {
 	$pkg = "ocsinventory-agent"
-
 	package { $pkg:
 		ensure => installed,
 	}
+}
 
-	define client ( $server ) {
-		file { "/etc/ocsinventory/ocsinventory-agent.cfg":
-			ensure	=> file,
-			owner	=> root,
-			group	=> root,
-			mode	=> 600,
-			require	=> Package[$ocsinventory::pkg],
-			content	=> "# Managed by puppet - do not edit here!\nserver=$server\n",
-		}
+define ocsinventory::client ( $server ) {
+	include ocsinventory::package
+	file { "/etc/ocsinventory/ocsinventory-agent.cfg":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 600,
+		require	=> Class["ocsinventory::package"],
+		content	=> "# Managed by puppet - do not edit here!\nserver=$server\n",
 	}
-
 }
 
