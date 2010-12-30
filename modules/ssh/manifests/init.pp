@@ -1,33 +1,13 @@
-#
-# puppet class to manage ssh keys
-#
-# DONE: Checked for Ubuntu compatibility
-#
+# puppet class to manage ssh
 
 class ssh {
 
 	# change this for your site
 	$storedir = ""
 
-	$pkg = $operatingsystem ? {
-		centos	=> [ "openssh-clients", "openssh-server" ],
-		default	=> "ssh",
-	}
-	$svc = $operatingsystem ? {
-		centos	=> "sshd",
-		default	=> "ssh",
-	}
-
-	package { $pkg:
-		ensure => installed,
-	}
-
-	service { $svc:
-		enable		=> true,
-		hasrestart	=> true,
-		hasstatus	=> true,
-		require		=> Package[$pkg],
-	}
+	include ssh::package
+	include ssh::service
+	include ssh::without_password
 
 	# include this only once on your puppetmaster
 	define storedir( $storedir = "$ssh::storedir" ) {
@@ -100,5 +80,40 @@ class ssh {
 		}
 	}
 
+}
+
+class ssh::package {
+	$pkg = $operatingsystem ? {
+		centos	=> [ "openssh-clients", "openssh-server" ],
+		default	=> "ssh",
+	}
+	package { $pkg:
+		ensure => installed,
+	}
+}
+
+class ssh::service {
+	$svc = $operatingsystem ? {
+		centos	=> "sshd",
+		default	=> "ssh",
+	}
+	service { $svc:
+		enable		=> true,
+		hasrestart	=> true,
+		hasstatus	=> true,
+		require		=> Class["ssh::package"],
+	}
+}
+
+class ssh::without_password {
+	$file = "/etc/ssh/sshd_config"
+	text::replace_lines { $file:
+		file		=> $file,
+		pattern		=> '^PermitRootLogin.*',
+		replace		=> 'PermitRootLogin without-password',
+		optimise	=> true,
+		require		=> Class["ssh::package"],
+		notify		=> Class["ssh::service"],
+	}
 }
 
