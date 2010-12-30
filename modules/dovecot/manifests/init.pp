@@ -7,7 +7,7 @@ class dovecot {
 
 # install package
 class dovecot::package {
-	$pkg = "dovecot"
+	$pkg = "dovecot-imapd"
 	package { $pkg:
 		ensure		=> installed,
 	}
@@ -15,7 +15,7 @@ class dovecot::package {
 
 # enable service
 class dovecot::service {
-	$svc = "dovecot"
+	$svc = "dovecot-imapd"
 	service { $svc:
 		enable		=> true,
 		hasrestart	=> true,
