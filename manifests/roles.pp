@@ -28,6 +28,8 @@ class role::mailrelay {
 	include mailgraph
 	include postfix
 	include postgrey
+	include pyzor
+	include razor
 	include spamassassin
 	include role::fail2ban::postfix
 }
