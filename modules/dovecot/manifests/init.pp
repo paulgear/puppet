@@ -15,7 +15,7 @@ class dovecot::package {
 
 # enable service
 class dovecot::service {
-	$svc = "dovecot-imapd"
+	$svc = "dovecot"
 	service { $svc:
 		enable		=> true,
 		hasrestart	=> true,
