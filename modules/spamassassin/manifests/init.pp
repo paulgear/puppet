@@ -29,7 +29,7 @@ class spamassassin::ruleupdate {
 		}
 		debian, ubuntu: {
 			$file = "/etc/default/spamassassin"
-			text::replace_lines { $file:
+			text::replace_lines { "$file CRON":
 				file		=> $file,
 				pattern		=> "^CRON=.*",
 				replace		=> "CRON=1",
@@ -53,7 +53,7 @@ class spamassassin::service {
 	case $operatingsystem {
 		debian, ubuntu: {
 			$file = "/etc/default/spamassassin"
-			text::replace_lines { $file:
+			text::replace_lines { "$file ENABLE":
 				file		=> $file,
 				pattern		=> "^ENABLED=.*",
 				replace		=> "ENABLED=1",
