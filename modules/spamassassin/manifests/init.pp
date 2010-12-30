@@ -15,7 +15,7 @@ class spamassassin::package {
 }
 
 # enable nightly rule updates
-class spamasssassin::ruleupdate {
+class spamassassin::ruleupdate {
 	case $operatingsystem {
 		centos: {
 			cron_job { "spamassassin-rule-update":
