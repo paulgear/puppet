@@ -19,6 +19,7 @@ class role::fail2ban::winbind {
 class role::internetfacing {
         $pkgs = [ "chkrootkit", "rkhunter", "snort" ]
 	package { $pkgs: ensure => installed }
+	ssh::without_password { $fqdn: }
 }
 
 
