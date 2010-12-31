@@ -4,6 +4,7 @@
 
 class amavis {
 	include amavis::package
+	include amavis::service
 	include amavis::groups
 }
 
@@ -14,14 +15,32 @@ class amavis::package {
 	}
 }
 
+class amavis::service {
+	$pkg = "amavis"
+	package { $pkg:
+		enable		=> true,
+		hasrestart	=> true,
+		hasstatus	=> true,
+		require		=> Class["amavis::package"],
+	}
+}
+
 class amavis::groups {
+	include clamav
 	$groups = [ "amavis", "clamav" ]
-	# this relies on the fact that the user & group names are the same
-	user { $groups:
+	user { "amavis":
 		ensure		=> present,
 		groups		=> $groups,
 		membership	=> minimum,
 		require		=> Class["amavis::package"],
+		notify		=> Class["amavis::service"],
+	}
+	user { "clamav":
+		ensure		=> present,
+		groups		=> $groups,
+		membership	=> minimum,
+		require		=> Class["amavis::package"],
+		notify		=> Class["clamav::service"],
 	}
 }
 

@@ -1,48 +1,40 @@
-#
-# class to manage clamav
-#
-# DONE: Edited for Ubuntu compatibility
-#
+# puppet class to manage clamav
 
 class clamav {
+	include clamav::package
+	include clamav::service
+	include clamav::centos
+}
 
-	$pkg = $operatingsystem ? {
+class clamav::package {
+	$pkgs = $operatingsystem ? {
 		centos		=> "clamd",
-		ubuntu		=> "clamav-daemon",
-		debian		=> "clamav-daemon",
+		debian		=> [ "clamav-daemon", "clamav-freshclam", ],
+		ubuntu		=> [ "clamav-daemon", "clamav-freshclam", ],
 	}
-	$pkg_freshclam = $operatingsystem ? {
-		centos		=> "clamd",
-		ubuntu		=> "clamav-freshclam",
-		debian		=> "clamav-freshclam",
+	package { $pkgs:
+		ensure		=> installed,
 	}
-	if $pkg != $pkg_freshclam {
-		package { $pkg_freshclam: ensure => installed }
-	}
+}
 
+class clamav::service {
 	$svc = $operatingsystem ? {
-		default		=> $pkg,
+		centos		=> "clamd",
+		debian		=> "clamav-daemon",
+		ubuntu		=> "clamav-daemon",
 	}
-
-	$dir = $operatingsystem ? {
-		centos		=> "/etc",
-		ubuntu		=> "/etc/clamav",
-		debian		=> "/etc/clamav",
-	}
-
 	service { $svc:
 		enable		=> true,
 		hasrestart	=> true,
 		hasstatus	=> true,
-		require		=> Package[$pkg],
+		require		=> Class["clamav::package"],
 	}
+}
 
-	package { $pkg:
-		ensure		=> installed,
-	}
-
-	# these files are managed automatically by the Ubuntu clamav packages
+class clamav::centos {
+	# these files are managed automatically on Debian & Ubuntu
 	if $operatingsystem == "CentOS" {
+		$dir = "/etc"
 
 		file { "$dir/clamd.conf":
 			ensure		=> file,
@@ -50,7 +42,7 @@ class clamav {
 			group		=> root,
 			mode		=> 644,
 			source		=> "puppet:///modules/clamav/clamd.conf",
-			notify		=> Service[$svc],
+			notify		=> Class["clamav::service"],
 		}
 
 		file { "/etc/cron.daily/freshclam":
@@ -59,7 +51,7 @@ class clamav {
 			group		=> root,
 			mode		=> 755,
 			source		=> "puppet:///modules/clamav/freshclam.cron",
-			require		=> Package[$pkg_freshclam],
+			require		=> Class["clamav::package"],
 		}
 
 		file { "/etc/logrotate.d/clamav":
@@ -68,7 +60,7 @@ class clamav {
 			group		=> root,
 			mode		=> 644,
 			source		=> "puppet:///modules/clamav/clamav.logrotate",
-			require		=> Package[$pkg],
+			require		=> Class["clamav::package"],
 		}
 
 		file { "/etc/logrotate.d/freshclam":
