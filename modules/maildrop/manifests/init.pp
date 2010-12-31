@@ -17,7 +17,7 @@ class maildrop::config {
 	$cfg = "/etc/maildroprc"
 	text::replace_lines { $cfg:
 		file		=> $cfg,
-		pattern		=> '^#?DEFAULT=.*',
+		pattern		=> '^#DEFAULT=.*',
 		replace		=> 'DEFAULT="$HOME\/Maildir"',
 		optimise	=> true,
 		require		=> Class["maildrop::package"],
