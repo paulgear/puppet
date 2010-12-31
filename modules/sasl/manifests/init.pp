@@ -22,5 +22,17 @@ class sasl::service {
 		hasstatus	=> true,
 		require		=> Class["sasl::package"],
 	}
+	# manually enable service on Debian/Ubuntu
+	case $operatingsystem {
+		debian, ubuntu: {
+			text::replace_lines { "/etc/default/saslauthd":
+				file		=> "/etc/default/saslauthd",
+				pattern		=> "^start=.*",
+				replace		=> "start=yes",
+				optimise	=> true,
+				require		=> Class["sasl::package"],
+			}
+		}
+	}
 }
 
