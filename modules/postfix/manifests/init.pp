@@ -85,6 +85,13 @@ mech_list: PLAIN LOGIN DIGEST-MD5 CRAM-MD5
 		}
 	}
 
+	# create symlink pointing to the redirected run dir
+	$linkdest = "/var/spool/postfix/var/run/saslauthd"
+	file { "/var/run/saslauthd":
+		ensure		=> $linkdest,
+		require		=> File[$linkdest],
+	}
+
 	# add postfix user to sasl group
 	user { "postfix":
 		membership	=> minimum,
