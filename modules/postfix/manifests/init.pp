@@ -74,7 +74,7 @@ mech_list: PLAIN LOGIN DIGEST-MD5 CRAM-MD5
 		debian, ubuntu: {
 			text::replace_lines { "/etc/default/saslauthd postfix":
 				file		=> "/etc/default/saslauthd",
-				pattern		=> '^(OPTIONS=.-c -m) (/var/run/saslauthd)',
+				pattern		=> '^(OPTIONS=.-c -m) (.var.run.saslauthd)',
 				replace		=> '\1 \/var\/spool\/postfix\2',
 				require		=> [
 					Class["sasl::package"],
