@@ -17,7 +17,7 @@ class amavis::package {
 class amavis::groups {
 	$groups = [ "amavis", "clamav" ]
 	# this relies on the fact that the user & group names are the same
-	user { $group:
+	user { $groups:
 		ensure		=> present,
 		groups		=> $groups,
 		membership	=> minimum,
