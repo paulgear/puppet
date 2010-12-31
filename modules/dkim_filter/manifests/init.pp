@@ -29,13 +29,16 @@ define dkim_filter::config (
 		$domain,
 		$keyfile = "/etc/postfix/dkim.key",
 		$selector,
+		$socket = "inet:12345@127.0.0.1",
 		$statistics = "/var/run/dkim-filter/dkim-stats",
 		$syslog = "yes",
 		$umask = "002"
 		) {
 	include dkim_filter
-	$file = "/etc/dkim-filter.conf"
-	file { $file:
+
+	# create the config file
+	$cfg = "/etc/dkim-filter.conf"
+	file { $cfg:
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
@@ -51,6 +54,20 @@ UMask			$umask
 ",
 		require	=> Class["dkim_filter::package"],
 		notify	=> Class["dkim_filter::service"],
+	}
+
+	# set the socket in the startup config
+	$def = "/etc/default/dkim-filter"
+	text::replace_lines { $def:
+		file		=> $def,
+		pattern		=> '^(SOCKET=.*)',
+		replace		=> '#\1',
+		notify		=> Class["dkim_filter::service"],
+	}
+	text::append_if_no_such_line { $def:
+		file		=> $def,
+		line		=> "SOCKET=$socket",
+		notify		=> Class["dkim_filter::service"],
 	}
 }
 
