@@ -89,6 +89,8 @@ mech_list: PLAIN LOGIN DIGEST-MD5 CRAM-MD5
 	$linkdest = "/var/spool/postfix/var/run/saslauthd"
 	file { "/var/run/saslauthd":
 		ensure		=> $linkdest,
+		force		=> true,
+		before		=> Class["sasl::package"],
 		require		=> File[$linkdest],
 	}
 
