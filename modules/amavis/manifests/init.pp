@@ -16,8 +16,8 @@ class amavis::package {
 }
 
 class amavis::service {
-	$pkg = "amavis"
-	package { $pkg:
+	$svc = "amavis"
+	service { $svc:
 		enable		=> true,
 		hasrestart	=> true,
 		hasstatus	=> true,
