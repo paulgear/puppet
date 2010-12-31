@@ -65,8 +65,8 @@ UMask			$umask
 		group	=> root,
 		mode	=> 644,
 		content	=> "# Managed by puppet - do not edit here
-DAEMON_OPTS="$daemon_opts"
-SOCKET="$socket"
+DAEMON_OPTS=\"$daemon_opts\"
+SOCKET=\"$socket\"
 ",
 		require	=> Class["dkim_filter::package"],
 		notify	=> Class["dkim_filter::service"],
