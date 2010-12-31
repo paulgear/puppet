@@ -16,12 +16,9 @@ class amavis::package {
 
 class amavis::groups {
 	$group = [ "amavis", "clamav" ]
-	user { "amavis":
-		groups		=> $groups,
-		membership	=> minimum,
-		require		=> Class["amavis::package"],
-	}
-	user { "clamav":
+	# this relies on the fact that the user & group names are the same
+	user { $group:
+		ensure		=> present,
 		groups		=> $groups,
 		membership	=> minimum,
 		require		=> Class["amavis::package"],
