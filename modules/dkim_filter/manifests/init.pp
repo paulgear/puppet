@@ -26,6 +26,7 @@ class dkim_filter::service {
 
 define dkim_filter::config (
 		$canonicalization = "relaxed/simple",
+		$daemon_opts = "",
 		$domain,
 		$keyfile = "/etc/postfix/dkim.key",
 		$selector,
@@ -58,16 +59,17 @@ UMask			$umask
 
 	# set the socket in the startup config
 	$def = "/etc/default/dkim-filter"
-	text::replace_lines { $def:
-		file		=> $def,
-		pattern		=> '^(SOCKET=.*)',
-		replace		=> '#\1',
-		notify		=> Class["dkim_filter::service"],
-	}
-	text::append_if_no_such_line { $def:
-		file		=> $def,
-		line		=> "SOCKET=$socket",
-		notify		=> Class["dkim_filter::service"],
+	file { $def:
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 644,
+		content	=> "# Managed by puppet - do not edit here
+DAEMON_OPTS="$daemon_opts"
+SOCKET="$socket"
+",
+		require	=> Class["dkim_filter::package"],
+		notify	=> Class["dkim_filter::service"],
 	}
 }
 
