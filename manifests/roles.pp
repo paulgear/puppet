@@ -37,8 +37,9 @@ class role::mailrelay {
 
 class role::mailserver {
 	include role::mailrelay
-	include postfix::sasl
 	include dovecot
+	include maildrop
+	include postfix::sasl
 }
 
 class role::ntpserver {
