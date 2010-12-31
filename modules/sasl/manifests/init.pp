@@ -27,8 +27,8 @@ class sasl::service {
 		debian, ubuntu: {
 			text::replace_lines { "/etc/default/saslauthd":
 				file		=> "/etc/default/saslauthd",
-				pattern		=> "^start=.*",
-				replace		=> "start=yes",
+				pattern		=> "^START=.*",
+				replace		=> "START=yes",
 				optimise	=> true,
 				require		=> Class["sasl::package"],
 			}
