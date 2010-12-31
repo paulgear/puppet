@@ -37,7 +37,7 @@ class postfix::removepkgs {
 
 # enable sasl for postfix
 class postfix::sasl {
-	include sasl
+	include ::sasl
 
 	file { "/etc/postfix/sasl":
 		ensure		=> directory,
