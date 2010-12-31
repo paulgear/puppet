@@ -39,8 +39,9 @@ class fail2ban {
 	# exec to create jail.local from jail.d
 	exec { $exec:
 		command		=> "/usr/local/bin/concatfragments.sh -o $jail_local -d $jail_d",
-		onlyif		=> 'test -n "`find $jail_d -newer $jail_local`"',
+		onlyif		=> 'test -n "`find $jail_d -newer $jail_local`" -o ! -r $jail_local',
 		notify		=> Service[$svc],
+		logoutput	=> true,
 	}
 
 }
