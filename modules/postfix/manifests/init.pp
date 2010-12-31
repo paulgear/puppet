@@ -75,7 +75,7 @@ mech_list: PLAIN LOGIN DIGEST-MD5 CRAM-MD5
 			text::replace_lines { "/etc/default/saslauthd postfix":
 				file		=> "/etc/default/saslauthd",
 				pattern		=> '^(OPTIONS=.-c -m) (/var/run/saslauthd)',
-				replace		=> '\1 /var/spool/postfix\2',
+				replace		=> '\1 \/var\/spool\/postfix\2',
 				require		=> [
 					Class["sasl::package"],
 					File["/var/spool/postfix/var/run/saslauthd"],
