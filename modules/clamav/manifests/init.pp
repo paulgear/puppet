@@ -23,7 +23,7 @@ class clamav::service {
 		debian		=> [ "clamav-daemon", "clamav-freshclam", ],
 		ubuntu		=> [ "clamav-daemon", "clamav-freshclam", ],
 	}
-	service { $svc:
+	service { $svcs:
 		enable		=> true,
 		hasrestart	=> true,
 		hasstatus	=> true,
