@@ -18,10 +18,10 @@ class clamav::package {
 }
 
 class clamav::service {
-	$svc = $operatingsystem ? {
+	$svcs = $operatingsystem ? {
 		centos		=> "clamd",
-		debian		=> "clamav-daemon",
-		ubuntu		=> "clamav-daemon",
+		debian		=> [ "clamav-daemon", "clamav-freshclam", ],
+		ubuntu		=> [ "clamav-daemon", "clamav-freshclam", ],
 	}
 	service { $svc:
 		enable		=> true,
@@ -91,6 +91,9 @@ class clamav::centos {
 
 }
 
+# Configure freshclam proxy settings
+# Note that the service notify is a little ham-fisted - it really should restart
+# only freshclam, not clamd as well.
 define clamav::freshclam_config (
 		$httpproxyserver = "proxy",
 		$httpproxyport = "8080"
@@ -100,11 +103,13 @@ define clamav::freshclam_config (
 		file		=> $cfg,
 		pattern		=> '^HTTPProxyPort.*',
 		line		=> "HTTPProxyPort $httpproxyport",
+		notify		=> Class["clamav::service"],
 	}
 	text::replace_add_line { "$cfg HTTPProxyServer":
 		file		=> $cfg,
 		pattern		=> '^HTTPProxyServer.*',
 		line		=> "HTTPProxyServer $httpproxyserver",
+		notify		=> Class["clamav::service"],
 	}
 }
 
