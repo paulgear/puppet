@@ -91,3 +91,20 @@ class clamav::centos {
 
 }
 
+define clamav::freshclam_config (
+		$httpproxyserver = "proxy",
+		$httpproxyport = "8080"
+		) {
+	$cfg = "/etc/clamav/freshclam.conf"
+	text::replace_add_line { "$cfg HTTPProxyPort":
+		file		=> $cfg,
+		pattern		=> '^HTTPProxyPort.*',
+		line		=> "HTTPProxyPort $httpproxyport",
+	}
+	text::replace_add_line { "$cfg HTTPProxyServer":
+		file		=> $cfg,
+		pattern		=> '^HTTPProxyServer.*',
+		line		=> "HTTPProxyServer $httpproxyserver",
+	}
+}
+
