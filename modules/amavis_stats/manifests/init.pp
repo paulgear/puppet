@@ -6,7 +6,8 @@ class amavis_stats {
 
 class amavis_stats::package {
 	$pkg = "amavis-stats"
-	package { $pkg:
+	$php5 = "libapache2-mod-php5"
+	package { [ $pkg, $php5 ]:
 		ensure		=> installed
 	}
 }
