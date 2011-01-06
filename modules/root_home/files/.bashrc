@@ -37,6 +37,10 @@ alias vi='vim'
 export EDITOR=vim
 export VISUAL=vim
 
+if [ -d $HOME/bin ]; then
+	PATH=$HOME/bin:$PATH
+fi
+
 function paul
 {
 	alias dir='ls -Fabl'
