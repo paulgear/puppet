@@ -1,20 +1,27 @@
-# puppet class to install default sudo configuration
-# developed based on the examples in James Turnbull's "Pulling Strings with Puppet" book
+# puppet class to manage sudo
 
 class sudo {
+	include sudo::package
+}
 
+class sudo::package {
 	$pkg = "sudo"
-
 	package { $pkg:
 		ensure => installed,
 	}
+}
 
+define sudo::sudoers (
+		$superusers = [ "root" ]
+		) {
+	include sudo
+	$templatedir = "/etc/puppet/modules/sudo/templates"
 	file { "/etc/sudoers":
 		owner	=> "root",
 		group	=> "root",
 		mode	=> 440,
-		source	=> "puppet:///modules/sudo/sudoers",
-		require	=> Package[$pkg],
+		content	=> template("sudo/sudoers.erb"),
+		require	=> Class["sudo::package"],
 	}
-
 }
+
