@@ -62,11 +62,10 @@ class spamassassin::service {
 				require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
 			}
 			# set the nice value on the daemon
-			text::replace_lines { "$file NICE":
+			text::replace_add_line { "$file NICE":
 				file		=> $file,
 				pattern		=> '^#?NICE="--nicelevel .*"',
-				replace		=> 'NICE="--nicelevel 15"',
-				optimise	=> true,
+				line		=> 'NICE="--nicelevel 15"',
 				notify		=> Service[$svc],
 				require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
 			}
