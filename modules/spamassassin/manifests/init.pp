@@ -49,14 +49,23 @@ class spamassassin::service {
 		hasstatus	=> true,
 		require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
 	}
-	# on these operating systems, there is no standardised way to enable/disable a service :-(
 	case $operatingsystem {
 		debian, ubuntu: {
+			# on these operating systems, there is no standardised way to enable/disable a service :-(
 			$file = "/etc/default/spamassassin"
 			text::replace_lines { "$file ENABLE":
 				file		=> $file,
 				pattern		=> "^ENABLED=.*",
 				replace		=> "ENABLED=1",
+				optimise	=> true,
+				notify		=> Service[$svc],
+				require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
+			}
+			# set the nice value on the daemon
+			text::replace_lines { "$file NICE":
+				file		=> $file,
+				pattern		=> '^#?NICE="--nicelevel .*"',
+				replace		=> 'NICE="--nicelevel 15"',
 				optimise	=> true,
 				notify		=> Service[$svc],
 				require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
