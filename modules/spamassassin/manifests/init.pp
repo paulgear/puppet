@@ -52,6 +52,11 @@ class spamassassin::service {
 			centos	=> true,
 			default	=> undef,
 		},
+		pattern		=> $operatingsystem ? {
+			debian	=> spamd,
+			ubuntu	=> spamd,
+			default	=> undef,
+		},
 		require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
 	}
 	case $operatingsystem {
