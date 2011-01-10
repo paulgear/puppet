@@ -46,7 +46,12 @@ class spamassassin::service {
 	service { $svc:
 		enable		=> true,
 		hasrestart	=> true,
-		hasstatus	=> true,
+		hasstatus	=> $operatingsystem ? {
+			debian	=> false,
+			ubuntu	=> false,
+			centos	=> true,
+			default	=> undef,
+		},
 		require		=> Class["spamassassin::package"],	# I wonder if there's a way to set this once for the whole class...
 	}
 	case $operatingsystem {
