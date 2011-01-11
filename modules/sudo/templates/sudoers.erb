@@ -16,8 +16,8 @@ Defaults	env_reset
 # Cmnd alias specification
 
 # User privilege specification
-<% superusers.each do |su| -%>
-<%= su %> ALL=(ALL) ALL
+<% superusers.each do |net| -%>
+<%= superusers %> ALL=(ALL) ALL
 <% end -%>
 
 # Add your local sudoers here
