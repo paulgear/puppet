@@ -6,30 +6,34 @@
 
 class vmware::tools {
 
-	include	grub::default
+	if $operatingsystem == "centos" {
 
-	$pkgs = $operatingsystem ? {
-		centos	=> [ "gcc", "kernel-headers", "kernel-devel", ],
-		ubuntu	=> [ "build-essential", "linux-headers-server", "linux-source", ],
-		debian	=> [ "build-essential", "linux-headers-2.6", ],
-	}
+		include	grub::default
 
-	package { $pkgs:
-		ensure	=> installed,
-	}
+		$pkgs = $operatingsystem ? {
+			centos	=> [ "gcc", "kernel-headers", "kernel-devel", ],
+			ubuntu	=> [ "build-essential", "linux-headers-server", "linux-source", ],
+			debian	=> [ "build-essential", "linux-headers-2.6", ],
+		}
 
-	file { "/etc/init.d/vmware-tools-configure":
-		ensure	=> file,
-		owner	=> root,
-		group	=> root,
-		mode	=> 755,
-		source	=> "puppet:///modules/vmware/vmware-tools-configure.init.sh",
-		require	=> Package[ $pkgs ],
-	}
+		package { $pkgs:
+			ensure	=> installed,
+		}
 
-	service { "vmware-tools-configure":
-		enable	=> true,
-		require	=> File[ "/etc/init.d/vmware-tools-configure" ],
+		file { "/etc/init.d/vmware-tools-configure":
+			ensure	=> file,
+			owner	=> root,
+			group	=> root,
+			mode	=> 755,
+			source	=> "puppet:///modules/vmware/vmware-tools-configure.init.sh",
+			require	=> Package[ $pkgs ],
+		}
+
+		service { "vmware-tools-configure":
+			enable	=> true,
+			require	=> File[ "/etc/init.d/vmware-tools-configure" ],
+		}
+
 	}
 
 }
