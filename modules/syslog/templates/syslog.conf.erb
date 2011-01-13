@@ -1,0 +1,13 @@
+<%= magic %>
+
+*.info		/var/log/sysmgt/all
+
+<% priv_files.each do |f| -%>
+<%= f %>.info	/var/log/sysmgt/<%= f %>
+<% end -%>
+
+<% files.each do |f| -%>
+<%= f %>.info	/var/log/sysmgt/<%= f %>
+<% end -%>
+
+<%= magic %> end

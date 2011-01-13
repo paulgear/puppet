@@ -1,16 +1,14 @@
-#
 # puppet class to customise syslog
-#
-# DONE: Edited for Ubuntu compatibility
-#
 
 class syslog {
 
-	$kern_logfile = "/var/log/kernel.log"
-	$kern_logdir = "/var/log/kernellogs"
-	$kern_logrotate = "/etc/logrotate.d/kernel"
-	$mesg_logfile = "/var/log/messages"
-	$mail_logfile = "/var/log/maillog"
+	$dir = "/var/log/sysmgt"
+	$rot = "$dir/RotatedLogs"
+
+	$magic = "### puppet syslog configuration ###"
+
+	$owner = "root"
+	$group = "root"
 
 	$class = $operatingsystem ? {
 		centos		=> "sysklogd",
@@ -19,28 +17,75 @@ class syslog {
 	}
 	include $class
 
-	file { $kern_logfile:
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
+	include syslog::files
+	include syslog::logrotate
+
+}
+
+class syslog::files {
+	$priv_files = [
+		"all",
+		"authpriv",
+	]
+	$files = [
+		"auth",
+		"cron",
+		"daemon",
+		"ftp",
+		"kern",
+		"local0",
+		"local1",
+		"local2",
+		"local3",
+		"local4",
+		"local5",
+		"local6",
+		"local7",
+		"lpr",
+		"mail",
+		"news",
+		"syslog",
+		"user",
+		"uucp",
+	]
+
+	define syslog_dir ( $mode = 755 ) {
+		file { $name:
+			ensure		=> file,
+			owner		=> "$syslog::owner",
+			group		=> "$syslog::group",
+			mode		=> $mode,
+		}
 	}
 
-	file { $kern_logdir:
-		ensure		=> directory,
-		owner		=> root,
-		group		=> root,
-		mode		=> 750,
+	define syslog_file ( $mode = 644 ) {
+		file { "$syslog::dir/$name":
+			ensure		=> file,
+			owner		=> "$syslog::owner",
+			group		=> "$syslog::group",
+			mode		=> $mode,
+			require		=> File["$syslog::dir"],
+		}
 	}
 
-	file { $kern_logrotate:
+	# create base dir for all logs
+	syslog_dir { [ "$syslog::dir", "$syslog::rot" ]: }
+
+	# create files
+	syslog_file { $files: }
+	syslog_file { $priv_files: mode => 640 }
+}
+
+class syslog::logrotate {
+	$logrotate = "/etc/logrotate.d/syslog-sysmgt"
+	file { $logrotate:
 		ensure		=> file,
-		owner		=> root,
-		group		=> root,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
 		mode		=> 644,
-		require		=> [ File[$kern_logfile], File[$kern_logdir] ],
+		require		=> Class["syslog::files"],
 		content		=> "# Managed by puppet - do not edit here
-$kern_logfile {
+${syslog::dir}/* {
 	rotate 52
 	weekly
 	dateext
@@ -48,17 +93,20 @@ $kern_logfile {
 	delaycompress
 	missingok
 	notifempty
-	olddir $kern_logdir/
+	olddir ${syslog::rot}/
 }
 ",
 	}
-
 }
 
 class rsyslog {
 
 	$pkg = "rsyslog"
 	$svc = "rsyslog"
+
+	$dir = "/etc/rsyslog.d"
+	$magic = $syslog::magic
+	$extra_conf = "$dir/00-puppet-sysmgt.conf"
 
 	package { $pkg:
 		ensure		=> installed
@@ -70,72 +118,13 @@ class rsyslog {
 		hasstatus	=> true,
 	}
 
-	$rsyslog_dir = "/etc/rsyslog.d"
-
-	file { "$rsyslog_dir/00-puppet-kernel.conf":
+	file { $extra_conf:
 		ensure		=> file,
-		owner		=> root,
-		group		=> root,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
 		mode		=> 644,
 		notify		=> Service[$svc],
-		content		=> "kern.debug	$syslog::kern_logfile\n",
-	}
-
-	file { "$rsyslog_dir/00-puppet-maillog.conf":
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
-		notify		=> Service[$svc],
-		content		=> "mail.info	-$syslog::mail_logfile\n",
-	}
-
-	file { "$rsyslog_dir/00-puppet-messages.conf":
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
-		notify		=> Service[$svc],
-		content		=> "*.info;mail.none;news.none;authpriv.none;cron.none;kern.none	-$syslog::mesg_logfile\n",
-	}
-
-	$rsyslog_logrotate = "/etc/logrotate.d/rsyslog"
-	file { $rsyslog_logrotate:
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
-		content		=> "# Managed by puppet - do not edit here
-/var/log/syslog
-/var/log/mail.info
-/var/log/mail.warn
-/var/log/mail.err
-/var/log/mail.log
-/var/log/maillog
-/var/log/daemon.log
-/var/log/kern.log
-/var/log/auth.log
-/var/log/user.log
-/var/log/lpr.log
-/var/log/cron.log
-/var/log/debug
-/var/log/messages
-{
-        rotate 52
-        weekly
-	dateext
-        missingok
-        notifempty
-        compress
-        delaycompress
-        sharedscripts
-        postrotate
-		/etc/init.d/rsyslog reload >/dev/null 2>&1 || true
-		kill -HUP `cat /var/run/rsyslogd.pid`
-                #reload rsyslog >/dev/null 2>&1 || true
-        endscript
-}
-",
+		content		=> template("syslog/syslog.conf.erb"),
 	}
 
 }
@@ -145,7 +134,10 @@ class sysklogd {
 	$pkg = "sysklogd"
 	$svc = "syslog"
 
-	$syslog_conf = "/etc/syslog.conf"
+	$conf = "/etc/syslog.conf"
+	$extra_conf = "/etc/syslog-puppet.conf"
+
+	$magic = $syslog::magic
 
 	package { $pkg:
 		ensure		=> installed
@@ -157,44 +149,21 @@ class sysklogd {
 		hasstatus	=> true,
 	}
 
-	exec { "add kernel log":
-		logoutput	=> on_failure,
-		notify		=> Service[$svc],
-		require		=> Package[$pkg],
-		unless		=> "grep -q '^[^#]*kern\\..*$syslog::kern_logfile' $syslog_conf",
-		command		=> "echo 'kern.*	$syslog::kern_logfile' >> $syslog_conf",
-	}
-
-	exec { "remove kernel from $syslog::mesg_logfile":
-		logoutput	=> on_failure,
-		notify		=> Service[$svc],
-		require		=> Package[$pkg],
-		unless		=> "grep -q '^[^#]*kern.none[^#]*$syslog::mesg_logfile' $syslog_conf",
-		command		=> "sed -ri -e 's~^([^ 	]*)([ 	]*$syslog::mesg_logfile)~\\1;kern.none\\2~' $syslog_conf",
-	}
-	$syslog_logrotate = "/etc/logrotate.d/syslog"
-
-	file { $syslog_logrotate:
+	file { $extra_conf:
 		ensure		=> file,
-		owner		=> root,
-		group		=> root,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
 		mode		=> 644,
-		content		=> "# Managed by puppet - do not edit here
-/var/log/messages /var/log/secure /var/log/maillog /var/log/spooler /var/log/boot.log /var/log/cron {
-	rotate 52
-	weekly
-	dateext
-	compress
-	delaycompress
-	missingok
-	notifempty
-	sharedscripts
-	postrotate
-		/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true
-		/bin/kill -HUP `cat /var/run/rsyslogd.pid 2> /dev/null` 2> /dev/null || true
-	endscript
-}
-",
+		notify		=> Service[$svc],
+		content		=> template("syslog/syslog.conf.erb"),
+	}
+
+	exec { "update $conf":
+		logoutput	=> true,
+		notify		=> Service[$svc],
+		require		=> [ Package[$pkg], File[$extra_conf] ],
+		unless		=> "grep -q '^$magic' $conf",
+		command		=> "cat $extra_conf >> $conf",
 	}
 
 }

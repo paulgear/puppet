@@ -16,7 +16,7 @@ my ($connections, %users, %messages, %sizes);
 my ($imapconns, %imapusers, %imapmethods, %imapips);
 
 if ($#ARGV < 0) {
-	push @ARGV, "/var/log/maillog";
+	push @ARGV, "/var/log/sysmgt/mail";
 }
 
 my $i = 0;
