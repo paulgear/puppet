@@ -69,34 +69,6 @@ class aptitude {
 
 }
 
-define aptitude::set_proxy (
-		$proxy = "http://proxy:8080/"
-		) {
-
-	# create separate file for proxy configuration
-	file { "/etc/apt/apt.conf.d/proxy.conf":
-		ensure	=> file,
-		owner	=> root,
-		group	=> root,
-		mode	=> 644,
-		content	=> "// Managed by puppet - do not edit here!
-Acquire::http::Proxy \"$proxy\";\n",
-	}
-
-	# remove the guess file created by xen-tools/debootstrap
-	file { "/etc/apt/apt.conf.d/proxy-guess":
-		ensure	=> absent,
-	}
-
-	# comment out any matching lines in the master config file
-	text::replace_lines { "/etc/apt/apt.conf":
-		file	=> '/etc/apt/apt.conf',
-		pattern	=> '^[^/]*Acquire::http::Proxy',
-		replace	=> '// \\1',
-	}
-
-}
-
 # empty the sources.list file and save the original
 define aptitude::sources_list () {
 
