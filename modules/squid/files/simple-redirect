@@ -5,9 +5,9 @@ $|=1;
 
 while (<>) {
 	# turn on strict searching by default
-	s!(http://.*google.*)safe=(images|off)(.*)!\1safe=strict\3!;
+	s!(http://.*google.*)safe=(images|off)(.*)!$1safe=strict$3!;
 	#if (/google/ && !/safe=strict/) {
-	#    s!(http://.*google.*)\?(.*)!\1\?\2&safe=strict!;
+	#    s!(http://.*google.*)\?(.*)!$1\?$2&safe=strict!;
 	#}
         print;
 }
