@@ -1,0 +1,17 @@
+
+# RUN_AS_USER nutmon
+# MONITOR <system> <powervalue> <username> <password> ("master"|"slave")
+MINSUPPLIES 1
+SHUTDOWNCMD "/sbin/shutdown -h +0"
+# NOTIFYCMD /usr/local/ups/bin/notifyme
+POLLFREQ 5
+POLLFREQALERT 5
+HOSTSYNC 15
+DEADTIME 15
+POWERDOWNFLAG /etc/killpower
+# NOTIFYMSG <notify type> "message"
+# NOTIFYFLAG <notify type> <flag>[+<flag>][+<flag>] ...
+RBWARNTIME 43200
+NOCOMMWARNTIME 300
+FINALDELAY 5
+
