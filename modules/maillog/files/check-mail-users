@@ -16,7 +16,7 @@ my ($connections, %users, %messages, %sizes);
 my ($imapconns, %imapusers, %imapmethods, %imapips);
 
 if ($#ARGV < 0) {
-	push @ARGV, "/var/log/sysmgt/mail";
+	push @ARGV, "/var/log/maillog";
 }
 
 my $i = 0;
@@ -91,7 +91,6 @@ printf "\n%d IMAP logins since %s\n\n", $imapconns, $start;
 
 $headformat = "%-25s %16s\n";
 $lineformat = "%-25s %16d\n";
-$totalformat = "%25d %16d\n";
 $totalconns = 0;
 if ($imapconns > 0) {
 	printf $headformat, "User", "IMAP Connections";
@@ -101,13 +100,12 @@ if ($imapconns > 0) {
 		$totalconns += $imapusers{$user};
 	}
 	printf $headformat, "----", "----------------";
-	printf $totalformat, $#{keys %imapusers} + 1, $totalconns;
+	printf $lineformat, "TOTALS: " . keys %imapusers, $totalconns;
 }
 
 printf "\n";
 $headformat = "%-25s %16s\n";
 $lineformat = "%-25s %16d\n";
-$totalformat = "%25d %16d\n";
 $totalconns = 0;
 if ($imapconns > 0) {
 	printf $headformat, "IP Address", "IMAP Connections";
@@ -117,7 +115,7 @@ if ($imapconns > 0) {
 		$totalconns += $imapips{$ip};
 	}
 	printf $headformat, "----------", "----------------";
-	printf $totalformat, $#{keys %imapips} + 1, $totalconns;
+	printf $lineformat, "TOTALS: " . keys %imapips, $totalconns;
 }
 
 #####
@@ -146,7 +144,11 @@ while (<PIPE>) {
 	printf $lineformat, $user, $size;
 	$totalsize += $size;
 }
-printf $lineformat, "-----", "-----------------";
+# line below commented due to error
+#printf $lineformat, "-----", "-----------------";
 printf $lineformat, "TOTAL", $totalsize;
 close PIPE || warn "Cannot close pipe: $!";
+
+printf "\n";
+system ("du -hx  /home/Maildir/ --max-depth=0");
 
