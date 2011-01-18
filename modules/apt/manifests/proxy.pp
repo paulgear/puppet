@@ -1,6 +1,6 @@
 # puppet define to set apt proxy
 
-define aptitude::proxy (
+define apt::proxy (
 		$proxy = "http://proxy:8080/"
 		) {
 	$dir = "/etc/apt"
