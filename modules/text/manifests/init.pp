@@ -76,3 +76,11 @@ define text::replace_add_line($file, $pattern = undef, $line) {
 	}
 }
 
+define text::append_file ( $file, $append, $magic ) {
+	exec { "text::append_file $file $append $magic":
+		logoutput	=> true,
+		unless		=> "grep -q '^$magic' $file",
+		command		=> "cat $append >> $file",
+	}
+}
+
