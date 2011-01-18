@@ -64,7 +64,6 @@ while (<>) {
 printf "%d POP logins since %s\n\n", $connections, $start;
 my $headformat = "%-25s %12s %10s %10s %13s\n";
 my $lineformat = "%-25s %12d %10d %10d %13d\n";
-my $totalformat = "%25d %12d %10d %10d %13d\n";
 my $totalconns = 0;
 my $totalmesgs = 0;
 my $totalsize  = 0;
@@ -72,7 +71,7 @@ if ($connections > 0) {
 	printf $headformat, "User", "Connections", "Messages", "Size (Kb)", "Average (Kb)";
 	printf $headformat, "----", "-----------", "--------", "---------", "------------";
 	my @users = keys %users;
-	for my $user (sort { $users{$b} <=> $users{$a} } keys %users) {
+	for my $user (sort { $users{$b} <=> $users{$a} } @users) {
 		printf $lineformat, $user, $users{$user}, $messages{$user}, $sizes{$user} / 1024,
 			$messages{$user} > 0 ? $sizes{$user} / 1024 / $messages{$user} : -1;
 		$totalconns += $users{$user};
@@ -80,7 +79,7 @@ if ($connections > 0) {
 		$totalsize  += $sizes{$user};
 	}
 	printf $headformat, "----", "-----------", "--------", "---------", "------------";
-	printf $lineformat, $#users + 1, $totalconns, $totalmesgs, $totalsize,
+	printf $lineformat, "TOTAL: " . @users, $totalconns, $totalmesgs, $totalsize,
 		$totalmesgs > 0 ? $totalsize / 1024 / $totalmesgs : -1;
 }
 
