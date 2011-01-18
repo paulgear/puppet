@@ -71,6 +71,7 @@ my $totalsize  = 0;
 if ($connections > 0) {
 	printf $headformat, "User", "Connections", "Messages", "Size (Kb)", "Average (Kb)";
 	printf $headformat, "----", "-----------", "--------", "---------", "------------";
+	my @users = keys %users;
 	for my $user (sort { $users{$b} <=> $users{$a} } keys %users) {
 		printf $lineformat, $user, $users{$user}, $messages{$user}, $sizes{$user} / 1024,
 			$messages{$user} > 0 ? $sizes{$user} / 1024 / $messages{$user} : -1;
@@ -79,7 +80,7 @@ if ($connections > 0) {
 		$totalsize  += $sizes{$user};
 	}
 	printf $headformat, "----", "-----------", "--------", "---------", "------------";
-	printf $totalformat, $#{keys %users} + 1, $totalconns, $totalmesgs, $totalsize,
+	printf $lineformat, $#users + 1, $totalconns, $totalmesgs, $totalsize,
 		$totalmesgs > 0 ? $totalsize / 1024 / $totalmesgs : -1;
 }
 
