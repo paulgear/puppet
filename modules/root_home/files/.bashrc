@@ -25,6 +25,7 @@ case "`puppet agent --version 2>/dev/null`" in
 esac
 alias pt='kp; tme -n 1|grep puppetd'
 alias rm='rm -i'
+alias taillog='tme|grep -Evf ~/taillog.exclude'
 alias td='tail --follow=name /var/log/dansguardian/access.log'
 alias tk='tail --follow=name /var/log/sysmgt/kern'
 alias tma='tail --follow=name /var/log/sysmgt/mail'
