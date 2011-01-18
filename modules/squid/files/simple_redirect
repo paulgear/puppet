@@ -4,6 +4,10 @@
 $|=1;
 
 while (<>) {
-	s@http://sss-web-01:8081/@http://www.sssaustralia.com.au/@;
+	# turn on strict searching by default
+	s!(http://.*google.*)safe=(images|off)(.*)!\1safe=strict\3!;
+	#if (/google/ && !/safe=strict/) {
+	#    s!(http://.*google.*)\?(.*)!\1\?\2&safe=strict!;
+	#}
         print;
 }
