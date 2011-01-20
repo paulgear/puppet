@@ -1,4 +1,5 @@
-<%= magic %>
+<% require '/etc/puppet/include/puppetutils.rb' -%>
+<%= include_header( "configuration file: syslog local files" ) -%>
 
 *.info		/var/log/sysmgt/all
 
@@ -10,4 +11,3 @@
 <%= f %>.info	/var/log/sysmgt/<%= f %>
 <% end -%>
 
-<%= magic %> end

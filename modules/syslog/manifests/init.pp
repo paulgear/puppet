@@ -5,28 +5,30 @@ class syslog {
 	$dir = "/var/log/sysmgt"
 	$rot = "$dir/RotatedLogs"
 
-	$magic = "### puppet syslog configuration ###"
+	$magic = "### puppet syslog configuration - "
 
 	$owner = "root"
 	$group = "root"
 
-	$class = $operatingsystem ? {
+	$provider = $operatingsystem ? {
 		centos		=> "sysklogd",
 		ubuntu		=> "rsyslog",
 		debian		=> "rsyslog",
 	}
-	include $class
-
-	include syslog::files
-	include syslog::logrotate
+	include $provider
 
 }
 
-class syslog::files {
+class syslog::local_files {
+	include syslog
+
+	$logrotate = "/etc/logrotate.d/syslog-sysmgt"
+
 	$priv_files = [
 		"all",
 		"authpriv",
 	]
+
 	$files = [
 		"auth",
 		"cron",
@@ -51,7 +53,7 @@ class syslog::files {
 
 	define syslog_dir ( $mode = 755 ) {
 		file { $name:
-			ensure		=> file,
+			ensure		=> directory,
 			owner		=> "$syslog::owner",
 			group		=> "$syslog::group",
 			mode		=> $mode,
@@ -68,16 +70,14 @@ class syslog::files {
 		}
 	}
 
-	# create base dir for all logs
+	# create dirs
 	syslog_dir { [ "$syslog::dir", "$syslog::rot" ]: }
 
 	# create files
 	syslog_file { $files: }
 	syslog_file { $priv_files: mode => 640 }
-}
 
-class syslog::logrotate {
-	$logrotate = "/etc/logrotate.d/syslog-sysmgt"
+	# logrotate configuration for the local files
 	file { $logrotate:
 		ensure		=> file,
 		owner		=> "$syslog::owner",
@@ -97,6 +97,29 @@ ${syslog::dir}/* {
 }
 ",
 	}
+
+	$syslog::provider::add_config { "sysmgt":
+		content		=> template("syslog/sysmgt.conf.erb"),
+	}
+
+}
+
+define syslog::tty ( $tty = "tty12" ) {
+	include syslog
+	$syslog::provider::add_config { "tty":
+		content	=> "# Created by puppet on $server - do not edit here
+*.info /dev/$tty
+",
+	}
+}
+
+define syslog::remote( $host ) {
+	include syslog
+	$syslog::provider::add_config { "remote":
+		content => "# Created by puppet on $server - do not edit here
+*.info	@$host
+",
+	}
 }
 
 class rsyslog {
@@ -105,8 +128,6 @@ class rsyslog {
 	$svc = "rsyslog"
 
 	$dir = "/etc/rsyslog.d"
-	$magic = $syslog::magic
-	$extra_conf = "$dir/00-puppet-sysmgt.conf"
 
 	package { $pkg:
 		ensure		=> installed
@@ -118,13 +139,17 @@ class rsyslog {
 		hasstatus	=> true,
 	}
 
-	file { $extra_conf:
-		ensure		=> file,
-		owner		=> "$syslog::owner",
-		group		=> "$syslog::group",
-		mode		=> 644,
-		notify		=> Service[$svc],
-		content		=> template("syslog/syslog.conf.erb"),
+	# note: $name must not contain spaces
+	define add_config( $content ) {
+		$magic = "$syslog::magic $name"
+		file { "$rsyslog::dir/00-puppet-$name.conf":
+			ensure		=> file,
+			owner		=> "$syslog::owner",
+			group		=> "$syslog::group",
+			mode		=> 644,
+			notify		=> Service["$rsyslog::svc"],
+			content		=> "$magic\n$content",
+		}
 	}
 
 }
@@ -135,9 +160,7 @@ class sysklogd {
 	$svc = "syslog"
 
 	$conf = "/etc/syslog.conf"
-	$extra_conf = "/etc/syslog-puppet.conf"
-
-	$magic = $syslog::magic
+	$dir = "/etc/syslog-tmp.d"
 
 	package { $pkg:
 		ensure		=> installed
@@ -149,21 +172,34 @@ class sysklogd {
 		hasstatus	=> true,
 	}
 
-	file { $extra_conf:
-		ensure		=> file,
+	file { $dir:
+		ensure		=> directory,
 		owner		=> "$syslog::owner",
 		group		=> "$syslog::group",
-		mode		=> 644,
-		notify		=> Service[$svc],
-		content		=> template("syslog/syslog.conf.erb"),
+		mode		=> 755,
 	}
 
-	exec { "update $conf":
-		logoutput	=> true,
-		notify		=> Service[$svc],
-		require		=> [ Package[$pkg], File[$extra_conf] ],
-		unless		=> "grep -q '^$magic' $conf",
-		command		=> "cat $extra_conf >> $conf",
+	define add_config( $content ) {
+
+		$filename = "$sysklogd::dir/00-puppet-$name.conf"
+		$magic = "$syslog::magic $name"
+
+		file { $filename:
+			ensure		=> file,
+			owner		=> "$syslog::owner",
+			group		=> "$syslog::group",
+			mode		=> 644,
+			content		=> $content,
+		}
+
+		exec { "update $name":
+			logoutput	=> true,
+			notify		=> Service["$sysklogd::svc"],
+			require		=> [ Package["$sysklogd::pkg"], File[$filename] ],
+			unless		=> "grep -q '^$magic' $sysklogd::conf",
+			command		=> "echo '$magic' >> $sysklogd::conf && cat $filename >> $sysklogd::conf",
+		}
+
 	}
 
 }
