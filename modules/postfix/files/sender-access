@@ -1,0 +1,7 @@
+# Example postfix sender-access file
+
+# Spammers
+#badperson@example.com			REJECT
+
+# Others
+#sillyperson@example.com		ERROR Fix your out of office autoreply!

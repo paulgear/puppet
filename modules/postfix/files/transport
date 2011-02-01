@@ -1,0 +1,4 @@
+# Example postfix transport file
+#direct.ip.domain.com	smtp:[10.0.0.1]
+#lists.domain.com	smtp:listserver.domain.com
+#normal.domain.com	smtp:

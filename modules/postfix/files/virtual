@@ -1,0 +1,11 @@
+# Example postfix virtual file
+
+#postmaster@example.com postmaster
+#info@example.com       joe
+#sales@example.com      jane
+
+# spamtrap users
+#gandalf@example.com	spam
+
+# spamtrap domains
+#@lotr.example.com		spam

@@ -1,0 +1,3 @@
+# Example header-checks file
+#/^From:.*Nasty\.Person@example\.com/	REJECT
+#/^To:.*my.spamtrap.address@example\.com/	REJECT
