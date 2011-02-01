@@ -30,7 +30,7 @@ class postfix::files {
 }
 
 class postfix::make {
-	include make
+	include make::package
 	exec { "update postfix databases":
 		command		=> "make",
 		cwd		=> "/etc/postfix",
