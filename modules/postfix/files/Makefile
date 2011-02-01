@@ -14,7 +14,7 @@ UPDATE:	$(FILES) postgrey
 	postfix reload && touch $@
 
 postgrey:
-	if [ -d $(PGREY) ]; then \
+	-if [ -d $(PGREY) ]; then \
 		make -C $(PGREY); \
 	fi
 
