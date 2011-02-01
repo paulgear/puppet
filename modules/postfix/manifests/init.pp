@@ -34,7 +34,7 @@ class postfix::make {
 	exec { "update postfix databases":
 		command		=> "make",
 		cwd		=> "/etc/postfix",
-		logoutput	=> on_failure,
+		logoutput	=> true,
 		refreshonly	=> true,
 		require		=> Class["make::package"],
 	}
