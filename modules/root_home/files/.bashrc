@@ -29,7 +29,14 @@ alias taillog='tme|grep -Evf ~/taillog.exclude'
 alias td='tail --follow=name /var/log/dansguardian/access.log'
 alias tk='tail --follow=name /var/log/kernel.log'
 alias tma='tail --follow=name /var/log/maillog'
-alias tme='tail --follow=name /var/log/messages'
+case "`facter operatingsystem`" in
+Ubuntu|Debian)
+	alias tme='tail --follow=name /var/log/syslog'
+	;;
+*)
+	alias tme='tail --follow=name /var/log/messages'
+	;;
+esac
 alias tp='tme|grep puppetd'
 alias trad='tail --follow=name /var/log/radius/radius.log'
 alias ts='tail --follow=name /var/log/squid/access.log'
