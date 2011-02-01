@@ -91,7 +91,6 @@ class os::debian::packages {
 		"lsof",
 		"lsscsi",
 		"ltrace",
-		"make",
 		"mlocate",
 		"mutt",
 		"openssl",
@@ -122,6 +121,7 @@ class os::debian::packages {
 	}
 
 	include etckeeper
+	include make
 	include sysstat
 
 }
