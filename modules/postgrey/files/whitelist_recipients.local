@@ -1,0 +1,5 @@
+# Example postgrey whitelist_recipients.local
+#
+# Add local users' email addresses to this file if you want to exempt them
+# from greylisting.
+#spamlover@local.domain.com
