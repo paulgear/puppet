@@ -98,7 +98,7 @@ ${syslog::dir}/* {
 ",
 	}
 
-	${syslog::provider}::add_config { "sysmgt":
+	${syslog::provider::add_config} { "sysmgt":
 		content		=> template("syslog/sysmgt.conf.erb"),
 	}
 
@@ -106,7 +106,7 @@ ${syslog::dir}/* {
 
 define syslog::tty ( $tty = "tty12" ) {
 	include syslog
-	${syslog::provider}::add_config { "tty":
+	${syslog::provider::add_config} { "tty":
 		content	=> "# Created by puppet on $server - do not edit here
 *.info /dev/$tty
 ",
@@ -115,7 +115,7 @@ define syslog::tty ( $tty = "tty12" ) {
 
 define syslog::remote( $host ) {
 	include syslog
-	${syslog::provider}::add_config { "remote":
+	${syslog::provider::add_config} { "remote":
 		content => "# Created by puppet on $server - do not edit here
 *.info	@$host
 ",
