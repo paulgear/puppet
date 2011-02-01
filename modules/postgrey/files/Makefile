@@ -4,7 +4,7 @@ CI=$(VC) commit -m'postgrey automatic checkpoint'
 
 UPDATE:	$(FILES)
 	service postgrey restart && touch $@
-	-$(VC) add $(FILES)
+	-$(VC) add $(FILES) UPDATE Makefile
 	-$(VC) diff .
 	-$(CI) $(PWD)
 
