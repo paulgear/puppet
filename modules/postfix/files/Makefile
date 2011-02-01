@@ -1,4 +1,5 @@
 PLAINTEXT=header-checks main.cf
+SOURCES=header-checks sender-access transport virtual
 DATABASES=sender-access.db transport.db virtual.db /etc/aliases.db
 FILES=$(PLAINTEXT) $(DATABASES)
 POSTMAP=postmap -v
@@ -7,6 +8,7 @@ VC=git --no-pager
 CI=$(VC) commit -m'postfix automatic checkpoint'
 
 UPDATE:	$(FILES) postgrey
+	-$(VC) add $(PLAINTEXT)
 	-$(VC) diff .
 	-$(CI) $(PWD)
 	postfix reload && touch $@
