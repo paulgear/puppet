@@ -98,7 +98,7 @@ ${syslog::dir}/* {
 ",
 	}
 
-	${syslog::provider::add_config} { "sysmgt":
+	"$syslog::provider"::add_config { "sysmgt":
 		content		=> template("syslog/sysmgt.conf.erb"),
 	}
 
