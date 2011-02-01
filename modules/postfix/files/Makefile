@@ -2,7 +2,7 @@ PLAINTEXT=header-checks main.cf
 DATABASES=sender-access.db transport.db virtual.db /etc/aliases.db
 FILES=$(PLAINTEXT) $(DATABASES)
 PGDIR=/etc/postgrey
-POSTGREY=$(POSTGREY)/whitelist_recipients.local $(POSTGREY)/whitelist_clients.local
+PGFILES=$(PGDIR)/whitelist_recipients.local $(PGDIR)/whitelist_clients.local
 POSTMAP=postmap -v
 VC=git --no-pager
 CI=$(VC) commit -m'postfix automatic checkpoint'
@@ -12,10 +12,10 @@ UPDATE:	$(FILES) POSTGREY
 	-$(VC) diff .
 	-$(CI) $(PWD)
 
-POSTGREY:	$(POSTGREY)
+POSTGREY:	$(PGFILES)
 	service postgrey restart && touch $@
-	-$(VC) diff $(POSTGREY)
-	-$(CI) $(POSTGREY)
+	-$(VC) diff $(PGDIR)
+	-$(CI) $(PGDIR)
 
 force:	force-aliases UPDATE
 
