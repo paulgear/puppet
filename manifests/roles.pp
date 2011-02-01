@@ -28,6 +28,8 @@ class role::mailrelay {
 	include amavis_stats
 	include clamav
 	include mailgraph
+	# maildrop is included here in case there are local users on the relay, e.g. for spamtraps
+	include maildrop
 	include postfix
 	include postgrey
 	include pyzor
@@ -39,7 +41,6 @@ class role::mailrelay {
 class role::mailserver {
 	include role::mailrelay
 	include dovecot
-	include maildrop
 	include postfix::sasl
 }
 
