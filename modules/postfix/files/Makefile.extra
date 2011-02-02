@@ -1,0 +1,9 @@
+virtual:      virtual.head spam_lovers spam_lovers.exclude
+	cat virtual.head > $@
+	sed -e 's/^[    ]*[0-9]*[       ]*//' -i spam_lovers
+	grep -ivf spam_lovers.exclude spam_lovers > spam_lovers.tmp
+	mv -f spam_lovers.tmp spam_lovers
+	sort -u -o spam_lovers spam_lovers
+	awk '{print $$NF "      spam@localhost"}' spam_lovers >> "$@"
+	service amavis restart
+
