@@ -64,7 +64,17 @@ class os::debian {
 		}
 	}
 
-	include "os::debian::$lsbdistcodename"
+	case $lsbdistcodename {
+
+		"n/a": {
+			include "os::debian::squeeze"
+		}
+
+		default: {
+			include "os::debian::$lsbdistcodename"
+		}
+
+	}
 
 }
 
