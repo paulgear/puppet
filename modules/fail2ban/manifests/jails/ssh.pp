@@ -5,10 +5,12 @@
 
 class fail2ban::jails::ssh {
 	fail2ban::jail { "ssh":
-		port	=> 'ssh',
+		filtername	=> 'sshd',
+		port		=> 'ssh',
 	}
 	fail2ban::jail { "ssh-ddos":
-		port	=> 'ssh',
+		filtername	=> 'sshd-ddos',
+		port		=> 'ssh',
 	}
 }
 
