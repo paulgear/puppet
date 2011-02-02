@@ -7,16 +7,14 @@ PGREY=/etc/postgrey
 VC=git --no-pager
 CI=$(VC) commit -m'postfix automatic checkpoint'
 
-UPDATE:	$(FILES) postgrey
+UPDATE:	$(FILES)
+	-make checkin
+	postfix reload && touch $@
+
+checkin:
 	-$(VC) add $(PLAINTEXT)
 	-$(VC) diff .
 	-$(CI) $(PWD)
-	postfix reload && touch $@
-
-postgrey:
-	-if [ -d $(PGREY) ]; then \
-		make -C $(PGREY); \
-	fi
 
 force:	force-aliases UPDATE
 
