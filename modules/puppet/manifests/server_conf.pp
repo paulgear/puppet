@@ -1,8 +1,6 @@
 #
 # Manage puppet server configuration
 #
-# DONE: Checked for Ubuntu compatibility
-#
 
 class puppet::server_conf {
 
@@ -49,6 +47,9 @@ echo '---------------------------------------------------------'
 ) | mail -s 'Puppet nodes report' $mailto
 ",
 	}
+
+	include git
+	include git::gui
 
 	# script to checkpoint configuration
 	file { "/usr/local/bin/puppet-checkpoint-git":
