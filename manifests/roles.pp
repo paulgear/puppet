@@ -3,11 +3,20 @@
 ######################################################################
 
 class role::fail2ban::postfix {
+	include role::fail2ban::shorewall_route
+	include fail2ban::filters::postfix
+	include fail2ban::jails::postfix
+}
+
+class role::fail2ban::ssh {
+	include role::fail2ban::shorewall_route
+	include fail2ban::jails::ssh
+}
+
+class role::fail2ban::shorewall_route {
 	include shorewall
 	include fail2ban::actions::route
 	include fail2ban::actions::shorewall
-	include fail2ban::filters::postfix
-	include fail2ban::jails::postfix
 }
 
 class role::fail2ban::winbind {
@@ -21,7 +30,6 @@ class role::internetfacing {
 	package { $pkgs: ensure => installed }
 	ssh::without_password { $fqdn: }
 }
-
 
 class role::mailrelay {
 	include amavis
