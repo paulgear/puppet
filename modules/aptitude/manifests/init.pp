@@ -70,7 +70,8 @@ class aptitude {
 }
 
 # empty the sources.list file and save the original
-define aptitude::sources_list () {
+class aptitude::sources_list {
+	include aptitude
 
 	$sources_file = "$aptitude::apt_dir/sources.list"
 	$sources_file_save = "$sources_file.pre-puppet"
