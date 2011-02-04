@@ -8,7 +8,7 @@ class shorewall {
 	$pkg = $operatingsystem ? {
 		centos	=> "shorewall-perl",
 		debian	=> "shorewall-perl",
-		ubuntu	=> "shorewall-perl",
+		ubuntu	=> "shorewall",
 		default	=> undef,
 	}
 	$svc = "shorewall"
