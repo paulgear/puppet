@@ -1,4 +1,4 @@
-PLAINTEXT=header-checks main.cf
+PLAINTEXT=header-checks main.cf master.cf
 SOURCES=header-checks sender-access transport virtual
 DATABASES=sender-access.db transport.db virtual.db /etc/aliases.db
 FILES=$(PLAINTEXT) $(DATABASES)
