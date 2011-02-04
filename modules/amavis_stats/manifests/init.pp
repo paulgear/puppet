@@ -14,7 +14,7 @@ class amavis_stats::package {
 	}
 
 	# add symlink for missing file on Ubuntu 10.04 LTS
-	if $operatingsystem == "ubuntu" {
+	if $operatingsystem == "Ubuntu" {
 		file { "/etc/amavis-stats.conf":
 			ensure	=> "/etc/amavis-stats/amavis-stats.conf",
 		}
