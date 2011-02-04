@@ -12,5 +12,13 @@ class amavis_stats::package {
 		ensure		=> installed,
 		require		=> [ Class["php5::package"], Class["rrd::package::rrdp"] ],
 	}
+
+	# add symlink for missing file on Ubuntu 10.04 LTS
+	if $operatingsystem == "ubuntu" {
+		file { "/etc/amavis-stats.conf":
+			ensure	=> "/etc/amavis-stats/amavis-stats.conf",
+		}
+	}
+
 }
 
