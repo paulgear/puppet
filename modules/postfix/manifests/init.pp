@@ -4,6 +4,40 @@ class postfix {
 	include postfix::package
 	include postfix::service
 	include postfix::removepkgs
+	include postfix::make
+	include postfix::files
+}
+
+class postfix::files {
+	define postfix_file ( $replace = false ) {
+		file { "/etc/postfix/$name":
+			ensure	=> file,
+			owner	=> root,
+			group	=> root,
+			mode	=> 640,
+			notify	=> Class["postfix::make"],
+			replace	=> $replace,
+			source	=> "puppet:///modules/postfix/$name",
+		}
+	}
+
+	# files that merely need to be present - should not be overwritten by puppet
+	$files = [ "header-checks", "sender-access", "transport", "virtual" ]
+	postfix_file { $files: }
+
+	# files that puppet distributes
+	postfix_file { "Makefile": replace => true }
+}
+
+class postfix::make {
+	include make::package
+	exec { "update postfix databases":
+		command		=> "make",
+		cwd		=> "/etc/postfix",
+		logoutput	=> true,
+		refreshonly	=> true,
+		require		=> Class["make::package"],
+	}
 }
 
 class postfix::package {

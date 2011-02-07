@@ -38,6 +38,16 @@ class os::debian {
 		}
 	}
 
+	define updates($components = ["main", "contrib", "non-free"], $ensure = "file") {
+		aptitude::source { "$name-updates":
+			ensure		=> $ensure,
+			comment		=> "$operatingsystem $lsbdistcodename updates",
+			uri		=> "$isp::debianbase",
+			distribution	=> "$name-updates",
+			components	=> $components,
+		}
+	}
+
 	define volatile($components = ["main", "contrib", "non-free"], $ensure = "file") {
 		aptitude::source { "$name-volatile":
 			ensure		=> $ensure,
@@ -64,7 +74,17 @@ class os::debian {
 		}
 	}
 
-	include "os::debian::$lsbdistcodename"
+	case $lsbdistcodename {
+
+		"n/a": {
+			include "os::debian::squeeze"
+		}
+
+		default: {
+			include "os::debian::$lsbdistcodename"
+		}
+
+	}
 
 }
 
@@ -91,7 +111,6 @@ class os::debian::packages {
 		"lsof",
 		"lsscsi",
 		"ltrace",
-		"make",
 		"mlocate",
 		"mutt",
 		"openssl",
@@ -122,6 +141,7 @@ class os::debian::packages {
 	}
 
 	include etckeeper
+	include make
 	include sysstat
 
 }
@@ -155,6 +175,7 @@ class os::debian::lenny {
 class os::debian::squeeze {
 	os::debian::base	{ "squeeze": }
 	os::debian::security	{ "squeeze": }
+	os::debian::updates	{ "squeeze": }
 	os::debian::volatile	{ "squeeze": ensure => absent }
 	os::debian::backports	{ "squeeze": ensure => absent }
 

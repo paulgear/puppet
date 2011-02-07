@@ -3,11 +3,20 @@
 ######################################################################
 
 class role::fail2ban::postfix {
+	include role::fail2ban::shorewall_route
+	include fail2ban::filters::postfix
+	include fail2ban::jails::postfix
+}
+
+class role::fail2ban::ssh {
+	include role::fail2ban::shorewall_route
+	include fail2ban::jails::ssh
+}
+
+class role::fail2ban::shorewall_route {
 	include shorewall
 	include fail2ban::actions::route
 	include fail2ban::actions::shorewall
-	include fail2ban::filters::postfix
-	include fail2ban::jails::postfix
 }
 
 class role::fail2ban::winbind {
@@ -22,12 +31,13 @@ class role::internetfacing {
 	ssh::without_password { $fqdn: }
 }
 
-
 class role::mailrelay {
 	include amavis
 	include amavis_stats
 	include clamav
 	include mailgraph
+	# maildrop is included here in case there are local users on the relay, e.g. for spamtraps
+	include maildrop
 	include postfix
 	include postgrey
 	include pyzor
@@ -39,7 +49,6 @@ class role::mailrelay {
 class role::mailserver {
 	include role::mailrelay
 	include dovecot
-	include maildrop
 	include postfix::sasl
 }
 

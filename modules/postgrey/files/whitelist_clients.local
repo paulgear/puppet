@@ -1,0 +1,11 @@
+# Example postgrey whitelist_clients.local
+
+# BigPond must be exempted from greylisting because they retry from so many
+# different mail servers.
+bigpond.com
+61.9.168.*
+144.140.82.*
+144.140.83.*
+144.140.92.*
+144.140.93.*
+
