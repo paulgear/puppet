@@ -6,7 +6,7 @@
 class fail2ban::jails::winbind {
 	fail2ban::jail { "winbind":
 		findtime	=> 60,
-		logpath		=> '/var/log/messages',
+		logpath		=> '/var/log/sysmgt/all',
 		maxretry	=> 2,
 		filtername	=> 'winbind-remote-error',
 		action		=> 'winbind-restart',

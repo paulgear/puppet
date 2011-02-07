@@ -1,8 +1,4 @@
-#
 # puppet class to customise syslog
-#
-# DONE: Edited for Ubuntu compatibility
-#
 
 class syslog {
 
@@ -64,11 +60,14 @@ class syslog::local_files {
 		}
 	}
 
-	file { $kern_logdir:
-		ensure		=> directory,
-		owner		=> root,
-		group		=> root,
-		mode		=> 750,
+	define syslog_file ( $mode = 644 ) {
+		file { "$syslog::dir/$name":
+			ensure		=> file,
+			owner		=> "$syslog::owner",
+			group		=> "$syslog::group",
+			mode		=> $mode,
+			require		=> File["$syslog::dir"],
+		}
 	}
 
 	# create dirs
@@ -81,12 +80,12 @@ class syslog::local_files {
 	# logrotate configuration for the local files
 	file { $logrotate:
 		ensure		=> file,
-		owner		=> root,
-		group		=> root,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
 		mode		=> 644,
-		require		=> [ File[$kern_logfile], File[$kern_logdir] ],
+		require		=> Class["syslog::files"],
 		content		=> "# Managed by puppet - do not edit here
-$kern_logfile {
+${syslog::dir}/* {
 	rotate 52
 	weekly
 	dateext
@@ -94,7 +93,7 @@ $kern_logfile {
 	delaycompress
 	missingok
 	notifempty
-	olddir $kern_logdir/
+	olddir ${syslog::rot}/
 }
 ",
 	}
