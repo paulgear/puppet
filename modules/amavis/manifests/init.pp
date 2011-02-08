@@ -59,6 +59,7 @@ class amavis::decoders {
 	]
 	package { $pkgs:
 		ensure	=> installed,
+		notify	=> Class["clamav::service"],
 	}
 }
 
