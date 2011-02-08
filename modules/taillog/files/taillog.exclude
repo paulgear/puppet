@@ -8,6 +8,7 @@ CRON\[[0-9]+\]: \(root\) CMD \(if \[ -x /usr/bin/vnstat \]
 CRON\[[0-9]+\]: \(root\) CMD \(/root/bin/drupal_cron\)
 CRON\[[0-9]+\]: \(root\) CMD \(.*run-parts --report /etc/cron.hourly\)
 CRON\[[0-9]+\]: \(root\) CMD \(/share/music/update-permissions\)
+CRON\[[0-9]+\]: \(root\) CMD \(test -x /usr/share/queuegraph/count\.sh && /usr/share/queuegraph/count.sh
 CRON\[[0-9]+\]: \(root\) CMD \(  \[ -x /usr/lib/php5/maxlifetime \] && \[ -d /var/lib/php5 \] && find /var/lib/php5/ 
 CRON\[[0-9]+\]: \(root\) CMD \(\[ -x /usr/lib/sysstat/sa1 \] && { \[ -r "\$DEFAULT" \] && . "\$DEFAULT" ; \[ "\$ENABLED" = "true" \] && exec /usr/lib/sysstat/sa1
 CRON\[[0-9]+\]: \(www-data\) CMD \((php )?/usr/share/cacti/site/poller\.php >/dev/null 2>/var/log/cacti/poller-error\.log\)
