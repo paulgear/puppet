@@ -18,12 +18,14 @@ alias mv='mv -i'
 case "`puppet agent --version 2>/dev/null`" in
 2.6*)
 	alias kp='kill -USR1 $(cat /var/run/puppet/agent.pid)'
+	alias tp='tme -n 1|grep puppet-agent'
 	;;
 *)
 	alias kp='killall -USR1 puppetd'
+	alias tp='tme -n 1|grep puppetd'
 	;;
 esac
-alias pt='kp; tme -n 1|grep puppetd'
+alias pt='kp; tp'
 alias rm='rm -i'
 alias taillog='tme|grep -Evf ~/taillog.exclude'
 alias td='tail --follow=name /var/log/dansguardian/access.log'
@@ -37,7 +39,6 @@ Ubuntu|Debian)
 	alias tme='tail --follow=name /var/log/messages'
 	;;
 esac
-alias tp='tme|grep puppetd'
 alias trad='tail --follow=name /var/log/radius/radius.log'
 alias ts='tail --follow=name /var/log/squid/access.log'
 alias vi='vim'
