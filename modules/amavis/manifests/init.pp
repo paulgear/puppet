@@ -47,7 +47,9 @@ class amavis::groups {
 # extra utilities which enable amavis to look deeper into content
 class amavis::decoders {
 	$pkgs = [
+		"arj",
 		"cabextract",
+		"lha",
 		"lzop",
 		"nomarch",
 		"p7zip",
