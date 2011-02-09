@@ -1,0 +1,23 @@
+// bind9 zone definition fragment: <%= zone -%>
+zone "<%= zone %>" {
+	type <%= type %>;
+<% if file then -%>
+	file "<%= file %>";
+<% end -%>
+<% if masters.length > 0 then -%>
+	masters {
+<% masters.each do |ip| -%>
+		<%= ip %>;
+<% end -%>
+	};
+<% end -%>
+<% if forwarders.length > 0 then -%>
+	forwarders {
+<% forwarders.each do |ip| -%>
+		<%= ip %>;
+<% end -%>
+	};
+<% end -%>
+};
+// end of <%= zone %> fragment
+
