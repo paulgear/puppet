@@ -86,18 +86,21 @@ define bind::zone (
 	$file,
 	$forwarders,
 	$masters,
-	$order = 10
+	$order = undef
 ) {
 	include bind
 	include bind::setup
 	concat::fragment { $zone:
 		target	=> "${bind::setup}::zones",
 		content	=> template("bind/zone-def.erb"),
-		order	=> $order,
+		order	=> $order ? {
+			default	=> $order,
+			undef	=> 10,
+		},
 	}
 }
 
-define bind::master_zone ( $zone = undef ) {
+define bind::master_zone ( $zone = undef, $order = undef ) {
 	if $zone == "" {
 		$zone = $name
 	}
@@ -105,10 +108,11 @@ define bind::master_zone ( $zone = undef ) {
 		type		=> "master",
 		file		=> "master/$zone",
 		zone		=> $zone,
+		order		=> $order,
 	}
 }
 
-define bind::slave_zone ( $zone = undef, $masters ) {
+define bind::slave_zone ( $zone = undef, $order = undef, $masters ) {
 	if $zone == "" {
 		$zone = $name
 	}
@@ -117,10 +121,11 @@ define bind::slave_zone ( $zone = undef, $masters ) {
 		file		=> "slave/$zone",
 		masters		=> $masters,
 		zone		=> $zone,
+		order		=> $order,
 	}
 }
 
-define bind::forward_zone ( $zone = undef, $forwarders ) {
+define bind::forward_zone ( $zone = undef, $order = undef, $forwarders ) {
 	if $zone == "" {
 		$zone = $name
 	}
@@ -128,6 +133,7 @@ define bind::forward_zone ( $zone = undef, $forwarders ) {
 		type		=> "forward",
 		zone		=> $zone,
 		forwarders	=> $forwarders,
+		order		=> $order,
 	}
 }
 
