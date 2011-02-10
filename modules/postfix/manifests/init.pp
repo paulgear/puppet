@@ -16,6 +16,7 @@ class postfix::files {
 			group	=> root,
 			mode	=> 640,
 			notify	=> Class["postfix::make"],
+			require	=> Class["postfix::package"],
 			replace	=> $replace,
 			source	=> "puppet:///modules/postfix/$name",
 		}
