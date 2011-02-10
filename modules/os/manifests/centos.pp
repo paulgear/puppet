@@ -5,7 +5,7 @@ class os::centos {
 }
 
 class os::centos::packages {
-	$packages = [ 'lsscsi', 'screen', 'strace', 'wireshark', ]
+	$packages = [ 'lsscsi', 'screen', 'strace', 'vim', 'wireshark', ]
 
 	package { $packages:
 		ensure	=> installed,
