@@ -42,9 +42,12 @@ class mailgraph::service {
 class mailgraph::cronrestart {
 	cron_job { "000-puppet-mailgraph-restart":
 		interval	=> "hourly",
-		script		=> "#!/bin/sh
-/usr/sbin/service
-",
+		script		=> '#!/bin/sh
+PATH=/usr/sbin:/sbin:/usr/bin:/bin:$PATH
+if [ -z "`ps -el|grep mailgraph`" ]; then
+	service mailgraph restart >/dev/null
+fi
+',
 	}
 	cron_job { "mailgraph-restart":
 		enable		=> false,
