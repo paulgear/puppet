@@ -71,7 +71,7 @@ class bind::service {
 class bind::setup {
 	# generate named.conf.local from fragments
 	include concat::setup
-	$zones = "${bind::config}::dir/named.conf.local"
+	$zones = "${bind::config::dir}/named.conf.local"
 	concat { $zones:
 		owner	=> bind,
 		group	=> bind,
@@ -91,7 +91,7 @@ define bind::zone (
 	include bind
 	include bind::setup
 	concat::fragment { $zone:
-		target	=> "${bind::setup}::zones",
+		target	=> "${bind::setup::zones}",
 		content	=> template("bind/zone-def.erb"),
 		order	=> $order ? {
 			default	=> $order,
