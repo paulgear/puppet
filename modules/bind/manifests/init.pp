@@ -101,37 +101,40 @@ define bind::zone (
 }
 
 define bind::master_zone ( $zone = undef, $order = undef ) {
-	if $zone == "" {
-		$zone = $name
+	$zonename = $zone ? {
+		default	=> $zone,
+		undef	=> $name,
 	}
 	bind::zone { $zone:
 		type		=> "master",
-		file		=> "master/$zone",
-		zone		=> $zone,
+		file		=> "master/$zonename",
+		zone		=> $zonename,
 		order		=> $order,
 	}
 }
 
 define bind::slave_zone ( $zone = undef, $order = undef, $masters ) {
-	if $zone == "" {
-		$zone = $name
+	$zonename = $zone ? {
+		default	=> $zone,
+		undef	=> $name,
 	}
 	bind::zone { $name:
 		type		=> "slave",
-		file		=> "slave/$zone",
+		file		=> "slave/$zonename",
 		masters		=> $masters,
-		zone		=> $zone,
+		zone		=> $zonename,
 		order		=> $order,
 	}
 }
 
 define bind::forward_zone ( $zone = undef, $order = undef, $forwarders ) {
-	if $zone == "" {
-		$zone = $name
+	$zonename = $zone ? {
+		default	=> $zone,
+		undef	=> $name,
 	}
 	bind::zone { $name:
 		type		=> "forward",
-		zone		=> $zone,
+		zone		=> $zonename,
 		forwarders	=> $forwarders,
 		order		=> $order,
 	}
