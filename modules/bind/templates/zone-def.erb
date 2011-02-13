@@ -4,14 +4,14 @@ zone "<%= zone %>" {
 <% if file then -%>
 	file "<%= file %>";
 <% end -%>
-<% if masters.length > 0 then -%>
+<% if masters and masters.length > 0 then -%>
 	masters {
 <% masters.each do |ip| -%>
 		<%= ip %>;
 <% end -%>
 	};
 <% end -%>
-<% if forwarders.length > 0 then -%>
+<% if forwarders and forwarders.length > 0 then -%>
 	forwarders {
 <% forwarders.each do |ip| -%>
 		<%= ip %>;
