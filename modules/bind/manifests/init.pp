@@ -83,9 +83,9 @@ class bind::setup {
 define bind::zone (
 	$zone,
 	$type,
-	$file,
-	$forwarders,
-	$masters,
+	$file = undef,
+	$forwarders = undef,
+	$masters = undef,
 	$order = undef
 ) {
 	include bind
