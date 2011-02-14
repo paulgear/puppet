@@ -90,9 +90,10 @@ define bind::zone (
 ) {
 	include bind
 	include bind::setup
+	$content = template("bind/zone-def.erb")
 	concat::fragment { $zone:
 		target	=> "${bind::setup::zones}",
-		content	=> template("bind/zone-def.erb"),
+		content	=> $content,
 		order	=> $order ? {
 			default	=> $order,
 			undef	=> 10,
@@ -105,7 +106,7 @@ define bind::master_zone ( $zone = undef, $order = undef ) {
 		default	=> $zone,
 		undef	=> $name,
 	}
-	bind::zone { $zone:
+	bind::zone { $name:
 		zonetype	=> "master",
 		zonefile	=> "master/$zonename",
 		zone		=> $zonename,
