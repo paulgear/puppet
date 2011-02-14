@@ -82,8 +82,8 @@ class bind::setup {
 # create concat fragment in the zone file
 define bind::zone (
 	$zone,
-	$type,
-	$file = undef,
+	$zonetype,
+	$zonefile = undef,
 	$forwarders = undef,
 	$masters = undef,
 	$order = undef
@@ -106,8 +106,8 @@ define bind::master_zone ( $zone = undef, $order = undef ) {
 		undef	=> $name,
 	}
 	bind::zone { $zone:
-		type		=> "master",
-		file		=> "master/$zonename",
+		zonetype	=> "master",
+		zonefile	=> "master/$zonename",
 		zone		=> $zonename,
 		order		=> $order,
 	}
@@ -119,8 +119,8 @@ define bind::slave_zone ( $zone = undef, $order = undef, $masters ) {
 		undef	=> $name,
 	}
 	bind::zone { $name:
-		type		=> "slave",
-		file		=> "slave/$zonename",
+		zonetype	=> "slave",
+		zonefile	=> "slave/$zonename",
 		masters		=> $masters,
 		zone		=> $zonename,
 		order		=> $order,
@@ -133,7 +133,7 @@ define bind::forward_zone ( $zone = undef, $order = undef, $forwarders ) {
 		undef	=> $name,
 	}
 	bind::zone { $name:
-		type		=> "forward",
+		zonetype	=> "forward",
 		zone		=> $zonename,
 		forwarders	=> $forwarders,
 		order		=> $order,

@@ -1,8 +1,8 @@
 // bind9 zone definition fragment: <%= zone %>
 zone "<%= zone %>" {
-	type <%= scope.lookupvar("type") %>;
-<% if file then -%>
-	file "<%= scope.lookupvar("file") %>";
+	type <%= zonetype %>;
+<% if defined? zonefile then -%>
+	file "<%= zonefile %>";
 <% end -%>
 <% if defined? masters and masters.length > 0 then -%>
 	masters {
