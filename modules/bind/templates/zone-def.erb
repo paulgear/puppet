@@ -1,8 +1,8 @@
 // bind9 zone definition fragment: <%= zone %>
 zone "<%= zone %>" {
-	type <%= Puppet.lookupvar("type") %>;
+	type <%= scope.lookupvar("type") %>;
 <% if file then -%>
-	file "<%= Puppet.lookupvar("file") %>";
+	file "<%= scope.lookupvar("file") %>";
 <% end -%>
 <% if defined? masters and masters.length > 0 then -%>
 	masters {
