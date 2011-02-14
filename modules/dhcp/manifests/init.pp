@@ -7,7 +7,10 @@ class dhcp::server {
 
 class dhcp::server::package {
 	$pkg = $operatingsystem ? {
-		debian	=> "dhcp3-server",
+		debian	=> $lsbdistcodename ? {
+			lenny	=> "dhcp3-server",
+			squeeze	=> "isc-dhcp-server",
+		},
 		ubuntu	=> "dhcp3-server",
 		centos	=> "dhcp",
 	}
@@ -18,7 +21,10 @@ class dhcp::server::package {
 
 class dhcp::server::service {
 	$svc = $operatingsystem ? {
-		debian	=> "dhcp3-server",
+		debian	=> $lsbdistcodename ? {
+			lenny	=> "dhcp3-server",
+			squeeze	=> "isc-dhcp-server",
+		},
 		ubuntu	=> "dhcp3-server",
 		centos	=> "dhcpd",
 	}
@@ -31,7 +37,10 @@ class dhcp::server::service {
 class dhcp::server::config {
 	include dhcp::server
 	$cfg = $operatingsystem ? {
-		debian	=> "/etc/dhcp3/dhcpd.conf",
+		debian	=> $lsbdistcodename ? {
+			lenny	=> "/etc/dhcp3/dhcpd.conf",
+			squeeze	=> "/etc/dhcp/dhcpd.conf",
+		},
 		ubuntu	=> "/etc/dhcp3/dhcpd.conf",
 		centos	=> "/etc/dhcpd.conf",
 	}
