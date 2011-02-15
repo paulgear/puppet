@@ -15,16 +15,29 @@ class bind::config {
 		ubuntu		=> "/etc/bind",
 		centos		=> "/var/named/chroot",
 	}
+	$datadirs = $operatingsystem ? {
+		debian		=> [ "/var/cache/bind/master", "/var/cache/bind/slave", ],
+		ubuntu		=> [ "/var/cache/bind/master", "/var/cache/bind/slave", ],
+		centos		=> [ "$dir/var/named", "$dir/var/named/slaves" ],
+	}
 	$group = $operatingsystem ? {
 		debian		=> "bind",
 		ubuntu		=> "bind",
 		centos		=> "named",
 	}
 
-	case $operatingsystem {
+	file { $datadirs:
+		ensure	=> directory,
+		owner	=> root,
+		group	=> $group,
+		mode	=> 2770,
+		require	=> Class["bind::package"],
+		notify	=> Class["bind::service"],
+	}
 
-	"CentOS": {
-		file { "$dir/etc":
+	if $operatingsystem == "CentOS" {
+		$etc = "$dir/etc"
+		file { $etc:
 			ensure		=> directory,
 			owner		=> root,
 			group		=> $group,
@@ -38,30 +51,19 @@ class bind::config {
 		]
 		define named_etc_file () {
 			include bind::config
-			file { "${bind::config::dir}/etc/$name":
+			file { "${bind::config::etc}/$name":
 				ensure		=> file,
 				owner		=> root,
 				group		=> "${bind::config::group}",
 				mode		=> 640,
 				source		=> "puppet:///modules/bind/$name",
-				require		=> [ File["${bind::config::dir}/etc"], Class["bind::package"] ],
+				require		=> [ File["${bind::config::etc}"], Class["bind::package"] ],
 				notify		=> Class["bind::service"],
 			}
 		}
 		named_etc_file { $etc_files: }
 	}
 
-	"Debian", "Ubuntu": {
-		$dirs = [ "/var/cache/bind/master", "/var/cache/bind/slave", ]
-		file { $dirs:
-			ensure	=> directory,
-			owner	=> root,
-			group	=> $group,
-			mode	=> 2750,
-		}
-	}
-
-	}
 }
 
 # generate named.conf.options (used on both CentOS & Debian/Ubuntu)
