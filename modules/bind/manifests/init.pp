@@ -15,6 +15,11 @@ class bind::config {
 		ubuntu		=> "/etc/bind",
 		centos		=> "/var/named/chroot",
 	}
+	$etc = $operatingsystem ? {
+		debian		=> $dir,
+		ubuntu		=> $dir,
+		centos		=> "$dir/etc",
+	}
 	$datadir = $operatingsystem ? {
 		debian		=> "/var/cache/bind",
 		ubuntu		=> "/var/cache/bind",
@@ -25,10 +30,7 @@ class bind::config {
 		ubuntu		=> "bind",
 		centos		=> "named",
 	}
-	$local = $operatingsystem ? {
-		"centos"	=> "${bind::config::etc}/named.conf.local",
-		default		=> "${bind::config::dir}/named.conf.local",
-	}
+	$local = "$etc/named.conf.local"
 	$masterdir = "$datadir/master"
 	$slavedir = "$datadir/slave"
 	$datadirs = [ $masterdir, $slavedir ]
@@ -48,7 +50,6 @@ class bind::config {
 	}
 
 	if $operatingsystem == "CentOS" {
-		$etc = "$dir/etc"
 		file { $etc:
 			ensure		=> directory,
 			owner		=> root,
@@ -102,10 +103,7 @@ define bind::config::options (
 	}
 
 	$content = template("bind/named.conf.options.erb")
-	$path = $operatingsystem ? {
-		"centos"	=> "${bind::config::etc}/named.conf.options",
-		default		=> "${bind::config::dir}/named.conf.options",
-	}
+	$path = "${bind::config::etc}/named.conf.options"
 
 	file { $path:
 		ensure		=> file,
