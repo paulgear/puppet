@@ -90,12 +90,8 @@ define bind::zone (
 ) {
 	include bind
 	include bind::setup
-	notice("zone $zone")
-	notice("type $zonetype")
-	notice("file $zonefile")
-	notice("forwarders $forwarders")
-	notice("masters $masters")
 	$content = template("bind/zone-def.erb")
+	notice($content)
 	concat::fragment { $zone:
 		target	=> "${bind::setup::zones}",
 		content	=> $content,
