@@ -21,7 +21,9 @@ class bind::config {
 		centos		=> "named",
 	}
 
-	if $operatingsystem == "CentOS" {
+	case $operatingsystem {
+
+	"CentOS": {
 		file { "$dir/etc":
 			ensure		=> directory,
 			owner		=> root,
@@ -47,6 +49,18 @@ class bind::config {
 			}
 		}
 		named_etc_file { $etc_files: }
+	}
+
+	"Debian", "Ubuntu": {
+		$dirs = [ "/var/cache/bind/master", "/var/cache/bind/slave", ]
+		file { $dirs:
+			ensure	=> directory,
+			owner	=> root,
+			group	=> $group,
+			mode	=> 2750,
+		}
+	}
+
 	}
 }
 
