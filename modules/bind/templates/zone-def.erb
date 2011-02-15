@@ -1,5 +1,8 @@
 zone "<%= zone %>" {
 	type <%= zonetype %>;
+<% if zone_notify.length > 0 then -%>
+	notify <%= zone_notify %>;
+<% end -%>
 <% if zonefile.length > 0 then -%>
 	file "<%= zonefile %>";
 <% end -%>
