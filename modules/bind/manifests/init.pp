@@ -120,7 +120,9 @@ class bind::setup {
 		owner	=> root,
 		group	=> "${bind::config::group}",
 		mode	=> 640,
-		notify	=> Class["bind::service"],
+	}
+	File[$zones] {
+		notify	+> Class["bind::service"],
 	}
 }
 
