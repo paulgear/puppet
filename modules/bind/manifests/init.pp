@@ -58,7 +58,7 @@ define bind::config::options (
 		$forward = "first",
 		$forwarder_set = "opendns-basic",
 		$forwarders = [],
-		$zone_notify = "no",
+		$global_notify = "no",
 		$edns_udp_size = "512",
 		$max_udp_size = "512"
 		) {
@@ -131,7 +131,7 @@ define bind::zone (
 	$zonefile = "",
 	$forwarders = [],
 	$masters = [],
-	$notify = "",
+	$zone_notify = "",
 	$order = ""
 ) {
 	include concat::setup
@@ -147,7 +147,7 @@ define bind::zone (
 	}
 }
 
-define bind::master_zone ( $zone = "", $order = "", $notify = "yes" ) {
+define bind::master_zone ( $zone = "", $order = "", $zone_notify = "yes" ) {
 	$zonename = $zone ? {
 		default	=> $zone,
 		""	=> $name,
@@ -156,12 +156,12 @@ define bind::master_zone ( $zone = "", $order = "", $notify = "yes" ) {
 		zonetype	=> "master",
 		zonefile	=> "master/$zonename",
 		zone		=> $zonename,
-		notify		=> $notify,
+		zone_notify	=> $zone_notify,
 		order		=> $order,
 	}
 }
 
-define bind::slave_zone ( $zone = "", $order = "", $masters, $notify = "no" ) {
+define bind::slave_zone ( $zone = "", $order = "", $masters, $zone_notify = "no" ) {
 	$zonename = $zone ? {
 		default	=> $zone,
 		""	=> $name,
@@ -171,7 +171,7 @@ define bind::slave_zone ( $zone = "", $order = "", $masters, $notify = "no" ) {
 		zonefile	=> "slave/$zonename",
 		masters		=> $masters,
 		zone		=> $zonename,
-		notify		=> $notify,
+		zone_notify	=> $zone_notify,
 		order		=> $order,
 	}
 }
