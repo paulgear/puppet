@@ -58,7 +58,7 @@ define bind::config::options (
 		$forward = "first",
 		$forwarder_set = "opendns-basic",
 		$forwarders = [],
-		$notify = "no",
+		$zone_notify = "no",
 		$edns_udp_size = "512",
 		$max_udp_size = "512"
 		) {
