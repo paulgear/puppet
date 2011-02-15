@@ -21,14 +21,13 @@ class bind::config {
 		centos		=> "named",
 	}
 
-	file { "$dir/etc":
-		ensure		=> directory,
-		owner		=> root,
-		group		=> $group,
-		mode		=> 2750,
-	}
-
 	if $operatingsystem == "CentOS" {
+		file { "$dir/etc":
+			ensure		=> directory,
+			owner		=> root,
+			group		=> $group,
+			mode		=> 2750,
+		}
 		$etc_files = [
 			"rndc.conf",
 			"rndc.key",
@@ -43,7 +42,7 @@ class bind::config {
 				group		=> "${bind::config::group}",
 				mode		=> 640,
 				source		=> "puppet:///modules/bind/$name",
-				require		=> Class["bind::package"],
+				require		=> [ File["${bind::config::dir}/etc"], Class["bind::package"] ],
 				notify		=> Class["bind::service"],
 			}
 		}
