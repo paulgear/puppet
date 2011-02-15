@@ -46,6 +46,9 @@ class bind::config {
 			group		=> $group,
 			mode		=> 2750,
 		}
+		file { "/etc/named.conf":
+			ensure	=> "$etc/named.conf",
+		}
 		$etc_files = [
 			"rndc.conf",
 			"rndc.key",
