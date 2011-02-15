@@ -28,6 +28,12 @@ end -%>
 <% if global_notify.length > 0 then -%>
 	notify <%= global_notify %>;
 <% end -%>
+<% if edns_udp_size.length > 0 then -%>
+	edns-udp-size <%= edns_udp_size %>;
+<% end -%>
+<% if max_udp_size.length > 0 then -%>
+	max-udp-size <%= max_udp_size %>;
+<% end -%>
 
 };
 
