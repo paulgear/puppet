@@ -18,7 +18,7 @@ class bind::config {
 	$datadirs = $operatingsystem ? {
 		debian		=> [ "/var/cache/bind/master", "/var/cache/bind/slave", ],
 		ubuntu		=> [ "/var/cache/bind/master", "/var/cache/bind/slave", ],
-		centos		=> [ "$dir/var/named", "$dir/var/named/slaves" ],
+		centos		=> [ "$dir/var/named/master", "$dir/var/named/slave" ],
 	}
 	$group = $operatingsystem ? {
 		debian		=> "bind",
