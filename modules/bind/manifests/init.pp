@@ -165,10 +165,10 @@ define bind::zone (
 	$order = ""
 ) {
 	include concat::setup
-	include bind::setup
+	include bind::config
 	$content = template("bind/zone-def.erb")
 	concat::fragment { $zone:
-		target	=> "${bind::setup::zones}",
+		target	=> "${bind::config::local}",
 		content	=> $content,
 		order	=> $order ? {
 			default	=> $order,
