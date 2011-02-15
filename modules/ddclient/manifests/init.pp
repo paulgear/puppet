@@ -23,6 +23,7 @@ class ddclient::service {
 class ddclient::config {
 	include ddclient
 	$cfg = "/etc/ddclient.conf"
+	$templatedir = "/etc/puppet/modules/ddclient/templates"
 	file { $cfg:
 		ensure	=> file,
 		owner	=> root,
