@@ -87,7 +87,6 @@ define bind::config::options (
 	}
 
 	$content = template("bind/named.conf.options.erb")
-	notice($content)
 
 	file { "${bind::config::dir}/named.conf.options":
 		ensure		=> file,
