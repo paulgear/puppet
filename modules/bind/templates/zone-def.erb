@@ -1,19 +1,16 @@
 zone "<%= zone %>" {
 	type <%= zonetype %>;
-<% if not defined? zonefile then
-	zonefile = scope.lookupvar("zonefile")
-end
-if defined? zonefile then -%>
+<% if zonefile.length > 0 then -%>
 	file "<%= zonefile %>";
 <% end -%>
-<% if defined? masters and masters.length > 0 then -%>
+<% if masters.length > 0 then -%>
 	masters {
 <% masters.each do |ip| -%>
 		<%= ip %>;
 <% end -%>
 	};
 <% end -%>
-<% if defined? forwarders and forwarders.length > 0 then -%>
+<% if forwarders.length > 0 then -%>
 	forwarders {
 <% forwarders.each do |ip| -%>
 		<%= ip %>;
