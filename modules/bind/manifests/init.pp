@@ -142,7 +142,7 @@ class bind::service {
 }
 
 # generate named.conf.local from fragments
-class bind::setup {
+class bind::config::named_conf_local {
 	include concat::setup
 	include bind::config
 	include bind::service
@@ -166,6 +166,7 @@ define bind::zone (
 ) {
 	include concat::setup
 	include bind::config
+	include bind::config::named_conf_local
 	$content = template("bind/zone-def.erb")
 	concat::fragment { $zone:
 		target	=> "${bind::config::local}",
