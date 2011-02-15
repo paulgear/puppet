@@ -76,10 +76,11 @@ class bind::setup {
 		owner	=> bind,
 		group	=> bind,
 		mode	=> 644,
+		notift	=> Class["bind::service"],
 	}
 }
 
-# create concat fragment in the zone file
+# create zone fragment to be placed in in the zone file
 define bind::zone (
 	$zone,
 	$zonetype,
@@ -90,9 +91,7 @@ define bind::zone (
 ) {
 	include bind
 	include bind::setup
-	notice($zonefile)
 	$content = template("bind/zone-def.erb")
-	notice($content)
 	concat::fragment { $zone:
 		target	=> "${bind::setup::zones}",
 		content	=> $content,
