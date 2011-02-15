@@ -26,14 +26,15 @@
 #
 
 class resolver {
-
-	define config ($domainname = $domain, $searchpath = [ $domain ], $nameservers) {
-		file { "/etc/resolv.conf":
-			owner	=> root,
-			group	=> root,
-			mode	=> 644,
-			content	=> template("resolver/resolv.conf.erb"),
-		}
-	}
-
 }
+
+define resolver::config ($domainname = $domain, $searchpath = [ $domain ], $nameservers) {
+	include resolver
+	file { "/etc/resolv.conf":
+		owner	=> root,
+		group	=> root,
+		mode	=> 644,
+		content	=> template("resolver/resolv.conf.erb"),
+	}
+}
+
