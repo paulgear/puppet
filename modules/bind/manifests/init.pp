@@ -48,6 +48,7 @@ class bind::config {
 		}
 		file { "/etc/named.conf":
 			ensure	=> "$etc/named.conf",
+			notify	=> Class["bind::service"],
 		}
 		$etc_files = [
 			"rndc.conf",
