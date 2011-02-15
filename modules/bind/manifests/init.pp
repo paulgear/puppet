@@ -25,6 +25,10 @@ class bind::config {
 		ubuntu		=> "bind",
 		centos		=> "named",
 	}
+	$local = $operatingsystem ? {
+		"centos"	=> "${bind::config::etc}/named.conf.local",
+		default		=> "${bind::config::dir}/named.conf.local",
+	}
 	$masterdir = "$datadir/master"
 	$slavedir = "$datadir/slave"
 	$datadirs = [ $masterdir, $slavedir ]
@@ -36,6 +40,11 @@ class bind::config {
 		mode	=> 2770,
 		require	=> Class["bind::package"],
 		notify	=> Class["bind::service"],
+	}
+
+	exec { "create $local":
+		command	=> "touch $local; chmod 644 $local",
+		creates	=> $local,
 	}
 
 	if $operatingsystem == "CentOS" {
@@ -139,11 +148,7 @@ class bind::setup {
 	include concat::setup
 	include bind::config
 	include bind::service
-	$zones = $operatingsystem ? {
-		"centos"	=> "${bind::config::etc}/named.conf.local",
-		default		=> "${bind::config::dir}/named.conf.local",
-	}
-	concat { $zones:
+	concat { "${bind::config::local}":
 		owner	=> root,
 		group	=> "${bind::config::group}",
 		mode	=> 640,
