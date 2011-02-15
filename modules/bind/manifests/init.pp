@@ -87,8 +87,12 @@ define bind::config::options (
 	}
 
 	$content = template("bind/named.conf.options.erb")
+	$path = $operatingsystem ? {
+		"centos"	=> "${bind::config::etc}/named.conf.options",
+		default		=> "${bind::config::dir}/named.conf.options",
+	}
 
-	file { "${bind::config::dir}/named.conf.options":
+	file { $path:
 		ensure		=> file,
 		owner		=> root,
 		group		=> "${bind::config::group}",
@@ -129,7 +133,10 @@ class bind::setup {
 	include concat::setup
 	include bind::config
 	include bind::service
-	$zones = "${bind::config::dir}/named.conf.local"
+	$zones = $operatingsystem ? {
+		"centos"	=> "${bind::config::etc}/named.conf.local",
+		default		=> "${bind::config::dir}/named.conf.local",
+	}
 	concat { $zones:
 		owner	=> root,
 		group	=> "${bind::config::group}",
