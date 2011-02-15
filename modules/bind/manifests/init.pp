@@ -90,6 +90,7 @@ define bind::zone (
 ) {
 	include bind
 	include bind::setup
+	notice($zonefile)
 	$content = template("bind/zone-def.erb")
 	notice($content)
 	concat::fragment { $zone:

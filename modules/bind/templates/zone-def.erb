@@ -1,6 +1,9 @@
 zone "<%= zone %>" {
 	type <%= zonetype %>;
-<% if defined? zonefile then -%>
+<% if not defined? zonefile then
+	zonefile = scope.lookupvar("zonefile")
+end
+if defined? zonefile then -%>
 	file "<%= zonefile %>";
 <% end -%>
 <% if defined? masters and masters.length > 0 then -%>
