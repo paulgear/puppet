@@ -7,21 +7,28 @@ class bind {
 }
 
 class bind::config {
+	include bind::package
+	include bind::service
+
 	$dir = $operatingsystem ? {
 		debian		=> "/etc/bind",
 		ubuntu		=> "/etc/bind",
 		centos		=> "/var/named/chroot",
 	}
+	$group = $operatingsystem ? {
+		debian		=> "bind",
+		ubuntu		=> "bind",
+		centos		=> "named",
+	}
+
+	file { "$dir/etc":
+		ensure		=> directory,
+		owner		=> root,
+		group		=> $group,
+		mode		=> 2750,
+	}
 
 	if $operatingsystem == "CentOS" {
-		file { "$dir/etc":
-			ensure	=> directory,
-			owner	=> root,
-			group	=> named,
-			mode	=> 750,
-		}
-
-		# definitions for files in chroot/etc
 		$etc_files = [
 			"rndc.conf",
 			"rndc.key",
@@ -29,17 +36,50 @@ class bind::config {
 			"named.slave.zones",
 		]
 		define named_etc_file () {
-			file { "$dir/etc/$name":
+			file { "${bind::config::dir}/etc/$name":
 				ensure		=> file,
 				owner		=> root,
-				group		=> named,
+				group		=> ${bind::config::group},
 				mode		=> 640,
 				source		=> "puppet:///modules/bind/$name",
-				require		=> Package[$pkg],
-				notify		=> Service[$svc],
+				require		=> Class["bind::package"],
+				notify		=> Class["bind::service"],
 			}
 		}
 		named_etc_file { $etc_files: }
+	}
+}
+
+# generate named.conf.options (used on both CentOS & Debian/Ubuntu)
+# set arguments to empty string/array to disable them
+define bind::config::options (
+		$check_names = [ "master fail", "slave warn", "response ignore" ],
+		$forward = "first",
+		$forwarder_set = "opendns-basic",
+		$forwarders = [],
+		$notify = "no",
+		$edns_udp_size = "512",
+		$max_udp_size = "512"
+		) {
+	include bind
+
+	$forwarder_list = $forwarder_set ? {
+		"opendns-familyfilter"	=> [ "208.67.222.123", "208.67.220.123" ],
+		"opendns-basic"		=> [ "208.67.222.222", "208.67.220.220" ],
+		"custom"		=> $forwarders,
+		default			=> [],
+	}
+
+	$content = template("bind/named.conf.options.erb")
+	notice($content)
+
+	file { "${bind::config::dir}/named.conf.options":
+		ensure		=> file,
+		owner		=> root,
+		group		=> ${bind::config::group},
+		content		=> $content,
+		require		=> Class["bind::package"],
+		notify		=> Class["bind::service"],
 	}
 }
 
@@ -55,6 +95,7 @@ class bind::package {
 }
 
 class bind::service {
+	include bind::package
 	$svc = $operatingsystem ? {
 		debian		=> "bind9",
 		ubuntu		=> "bind9",
@@ -68,15 +109,17 @@ class bind::service {
 	}
 }
 
+# generate named.conf.local from fragments
 class bind::setup {
-	# generate named.conf.local from fragments
 	include concat::setup
+	include bind::config
+	include bind::service
 	$zones = "${bind::config::dir}/named.conf.local"
 	concat { $zones:
-		owner	=> bind,
-		group	=> bind,
-		mode	=> 644,
-		notift	=> Class["bind::service"],
+		owner	=> root,
+		group	=> ${bind::config::group},
+		mode	=> 640,
+		notify	=> Class["bind::service"],
 	}
 }
 
@@ -87,9 +130,10 @@ define bind::zone (
 	$zonefile = "",
 	$forwarders = [],
 	$masters = [],
+	$notify = "",
 	$order = ""
 ) {
-	include bind
+	include concat::setup
 	include bind::setup
 	$content = template("bind/zone-def.erb")
 	concat::fragment { $zone:
@@ -102,7 +146,7 @@ define bind::zone (
 	}
 }
 
-define bind::master_zone ( $zone = "", $order = "" ) {
+define bind::master_zone ( $zone = "", $order = "", $notify = "yes" ) {
 	$zonename = $zone ? {
 		default	=> $zone,
 		""	=> $name,
@@ -111,11 +155,12 @@ define bind::master_zone ( $zone = "", $order = "" ) {
 		zonetype	=> "master",
 		zonefile	=> "master/$zonename",
 		zone		=> $zonename,
+		notify		=> $notify,
 		order		=> $order,
 	}
 }
 
-define bind::slave_zone ( $zone = "", $order = "", $masters ) {
+define bind::slave_zone ( $zone = "", $order = "", $masters, $notify = "no" ) {
 	$zonename = $zone ? {
 		default	=> $zone,
 		""	=> $name,
@@ -125,6 +170,7 @@ define bind::slave_zone ( $zone = "", $order = "", $masters ) {
 		zonefile	=> "slave/$zonename",
 		masters		=> $masters,
 		zone		=> $zonename,
+		notify		=> $notify,
 		order		=> $order,
 	}
 }
