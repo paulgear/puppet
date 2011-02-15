@@ -47,7 +47,6 @@ class bind::config {
 			"rndc.conf",
 			"rndc.key",
 			"named.conf",
-			"named.slave.zones",
 		]
 		define named_etc_file () {
 			include bind::config
