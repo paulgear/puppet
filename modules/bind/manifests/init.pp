@@ -122,7 +122,7 @@ class bind::setup {
 		mode	=> 640,
 	}
 	File[$zones] {
-		notify	+> Class["bind::service"],
+		notify	=> Class["bind::service"],
 	}
 }
 
