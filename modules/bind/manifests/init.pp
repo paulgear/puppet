@@ -15,16 +15,19 @@ class bind::config {
 		ubuntu		=> "/etc/bind",
 		centos		=> "/var/named/chroot",
 	}
-	$datadirs = $operatingsystem ? {
-		debian		=> [ "/var/cache/bind/master", "/var/cache/bind/slave", ],
-		ubuntu		=> [ "/var/cache/bind/master", "/var/cache/bind/slave", ],
-		centos		=> [ "$dir/var/named/master", "$dir/var/named/slave" ],
+	$datadir = $operatingsystem ? {
+		debian		=> "/var/cache/bind",
+		ubuntu		=> "/var/cache/bind",
+		centos		=> "$dir/var/named",
 	}
 	$group = $operatingsystem ? {
 		debian		=> "bind",
 		ubuntu		=> "bind",
 		centos		=> "named",
 	}
+	$masterdir = "$datadir/master"
+	$slavedir = "$datadir/slave"
+	$datadirs = [ $masterdir, $slavedir ]
 
 	file { $datadirs:
 		ensure	=> directory,
@@ -168,6 +171,7 @@ define bind::zone (
 }
 
 define bind::master_zone ( $zone = "", $order = "", $zone_notify = "yes" ) {
+	include bind::config
 	$zonename = $zone ? {
 		default	=> $zone,
 		""	=> $name,
@@ -178,10 +182,12 @@ define bind::master_zone ( $zone = "", $order = "", $zone_notify = "yes" ) {
 		zone		=> $zonename,
 		zone_notify	=> $zone_notify,
 		order		=> $order,
+		require		=> File["${bind::config::masterdir}"],
 	}
 }
 
 define bind::slave_zone ( $zone = "", $order = "", $masters, $zone_notify = "no" ) {
+	include bind::config
 	$zonename = $zone ? {
 		default	=> $zone,
 		""	=> $name,
@@ -193,6 +199,7 @@ define bind::slave_zone ( $zone = "", $order = "", $masters, $zone_notify = "no"
 		zone		=> $zonename,
 		zone_notify	=> $zone_notify,
 		order		=> $order,
+		require		=> File["${bind::config::slavedir}"],
 	}
 }
 
