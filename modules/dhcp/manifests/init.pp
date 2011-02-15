@@ -44,6 +44,7 @@ class dhcp::server::config {
 		ubuntu	=> "/etc/dhcp3/dhcpd.conf",
 		centos	=> "/etc/dhcpd.conf",
 	}
+	$templatedir = "/etc/puppet/modules/dhcp/templates"
 	file { $cfg:
 		ensure	=> file,
 		owner	=> root,
