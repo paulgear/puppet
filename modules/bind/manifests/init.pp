@@ -83,10 +83,10 @@ class bind::setup {
 define bind::zone (
 	$zone,
 	$zonetype,
-	$zonefile = undef,
-	$forwarders = undef,
-	$masters = undef,
-	$order = undef
+	$zonefile = "",
+	$forwarders = [],
+	$masters = [],
+	$order = ""
 ) {
 	include bind
 	include bind::setup
@@ -98,15 +98,15 @@ define bind::zone (
 		content	=> $content,
 		order	=> $order ? {
 			default	=> $order,
-			undef	=> 10,
+			""	=> 10,
 		},
 	}
 }
 
-define bind::master_zone ( $zone = undef, $order = undef ) {
+define bind::master_zone ( $zone = "", $order = "" ) {
 	$zonename = $zone ? {
 		default	=> $zone,
-		undef	=> $name,
+		""	=> $name,
 	}
 	bind::zone { $name:
 		zonetype	=> "master",
@@ -116,10 +116,10 @@ define bind::master_zone ( $zone = undef, $order = undef ) {
 	}
 }
 
-define bind::slave_zone ( $zone = undef, $order = undef, $masters ) {
+define bind::slave_zone ( $zone = "", $order = "", $masters ) {
 	$zonename = $zone ? {
 		default	=> $zone,
-		undef	=> $name,
+		""	=> $name,
 	}
 	bind::zone { $name:
 		zonetype	=> "slave",
@@ -130,10 +130,10 @@ define bind::slave_zone ( $zone = undef, $order = undef, $masters ) {
 	}
 }
 
-define bind::forward_zone ( $zone = undef, $order = undef, $forwarders ) {
+define bind::forward_zone ( $zone = "", $order = "", $forwarders ) {
 	$zonename = $zone ? {
 		default	=> $zone,
-		undef	=> $name,
+		""	=> $name,
 	}
 	bind::zone { $name:
 		zonetype	=> "forward",
