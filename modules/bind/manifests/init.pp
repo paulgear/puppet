@@ -36,10 +36,11 @@ class bind::config {
 			"named.slave.zones",
 		]
 		define named_etc_file () {
+			include bind::config
 			file { "${bind::config::dir}/etc/$name":
 				ensure		=> file,
 				owner		=> root,
-				group		=> ${bind::config::group},
+				group		=> "${bind::config::group}",
 				mode		=> 640,
 				source		=> "puppet:///modules/bind/$name",
 				require		=> Class["bind::package"],
@@ -76,7 +77,7 @@ define bind::config::options (
 	file { "${bind::config::dir}/named.conf.options":
 		ensure		=> file,
 		owner		=> root,
-		group		=> ${bind::config::group},
+		group		=> "${bind::config::group}",
 		content		=> $content,
 		require		=> Class["bind::package"],
 		notify		=> Class["bind::service"],
@@ -117,7 +118,7 @@ class bind::setup {
 	$zones = "${bind::config::dir}/named.conf.local"
 	concat { $zones:
 		owner	=> root,
-		group	=> ${bind::config::group},
+		group	=> "${bind::config::group}",
 		mode	=> 640,
 		notify	=> Class["bind::service"],
 	}
