@@ -36,9 +36,8 @@ define cron_job( $enable = "true", $interval = "daily", $script = "" ) {
 	file { "/etc/cron.$interval/$name":
 		content		=> $script,
 		ensure		=> $enable ? {
-			"false"|"off"|"no"|"0"	=> absent,
-			false|off|no|0		=> absent,
-			default			=> file,
+			/^("false"|"off"|"no"|"0"|false|off|no|0)$/ => absent,
+			default	=> file,
 		},
 		force		=> true,
 		owner		=> root,
