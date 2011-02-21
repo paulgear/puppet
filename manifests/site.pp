@@ -37,6 +37,10 @@ define cron_job( $enable = "true", $interval = "daily", $script = "" ) {
 		content		=> $script,
 		ensure		=> $enable ? {
 			"false"	=> absent,
+			false	=> absent,
+			off	=> absent,
+			no	=> absent,
+			0	=> absent,
 			default	=> file,
 		},
 		force		=> true,
