@@ -18,6 +18,7 @@ class mysql::server::service {
 		enable		=> true,
 		hasrestart	=> true,
 		hasstatus	=> true,
+		require		=> Class["mysql::server::package"],
 	}
 }
 
