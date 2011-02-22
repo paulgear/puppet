@@ -12,7 +12,7 @@ class utils {
 			baseurl		=> 'http://apt.sw.be/redhat/el5/en/$basearch/rpmforge',
 			descr		=> 'Red Hat Enterprise $releasever - RPMforge.net - dag',
 			enabled		=> 1,
-			includepkgs	=> 'clam*,sarg*,memtester*,lzo*',
+			includepkgs	=> 'clam*,sarg*,memtester*',
 			gpgcheck	=> 1,
 			gpgkey		=> 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag',
 			mirrorlist	=> 'http://apt.sw.be/redhat/el5/en/mirrors-rpmforge',
@@ -28,7 +28,7 @@ class utils {
 			gpgkey		=> 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL',
 			mirrorlist	=> 'http://mirrors.fedoraproject.org/mirrorlist?repo=epel-5&arch=$basearch',
 			protect		=> 0,
-			includepkgs	=> 'fail2ban*,git*,openvpn*',
+			includepkgs	=> 'fail2ban*,git*,lzo*,openvpn*',
 	#failovermethod=priority
 		}
 
