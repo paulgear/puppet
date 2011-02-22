@@ -53,6 +53,10 @@ class role::mailserver {
 	include postfix::sasl
 }
 
+class role::mysql::server {
+	include mysql::server
+}
+
 class role::ntpserver {
 	include ntp::server
 }
