@@ -6,6 +6,7 @@ class observium {
 
 class observium::packages {
 	$deps = [
+
 		"fping",
 		"graphviz",
 		"imagemagick",
@@ -19,12 +20,14 @@ class observium::packages {
 		"php5-gd",
 		"php5-mysql",
 		"php5-snmp",
+		"php5-xcache",
 		"php-pear",
 		"rrdtool",
 		"sipcalc",
 		"snmp",
 		"subversion",
 		"whois",
+
 	]
 	package { $deps:
 		ensure	=> installed,
