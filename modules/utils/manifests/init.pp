@@ -5,14 +5,14 @@
 #
 
 class utils {
-	if ($operatingsystem == "centos") {
+	if ($operatingsystem == "CentOS") {
 
 		# define rpmforge yum repo
 		yumrepo { "rpmforge":
 			baseurl		=> 'http://apt.sw.be/redhat/el5/en/$basearch/rpmforge',
 			descr		=> 'Red Hat Enterprise $releasever - RPMforge.net - dag',
 			enabled		=> 1,
-			includepkgs	=> 'clam*,sarg*',
+			includepkgs	=> 'clam*,sarg*,memtester*,lzo*',
 			gpgcheck	=> 1,
 			gpgkey		=> 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag',
 			mirrorlist	=> 'http://apt.sw.be/redhat/el5/en/mirrors-rpmforge',
@@ -28,7 +28,7 @@ class utils {
 			gpgkey		=> 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL',
 			mirrorlist	=> 'http://mirrors.fedoraproject.org/mirrorlist?repo=epel-5&arch=$basearch',
 			protect		=> 0,
-			includepkgs	=> 'fail2ban*',
+			includepkgs	=> 'fail2ban*,git*',
 	#failovermethod=priority
 		}
 
