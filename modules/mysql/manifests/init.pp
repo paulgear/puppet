@@ -13,7 +13,7 @@ class mysql::server::package {
 }
 
 class mysql::server::service {
-	$svc = "mysql-server"
+	$svc = "mysql"
 	service { $svc:
 		enable		=> true,
 		hasrestart	=> true,
