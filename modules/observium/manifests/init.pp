@@ -10,7 +10,7 @@ class observium::packages {
 		"graphviz",
 		"imagemagick",
 		"ipcalc",
-		"ipmitool"
+		"ipmitool",
 		"libapache2-mod-php5",
 		"mtr-tiny",
 		"mysql-client",
