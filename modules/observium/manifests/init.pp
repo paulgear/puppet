@@ -25,6 +25,7 @@ class observium::packages {
 		"rrdtool",
 		"sipcalc",
 		"snmp",
+		"snmp-mibs-downloader",
 		"subversion",
 		"whois",
 
