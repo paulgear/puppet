@@ -1,5 +1,5 @@
 #
-# puppet class to create static bond/bridge network interfaces
+# puppet class to create network interfaces file
 #
 
 class network::interfaces {
