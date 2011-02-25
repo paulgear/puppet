@@ -1,0 +1,24 @@
+zone "<%= zone %>" {
+	type <%= zonetype %>;
+<% if zone_notify.length > 0 then -%>
+	notify <%= zone_notify %>;
+<% end -%>
+<% if zonefile.length > 0 then -%>
+	file "<%= zonefile %>";
+<% end -%>
+<% if masters.length > 0 then -%>
+	masters {
+<% masters.each do |ip| -%>
+		<%= ip %>;
+<% end -%>
+	};
+<% end -%>
+<% if forwarders.length > 0 then -%>
+	forwarders {
+<% forwarders.each do |ip| -%>
+		<%= ip %>;
+<% end -%>
+	};
+<% end -%>
+};
+

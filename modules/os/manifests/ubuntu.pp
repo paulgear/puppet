@@ -5,7 +5,7 @@ class os::ubuntu {
 }
 
 class os::ubuntu::packages {
-	$packages = [ 'byobu', 'lsscsi', 'screen', 'strace', 'wireshark', ]
+	$packages = [ 'byobu', 'lsscsi', 'screen', 'strace', 'vim', 'wireshark', ]
 
 	package { $packages:
 		ensure	=> installed,

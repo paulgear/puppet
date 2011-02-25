@@ -33,6 +33,7 @@ class role::internetfacing {
 
 class role::mailrelay {
 	include amavis
+	include amavis::decoders
 	include amavis_stats
 	include clamav
 	include mailgraph

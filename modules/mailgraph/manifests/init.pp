@@ -5,11 +5,11 @@
 class mailgraph {
 	include mailgraph::package
 	include mailgraph::service
+	include mailgraph::cronrestart
 }
 
 class mailgraph::package {
 	$pkg = "mailgraph"
-
 	package { $pkg:
 		ensure		=> installed
 	}
@@ -17,7 +17,6 @@ class mailgraph::package {
 
 class mailgraph::service {
 	$svc = "mailgraph"
-
 	service { $svc:
 		enable		=> true,
 		hasstatus	=> true,
@@ -37,6 +36,21 @@ class mailgraph::service {
 				require		=> Class["mailgraph::package"],
 			}
 		}
+	}
+}
+
+class mailgraph::cronrestart {
+	cron_job { "000-puppet-mailgraph-restart":
+		interval	=> "hourly",
+		script		=> '#!/bin/sh
+PATH=/usr/sbin:/sbin:/usr/bin:/bin:$PATH
+if [ -z "`ps -el|grep mailgraph`" ]; then
+	service mailgraph restart >/dev/null
+fi
+',
+	}
+	cron_job { "mailgraph-restart":
+		enable		=> false,
 	}
 }
 

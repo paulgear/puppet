@@ -44,3 +44,24 @@ class amavis::groups {
 	}
 }
 
+# extra utilities which enable amavis to look deeper into content
+class amavis::decoders {
+	$pkgs = [
+		"arj",
+		"cabextract",
+		"lha",
+		"lzop",
+		"nomarch",
+		"p7zip",
+		"p7zip-full",
+		"ripole",
+		"rpm2cpio",
+		"unrar-free",
+		"zoo",
+	]
+	package { $pkgs:
+		ensure	=> installed,
+		notify	=> Class["amavis::service"],
+	}
+}
+
