@@ -2,10 +2,8 @@
 
 class syslog {
 
-	$dir = "/var/log/sysmgt"
-	$rot = "$dir/RotatedLogs"
-
-	$magic = "### puppet syslog configuration - "
+	$logdir = "/var/log/sysmgt"
+	$rotdir = "$logdir/RotatedLogs"
 
 	$owner = "root"
 	$group = "root"
@@ -17,6 +15,29 @@ class syslog {
 	}
 	include $provider
 
+	# We put the configuration in /etc/rsyslog.d even if rsyslog is not
+	# the provider - with sysklogd this configuration is concatenated
+	# and added to the end of /etc/syslog.conf.
+	$confdir = "/etc/rsyslog.d"
+	file { $confdir:
+		ensure		=> directory,
+		require		=> Class["$provider::package"],
+	}
+}
+
+# note: $name must not contain spaces
+define syslog::add_config( $content ) {
+	file { "$syslog::confdir/00-puppet-$name.conf":
+		ensure		=> file,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
+		mode		=> 644,
+		notify		=> $syslog::provider ? {
+			rsyslog		=> Class["$provider::service"],
+			sysklogd	=> Class["$provider::exec"],
+		}
+		content		=> $content,
+	}
 }
 
 class syslog::local_files {
@@ -61,17 +82,17 @@ class syslog::local_files {
 	}
 
 	define syslog_file ( $mode = 644 ) {
-		file { "$syslog::dir/$name":
+		file { "$syslog::logdir/$name":
 			ensure		=> file,
 			owner		=> "$syslog::owner",
 			group		=> "$syslog::group",
 			mode		=> $mode,
-			require		=> File["$syslog::dir"],
+			require		=> File["$syslog::logdir"],
 		}
 	}
 
 	# create dirs
-	syslog_dir { [ "$syslog::dir", "$syslog::rot" ]: }
+	syslog_dir { [ "$syslog::logdir", "$syslog::rotdir" ]: }
 
 	# create files
 	syslog_file { $files: }
@@ -85,7 +106,7 @@ class syslog::local_files {
 		mode		=> 644,
 		require		=> Class["syslog::files"],
 		content		=> "# Managed by puppet - do not edit here
-${syslog::dir}/* {
+${syslog::logdir}/* {
 	rotate 52
 	weekly
 	dateext
@@ -93,7 +114,7 @@ ${syslog::dir}/* {
 	delaycompress
 	missingok
 	notifempty
-	olddir ${syslog::rot}/
+	olddir ${syslog::rotdir}/
 }
 ",
 	}
@@ -120,87 +141,5 @@ define syslog::remote ( $host ) {
 *.info	@$host
 ",
 	}
-}
-
-class rsyslog {
-
-	$pkg = "rsyslog"
-	$svc = "rsyslog"
-
-	$dir = "/etc/rsyslog.d"
-
-	package { $pkg:
-		ensure		=> installed
-	}
-
-	service { $svc:
-		enable		=> true,
-		hasrestart	=> true,
-		hasstatus	=> true,
-	}
-
-	# note: $name must not contain spaces
-	define add_config( $content ) {
-		$magic = "$syslog::magic $name"
-		file { "$rsyslog::dir/00-puppet-$name.conf":
-			ensure		=> file,
-			owner		=> "$syslog::owner",
-			group		=> "$syslog::group",
-			mode		=> 644,
-			notify		=> Service["$rsyslog::svc"],
-			content		=> "$magic\n$content",
-		}
-	}
-
-}
-
-class sysklogd {
-
-	$pkg = "sysklogd"
-	$svc = "syslog"
-
-	$conf = "/etc/syslog.conf"
-	$dir = "/etc/syslog-tmp.d"
-
-	package { $pkg:
-		ensure		=> installed
-	}
-
-	service { $svc:
-		enable		=> true,
-		hasrestart	=> true,
-		hasstatus	=> true,
-	}
-
-	file { $dir:
-		ensure		=> directory,
-		owner		=> "$syslog::owner",
-		group		=> "$syslog::group",
-		mode		=> 755,
-	}
-
-	define add_config( $content ) {
-
-		$filename = "$sysklogd::dir/00-puppet-$name.conf"
-		$magic = "$syslog::magic $name"
-
-		file { $filename:
-			ensure		=> file,
-			owner		=> "$syslog::owner",
-			group		=> "$syslog::group",
-			mode		=> 644,
-			content		=> $content,
-		}
-
-		exec { "update $name":
-			logoutput	=> true,
-			notify		=> Service["$sysklogd::svc"],
-			require		=> [ Package["$sysklogd::pkg"], File[$filename] ],
-			unless		=> "grep -q '^$magic' $sysklogd::conf",
-			command		=> "echo '$magic' >> $sysklogd::conf && cat $filename >> $sysklogd::conf",
-		}
-
-	}
-
 }
 
