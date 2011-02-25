@@ -112,7 +112,6 @@ class os::debian::packages {
 		"lsscsi",
 		"ltrace",
 		"mlocate",
-		"mutt",
 		"openssl",
 		"patch",
 		"perl",
