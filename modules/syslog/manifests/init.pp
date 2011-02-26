@@ -40,6 +40,15 @@ define syslog::add_config( $content ) {
 	}
 }
 
+class syslog::migrate_old_sysmgt {
+	exec { "migrate old sysmgt":
+		command		=> "mv -f /var/opt/sysmgt/log ${syslog::logdir}",
+		logoutput	=> true,
+		onlyif		=> "test -e /var/opt/sysmgt/log",
+		before		=> File["${syslog::logdir}"],
+	}
+}
+
 class syslog::local_files {
 	include syslog
 
@@ -72,15 +81,19 @@ class syslog::local_files {
 		"uucp",
 	]
 
+	# create dirs
 	define syslog_dir ( $mode = 755 ) {
 		file { $name:
 			ensure		=> directory,
 			owner		=> "$syslog::owner",
 			group		=> "$syslog::group",
 			mode		=> $mode,
+			require		=> Class["syslog::migrate_old_sysmgt"],
 		}
 	}
+	syslog_dir { [ "$syslog::logdir", "$syslog::rotdir" ]: }
 
+	# create files
 	define syslog_file ( $mode = 644 ) {
 		file { "$syslog::logdir/$name":
 			ensure		=> file,
@@ -90,11 +103,6 @@ class syslog::local_files {
 			require		=> File["$syslog::logdir"],
 		}
 	}
-
-	# create dirs
-	syslog_dir { [ "$syslog::logdir", "$syslog::rotdir" ]: }
-
-	# create files
 	syslog_file { $files: }
 	syslog_file { $priv_files: mode => 640 }
 
