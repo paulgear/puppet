@@ -32,7 +32,7 @@ define syslog::add_config( $content ) {
 		owner		=> "$syslog::owner",
 		group		=> "$syslog::group",
 		mode		=> 644,
-		notify		=> $syslog::provider ? {
+		notify		=> "$syslog::provider" ? {
 			rsyslog		=> Class["${provider}::service"],
 			sysklogd	=> Class["${provider}::exec"],
 		},
