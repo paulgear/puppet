@@ -34,8 +34,8 @@ define syslog::add_config( $content ) {
 		group		=> "$syslog::group",
 		mode		=> 644,
 		notify		=> "$syslog::provider" ? {
-			rsyslog		=> Class["${provider}::service"],
-			sysklogd	=> Class["${provider}::exec"],
+			rsyslog		=> Class["${syslog::provider}::service"],
+			sysklogd	=> Class["${syslog::provider}::exec"],
 		},
 		content		=> $content,
 	}
