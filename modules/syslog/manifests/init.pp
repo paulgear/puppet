@@ -115,7 +115,6 @@ class syslog::local_files {
 		owner		=> "$syslog::owner",
 		group		=> "$syslog::group",
 		mode		=> 644,
-		require		=> Class["syslog::files"],
 		content		=> "# Managed by puppet - do not edit here
 ${syslog::logdir}/* {
 	rotate 52
