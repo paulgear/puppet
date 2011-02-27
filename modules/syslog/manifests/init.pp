@@ -35,7 +35,7 @@ define syslog::add_config( $content ) {
 		notify		=> $syslog::provider ? {
 			rsyslog		=> Class["$provider::service"],
 			sysklogd	=> Class["$provider::exec"],
-		}
+		},
 		content		=> $content,
 	}
 }
