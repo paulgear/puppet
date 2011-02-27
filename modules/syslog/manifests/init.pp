@@ -28,12 +28,12 @@ class syslog {
 # note: $name must not contain spaces
 define syslog::add_config( $content ) {
 	include syslog
-	file { "$syslog::confdir/00-puppet-$name.conf":
+	file { "${syslog::confdir}/00-puppet-$name.conf":
 		ensure		=> file,
-		owner		=> "$syslog::owner",
-		group		=> "$syslog::group",
+		owner		=> "${syslog::owner}",
+		group		=> "${syslog::group}",
 		mode		=> 644,
-		notify		=> "$syslog::provider" ? {
+		notify		=> "${syslog::provider}" ? {
 			rsyslog		=> Class["${syslog::provider}::service"],
 			sysklogd	=> Class["${syslog::provider}::exec"],
 		},
