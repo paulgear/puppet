@@ -4,7 +4,7 @@
 *.info		/var/log/sysmgt/all
 
 <% my_files = files + priv_files - [ "all" ]
-my_files.each do |f| -%>
+my_files.sort.each do |f| -%>
 <%= f %>.info	/var/log/sysmgt/<%= f %>
 <% end -%>
 
