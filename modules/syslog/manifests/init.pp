@@ -27,6 +27,7 @@ class syslog {
 
 # note: $name must not contain spaces
 define syslog::add_config( $content ) {
+	include syslog
 	file { "$syslog::confdir/00-puppet-$name.conf":
 		ensure		=> file,
 		owner		=> "$syslog::owner",
