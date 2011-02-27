@@ -13,6 +13,10 @@ class syslog {
 		ubuntu		=> "rsyslog",
 		debian		=> "rsyslog",
 	}
+	$notifier = $provider ? {
+		rsyslog		=> "rsyslog::service",
+		sysklogd	=> "sysklogd::exec",
+	}
 	include $provider
 
 	# We put the configuration in /etc/rsyslog.d even if rsyslog is not
@@ -30,13 +34,10 @@ define syslog::add_config( $content ) {
 	include syslog
 	file { "${syslog::confdir}/00-puppet-$name.conf":
 		ensure		=> file,
-		owner		=> "${syslog::owner}",
-		group		=> "${syslog::group}",
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
 		mode		=> 644,
-		notify		=> "${syslog::provider}" ? {
-			rsyslog		=> Class["${syslog::provider}::service"],
-			sysklogd	=> Class["${syslog::provider}::exec"],
-		},
+		notify		=> Class["$syslog::notifier"],
 		content		=> $content,
 	}
 }
