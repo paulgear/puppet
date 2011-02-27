@@ -21,7 +21,7 @@ class syslog {
 	$confdir = "/etc/rsyslog.d"
 	file { $confdir:
 		ensure		=> directory,
-		require		=> Class["$provider::package"],
+		require		=> Class["${provider}::package"],
 	}
 }
 
@@ -33,8 +33,8 @@ define syslog::add_config( $content ) {
 		group		=> "$syslog::group",
 		mode		=> 644,
 		notify		=> $syslog::provider ? {
-			rsyslog		=> Class["$provider::service"],
-			sysklogd	=> Class["$provider::exec"],
+			rsyslog		=> Class["${provider}::service"],
+			sysklogd	=> Class["${provider}::exec"],
 		},
 		content		=> $content,
 	}
