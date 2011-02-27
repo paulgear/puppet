@@ -53,6 +53,7 @@ class syslog::migrate_old_sysmgt {
 
 class syslog::local_files {
 	include syslog
+	include syslog::migrate_old_sysmgt
 
 	$logrotate = "/etc/logrotate.d/syslog-sysmgt"
 
