@@ -9,9 +9,9 @@ class syslog {
 	$group = "root"
 
 	$provider = $operatingsystem ? {
-		centos		=> "sysklogd",
-		ubuntu		=> "rsyslog",
-		debian		=> "rsyslog",
+		"CentOS"	=> "sysklogd",
+		"Debian"	=> "rsyslog",
+		"Ubuntu"	=> "rsyslog",
 	}
 	$notifier = $provider ? {
 		rsyslog		=> "rsyslog::service",
