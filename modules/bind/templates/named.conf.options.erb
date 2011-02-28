@@ -18,6 +18,9 @@ end -%>
 <% if forward.length > 0 then -%>
 	forward <%= forward %>;
 <% end -%>
+<% if forwarder_set.length > 0 then -%>
+	# <%= forwarder_set %>
+<% end -%>
 <% if forwarder_list.length > 0 then -%>
 	forwarders {
 <% forwarder_list.each do |fwd| -%>
