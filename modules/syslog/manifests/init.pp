@@ -49,6 +49,9 @@ class syslog::migrate_old_sysmgt {
 		onlyif		=> "test -e /var/opt/sysmgt/log",
 		before		=> File["${syslog::logdir}"],
 	}
+	file { "/etc/logrotate.d/sysmgt":
+		ensure		=> absent,
+	}
 }
 
 class syslog::remove_old_puppet {
