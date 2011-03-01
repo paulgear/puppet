@@ -21,6 +21,7 @@ class samba::package {
 }
 
 class samba::service {
+	include samba::package
 	$svc = $operatingsystem ? {
 		"CentOS"	=> "smb",
 		default		=> "samba",
@@ -34,6 +35,7 @@ class samba::service {
 }
 
 class samba::config {
+	include samba::base
 	$cfg = "/etc/samba/smb.conf"
 	$templatedir = "/etc/puppet/modules/samba/templates"
 	file { $cfg:
