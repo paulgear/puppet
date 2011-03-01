@@ -51,9 +51,22 @@ class syslog::migrate_old_sysmgt {
 	}
 }
 
+class syslog::remove_old_puppet {
+	$files = [
+		"/etc/rsyslog.d/00-puppet-kernel.conf",
+		"/etc/rsyslog.d/00-puppet-maillog.conf",
+		"/etc/rsyslog.d/00-puppet-messages.conf",
+	]
+	file { $files:
+		ensure		=> absent,
+		notify		=> Class["$syslog::notifier"],
+	}
+}
+
 class syslog::local_files {
 	include syslog
 	include syslog::migrate_old_sysmgt
+	include syslog::remove_old_puppet
 
 	$logrotate = "/etc/logrotate.d/syslog-sysmgt"
 
