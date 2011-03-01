@@ -1,0 +1,3 @@
+<% require '/etc/puppet/include/puppetutils.rb' -%>
+<%= include_header("samba configuration file") -%>
+<%= include_file(fqdn + "-smb.conf") -%>

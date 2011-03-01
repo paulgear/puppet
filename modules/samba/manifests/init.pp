@@ -1,34 +1,48 @@
 #
-# puppet class to copy samba server data from the central repository via rsync
+# puppet class to install & configure samba
 #
 # FIXME - Ubuntu: only samba 3.4 is available
 #
 
 class samba::base {
+	include samba::package
+	include samba::service
+}
 
-	$packagename = $sambaver ? {
+class samba::package {
+	$pkg = $sambaver ? {
 		"3.4"	=> "samba3",
 		default	=> "samba",
 	}
-
 	# ensure package is installed
-	package { $packagename:
+	package { $pkg:
 		ensure	=> installed,
 	}
+}
 
-	# set service name for distro
-	$servicename = $operatingsystem ? {
-		centos		=> "smb",
-		redhat		=> "smb",
+class samba::service {
+	$svc = $operatingsystem ? {
+		"CentOS"	=> "smb",
 		default		=> "samba",
 	}
-
-	# ensure service starts on boot
-	service { $servicename:
+	service { $svc:
 		enable		=> true,
 		hasrestart	=> true,
-		require		=> Package[$packagename],
+		hasstatus	=> true,
+		require		=> Class["samba::package"],
 	}
+}
 
+class samba::config {
+	$cfg = "/etc/samba/smb.conf"
+	file { $cfg:
+		ensure		=> file,
+		mode		=> 644,
+		owner		=> root,
+		group		=> root,
+		require		=> Class["samba::package"],
+		notify		=> Class["samba::service"],
+		content		=> template("samba/smb.conf.erb"),
+	}
 }
 
