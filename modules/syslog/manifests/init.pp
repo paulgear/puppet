@@ -1,46 +1,122 @@
-#
 # puppet class to customise syslog
-#
-# DONE: Edited for Ubuntu compatibility
-#
 
 class syslog {
 
-	$kern_logfile = "/var/log/kernel.log"
-	$kern_logdir = "/var/log/kernellogs"
-	$kern_logrotate = "/etc/logrotate.d/kernel"
-	$mesg_logfile = "/var/log/messages"
-	$mail_logfile = "/var/log/maillog"
+	$logdir = "/var/log/sysmgt"
+	$rotdir = "$logdir/RotatedLogs"
 
-	$class = $operatingsystem ? {
-		centos		=> "sysklogd",
-		ubuntu		=> "rsyslog",
-		debian		=> "rsyslog",
+	$owner = "root"
+	$group = "root"
+
+	$provider = $operatingsystem ? {
+		"CentOS"	=> "sysklogd",
+		"Debian"	=> "rsyslog",
+		"Ubuntu"	=> "rsyslog",
 	}
-	include $class
-
-	file { $kern_logfile:
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
+	$notifier = $provider ? {
+		rsyslog		=> "rsyslog::service",
+		sysklogd	=> "sysklogd::exec",
 	}
+	include $provider
 
-	file { $kern_logdir:
+	# We put the configuration in /etc/rsyslog.d even if rsyslog is not
+	# the provider - with sysklogd this configuration is concatenated
+	# and added to the end of /etc/syslog.conf.
+	$confdir = "/etc/rsyslog.d"
+	file { $confdir:
 		ensure		=> directory,
-		owner		=> root,
-		group		=> root,
-		mode		=> 750,
+		require		=> Class["${provider}::package"],
 	}
+}
 
-	file { $kern_logrotate:
+# note: $name must not contain spaces
+define syslog::add_config( $content ) {
+	include syslog
+	file { "${syslog::confdir}/00-puppet-$name.conf":
 		ensure		=> file,
-		owner		=> root,
-		group		=> root,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
 		mode		=> 644,
-		require		=> [ File[$kern_logfile], File[$kern_logdir] ],
+		notify		=> Class["$syslog::notifier"],
+		content		=> $content,
+	}
+}
+
+class syslog::migrate_old_sysmgt {
+	exec { "migrate old sysmgt":
+		command		=> "mv -f /var/opt/sysmgt/log ${syslog::logdir}",
+		logoutput	=> true,
+		onlyif		=> "test -e /var/opt/sysmgt/log",
+		before		=> File["${syslog::logdir}"],
+	}
+}
+
+class syslog::local_files {
+	include syslog
+	include syslog::migrate_old_sysmgt
+
+	$logrotate = "/etc/logrotate.d/syslog-sysmgt"
+
+	$priv_files = [
+		"all",
+		"authpriv",
+	]
+
+	$files = [
+		"auth",
+		"cron",
+		"daemon",
+		"ftp",
+		"kern",
+		"local0",
+		"local1",
+		"local2",
+		"local3",
+		"local4",
+		"local5",
+		"local6",
+		"local7",
+		"lpr",
+		"mail",
+		"news",
+		"syslog",
+		"user",
+		"uucp",
+	]
+
+	# create dirs
+	define syslog_dir ( $mode = 755 ) {
+		file { $name:
+			ensure		=> directory,
+			owner		=> "$syslog::owner",
+			group		=> "$syslog::group",
+			mode		=> $mode,
+			require		=> Class["syslog::migrate_old_sysmgt"],
+		}
+	}
+	syslog_dir { [ "$syslog::logdir", "$syslog::rotdir" ]: }
+
+	# create files
+	define syslog_file ( $mode = 644 ) {
+		file { "$syslog::logdir/$name":
+			ensure		=> file,
+			owner		=> "$syslog::owner",
+			group		=> "$syslog::group",
+			mode		=> $mode,
+			require		=> File["$syslog::logdir"],
+		}
+	}
+	syslog_file { $files: }
+	syslog_file { $priv_files: mode => 640 }
+
+	# logrotate configuration for the local files
+	file { $logrotate:
+		ensure		=> file,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
+		mode		=> 644,
 		content		=> "# Managed by puppet - do not edit here
-$kern_logfile {
+${syslog::logdir}/* {
 	rotate 52
 	weekly
 	dateext
@@ -48,154 +124,32 @@ $kern_logfile {
 	delaycompress
 	missingok
 	notifempty
-	olddir $kern_logdir/
+	olddir ${syslog::rotdir}/
 }
 ",
 	}
 
+	syslog::add_config { "sysmgt":
+		content		=> template("syslog/sysmgt.conf.erb"),
+	}
+
 }
 
-class rsyslog {
-
-	$pkg = "rsyslog"
-	$svc = "rsyslog"
-
-	package { $pkg:
-		ensure		=> installed
-	}
-
-	service { $svc:
-		enable		=> true,
-		hasrestart	=> true,
-		hasstatus	=> true,
-	}
-
-	$rsyslog_dir = "/etc/rsyslog.d"
-
-	file { "$rsyslog_dir/00-puppet-kernel.conf":
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
-		notify		=> Service[$svc],
-		content		=> "kern.debug	$syslog::kern_logfile\n",
-	}
-
-	file { "$rsyslog_dir/00-puppet-maillog.conf":
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
-		notify		=> Service[$svc],
-		content		=> "mail.info	-$syslog::mail_logfile\n",
-	}
-
-	file { "$rsyslog_dir/00-puppet-messages.conf":
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
-		notify		=> Service[$svc],
-		content		=> "*.info;mail.none;news.none;authpriv.none;cron.none;kern.none	-$syslog::mesg_logfile\n",
-	}
-
-	$rsyslog_logrotate = "/etc/logrotate.d/rsyslog"
-	file { $rsyslog_logrotate:
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
-		content		=> "# Managed by puppet - do not edit here
-/var/log/syslog
-/var/log/mail.info
-/var/log/mail.warn
-/var/log/mail.err
-/var/log/mail.log
-/var/log/maillog
-/var/log/daemon.log
-/var/log/kern.log
-/var/log/auth.log
-/var/log/user.log
-/var/log/lpr.log
-/var/log/cron.log
-/var/log/debug
-/var/log/messages
-{
-        rotate 52
-        weekly
-	dateext
-        missingok
-        notifempty
-        compress
-        delaycompress
-        sharedscripts
-        postrotate
-		/etc/init.d/rsyslog reload >/dev/null 2>&1 || true
-		kill -HUP `cat /var/run/rsyslogd.pid`
-                #reload rsyslog >/dev/null 2>&1 || true
-        endscript
-}
+define syslog::tty ( $tty = "tty12" ) {
+	include syslog
+	syslog::add_config { "tty":
+		content	=> "# Created by puppet on $server - do not edit here
+*.info /dev/$tty
 ",
 	}
-
 }
 
-class sysklogd {
-
-	$pkg = "sysklogd"
-	$svc = "syslog"
-
-	$syslog_conf = "/etc/syslog.conf"
-
-	package { $pkg:
-		ensure		=> installed
-	}
-
-	service { $svc:
-		enable		=> true,
-		hasrestart	=> true,
-		hasstatus	=> true,
-	}
-
-	exec { "add kernel log":
-		logoutput	=> on_failure,
-		notify		=> Service[$svc],
-		require		=> Package[$pkg],
-		unless		=> "grep -q '^[^#]*kern\\..*$syslog::kern_logfile' $syslog_conf",
-		command		=> "echo 'kern.*	$syslog::kern_logfile' >> $syslog_conf",
-	}
-
-	exec { "remove kernel from $syslog::mesg_logfile":
-		logoutput	=> on_failure,
-		notify		=> Service[$svc],
-		require		=> Package[$pkg],
-		unless		=> "grep -q '^[^#]*kern.none[^#]*$syslog::mesg_logfile' $syslog_conf",
-		command		=> "sed -ri -e 's~^([^ 	]*)([ 	]*$syslog::mesg_logfile)~\\1;kern.none\\2~' $syslog_conf",
-	}
-	$syslog_logrotate = "/etc/logrotate.d/syslog"
-
-	file { $syslog_logrotate:
-		ensure		=> file,
-		owner		=> root,
-		group		=> root,
-		mode		=> 644,
-		content		=> "# Managed by puppet - do not edit here
-/var/log/messages /var/log/secure /var/log/maillog /var/log/spooler /var/log/boot.log /var/log/cron {
-	rotate 52
-	weekly
-	dateext
-	compress
-	delaycompress
-	missingok
-	notifempty
-	sharedscripts
-	postrotate
-		/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true
-		/bin/kill -HUP `cat /var/run/rsyslogd.pid 2> /dev/null` 2> /dev/null || true
-	endscript
-}
+define syslog::remote ( $host ) {
+	include syslog
+	syslog::add_config { "remote":
+		content => "# Created by puppet on $server - do not edit here
+*.info	@$host
 ",
 	}
-
 }
 
