@@ -35,6 +35,7 @@ class samba::service {
 
 class samba::config {
 	$cfg = "/etc/samba/smb.conf"
+	$templatedir = "/etc/puppet/modules/samba/templates"
 	file { $cfg:
 		ensure		=> file,
 		mode		=> 644,
