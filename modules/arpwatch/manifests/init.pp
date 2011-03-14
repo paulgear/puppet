@@ -8,7 +8,7 @@ class arpwatch {
 class arpwatch::package {
 	$pkg = "arpwatch"
 	package { $pkg:
-		ensure	=> installed,
+		ensure		=> installed,
 	}
 }
 
@@ -16,8 +16,8 @@ class arpwatch::service {
 	$svc = "arpwatch"
 	service { $svc:
 		enable		=> true,
-		hasstatus	=> false,
 		hasrestart	=> true,
+		hasstatus	=> false,
 		require		=> Class["arpwatch::package"],
 	}
 }
