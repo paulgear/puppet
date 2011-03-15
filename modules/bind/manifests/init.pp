@@ -47,6 +47,7 @@ class bind::config {
 	exec { "create $local":
 		command	=> "touch $local; chmod 644 $local",
 		creates	=> $local,
+		require	=> Class["bind::package"],
 	}
 
 	if $operatingsystem == "CentOS" {
