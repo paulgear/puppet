@@ -28,8 +28,7 @@ class utils {
 			gpgkey		=> 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL',
 			mirrorlist	=> 'http://mirrors.fedoraproject.org/mirrorlist?repo=epel-5&arch=$basearch',
 			protect		=> 0,
-			includepkgs	=> 'fail2ban*,git*,lzo*,openvpn*',
-	#failovermethod=priority
+			includepkgs	=> 'fail2ban*,git*,lzo*,openvpn*,perl-Git*,pkcs11-helper*,rsnapshot',
 		}
 
 	}
