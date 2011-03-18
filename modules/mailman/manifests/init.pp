@@ -20,7 +20,7 @@ class mailman::service {
 		hasstatus	=> $operatingsystem ? {
 			debian	=> false,
 			ubuntu	=> false,
-		}
+		},
 		require		=> Class["mailman::package"],
 	}
 }
