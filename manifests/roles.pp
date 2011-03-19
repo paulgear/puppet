@@ -54,7 +54,7 @@ class role::mailserver {
 }
 
 class role::mysql::server {
-	include mysql::server
+	include ::mysql::server
 	include phpmyadmin
 }
 
