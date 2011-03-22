@@ -15,6 +15,7 @@ CRON\[[0-9]+\]: \(www-data\) CMD \((php )?/usr/share/cacti/site/poller\.php >/de
 CRON\[[0-9]+\]: \(www-data\) CMD \(/usr/lib/cgi-bin/ntpmon collect\)
 kernel:.*iwlagn 0000:0c:00.0: ERROR: No TX rate available.
 last message repeated [0-9]+ times
+named\[[0-9]+\]: client [0-9.#]*: query \(cache\) '.*' denied
 named\[[0-9]+\]: (connection refused|FORMERR|lame server|network unreachable|unexpected RCODE .(REFUSED|SERVFAIL).) resolving 
 named\[[0-9]+\]: too many timeouts resolving .*: (disabling EDNS|reducing the advertised EDNS UDP packet size to 512 octets)
 ntop\[[0-9]+\]:.*WARNING.. packet truncated
