@@ -1,5 +1,9 @@
 # puppet class to install php5
 
+class php5 {
+	include php5::package
+}
+
 class php5::package {
 	$pkg = $operatingsystem ? {
 		debian	=> "libapache2-mod-php5",
