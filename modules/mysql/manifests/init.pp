@@ -14,7 +14,11 @@ class mysql::server::package {
 }
 
 class mysql::server::service {
-	$svc = "mysql"
+	$svc = $operatingsystem ? {
+		centos	=> "mysqld",
+		debian	=> "mysql",
+		ubuntu	=> "mysql",
+	}
 	service { $svc:
 		enable		=> true,
 		hasrestart	=> true,
