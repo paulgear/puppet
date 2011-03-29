@@ -44,3 +44,14 @@ $script
 	}
 }
 
+class mysql::client {
+	include mysql::client::package
+}
+
+class mysql::client::package {
+	$pkg = "mysql-client"
+	package { $pkg:
+		ensure	=> installed,
+	}
+}
+
