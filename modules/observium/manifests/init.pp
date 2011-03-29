@@ -13,7 +13,6 @@ class observium::packages {
 
 		"fping",
 		"graphviz",
-		"imagemagick",
 		"nmap",
 		"php-pear",
 		"rrdtool",
@@ -22,6 +21,7 @@ class observium::packages {
 	]
 	$deb_pkgs = [
 
+		"imagemagick",
 		"ipcalc",
 		"ipmitool",
 		"libapache2-mod-php5",
@@ -40,6 +40,7 @@ class observium::packages {
 	]
 	$centos_pkgs = [
 
+		"ImageMagick",
 		"jwhois",
 		"mysql",
 		"net-snmp-utils",
