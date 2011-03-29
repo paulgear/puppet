@@ -3,6 +3,7 @@
 class roundcube {
 	include roundcube::package
 	include mysql::client
+	include php5::mysql
 }
 
 class roundcube::package {
