@@ -2,6 +2,7 @@
 
 class roundcube {
 	include roundcube::package
+	include mysql::client
 }
 
 class roundcube::package {
