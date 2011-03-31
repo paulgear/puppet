@@ -24,7 +24,6 @@ class observium::packages {
 		"imagemagick",
 		"ipcalc",
 		"ipmitool",
-		"libapache2-mod-php5",
 		"mtr-tiny",
 		"mysql-client",
 		"php5-cli",
