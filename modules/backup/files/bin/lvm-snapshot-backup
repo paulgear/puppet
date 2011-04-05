@@ -1,0 +1,92 @@
+#!/bin/bash
+#
+# Author:	Paul Gear
+# Created:	2011-04-05
+# Description:	Create LVM snapshots for all LVs on the current host
+#		and optionally copy them to a remote backup server
+#
+
+set -e
+set -u
+
+PATH="/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH"
+PROG=`basename $0`
+HOST=`hostname --short`
+SLEEP=5
+DIVISOR=8
+BACKUPHOST=""
+DEST=""
+
+CONF=/usr/local/etc/$PROG.conf
+if [ -r $CONF ]; then
+	. $CONF
+fi
+
+# use command line if present
+if [ "$#" -gt 0 ]; then
+	LVS="$@"
+# otherwise auto-detect LVs if none configured
+elif [ -z "$LVS" ]; then
+	LVS=`lvs --noheadings -o vg_name,lv_name,lv_attr | awk '/o$/ {print "/dev/" $1 "/" $2}'`
+fi
+
+log()
+{
+	echo "`date` " "$@"
+	#logger "$@"
+}
+
+islv()
+{
+	lvdisplay "$@" >/dev/null 2>&1
+}
+
+# Ignore LVM warnings, which happen when run from cron.daily on Debian squeeze
+# (and perhaps elsewhere as well).
+# See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=558712 for further
+# information.
+export LVM_SUPPRESS_FD_WARNINGS=1
+
+# save lvs output
+TMPDIR=`mktemp -d`
+LVS_DISPLAY="lvs --units m"
+$LVS_DISPLAY > $TMPDIR/before
+
+SNAPSHOT_LIST=""
+for LV in $LVS; do
+	log "Start backup of $LV"
+
+	# snapshot is a portion of the original LV size - this may need tuning above
+	LVSIZE=`lvs --noheadings -o lv_size --units m $LV 2>/dev/null|awk '{print $1}'| cut -d. -f1`
+	(( SNAPSIZE=LVSIZE/DIVISOR ))
+
+	# create LVM snapshot configuration file and back up using that
+	TMPFILE=`mktemp`
+	cat > $TMPFILE <<EOF
+ORIGINAL_LV=$LV
+SNAPSHOT_LV=$LV-snap
+SNAPSHOT_SIZE=$SNAPSIZE
+EOF
+	lvm-snapshot --conf $TMPFILE --no-mount
+	SNAPSHOT_LIST="$SNAPSHOT_LIST $LV-snap"
+
+	log "Finished backup of $LV"
+	sleep 5
+done
+
+log "Changes in LV use:"
+$LVS_DISPLAY > $TMPDIR/after
+diff $TMPDIR/before $TMPDIR/after | grep -Eve '^(\+\+\+|---|@@)'
+rm -rf $TMPDIR/
+
+# save snapshots to backup server
+if [ -n "$DEST" -a -n "$BACKUPHOST" ]; then
+	for LV in $SNAPSHOT_LIST; do
+		DESTNAME=`echo $LV|sed -e 's/\//_/g'`
+		log "Backup $LV to $BACKUPHOST:$DEST/$HOST/$DESTNAME.img.gz"
+		dd if=$LV bs=1024k conv=noerror | gzip --fast | \
+			ssh $BACKUPHOST "mkdir -p $DEST/$HOST; dd bs=1024k conv=noerror of=$DEST/$HOST/$DESTNAME.img.gz"
+	done
+	log "Finished backups to $BACKUPHOST:$DEST"
+fi
+
