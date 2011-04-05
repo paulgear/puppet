@@ -25,8 +25,10 @@ fi
 # use command line if present
 if [ "$#" -gt 0 ]; then
 	LVS="$@"
+fi
+
 # otherwise auto-detect LVs if none configured
-elif [ -z "$LVS" ]; then
+if [ -z "${LVS:-}" ]; then
 	LVS=`lvs --noheadings -o vg_name,lv_name,lv_attr | awk '/o$/ {print "/dev/" $1 "/" $2}'`
 fi
 
