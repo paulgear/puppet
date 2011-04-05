@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+set -u
+
+heading()
+{
+	echo "
+**********" "$@" "**********
+"
+}
+
+heading SCSI devices
+lsscsi
+
+heading Disk partitions
+fdisk -l
+
+heading Software RAID
+cat /proc/mdstat
+
+heading LVM summary
+lvs
+
+heading LVM detailed view
+vgdisplay -v
