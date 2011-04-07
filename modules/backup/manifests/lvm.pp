@@ -4,25 +4,22 @@
 
 class backup::lvm {
 
-	file { "/usr/local/bin/lvm-snapshot-mount":
-		ensure	=> file,
-		owner	=> root,
-		group	=> root,
-		mode	=> 755,
-		source	=> "puppet:///modules/backup/bin/lvm-snapshot-mount",
+	# copy scripts to /usr/local/bin
+	define usr_local_bin() {
+		file { "/usr/local/bin/$name":
+			ensure	=> file,
+			owner	=> root,
+			group	=> root,
+			mode	=> 755,
+			source	=> "puppet:///modules/backup/bin/$name",
+		}
 	}
+	usr_local_bin { [ "backup-sysinfo", "lvm-snapshot-backup", "lvm-snapshot-mount", "xen-backup", ]: }
 
 	# symlink lvm-snapshot to lvm-snapshot-mount
 	file { "/usr/local/bin/lvm-snapshot":
-		ensure	=> "/usr/local/bin/lvm-snapshot-mount",
-	}
-
-	file { "/usr/local/bin/xen-backup":
-		ensure	=> file,
-		owner	=> root,
-		group	=> root,
-		mode	=> 755,
-		source	=> "puppet:///modules/backup/bin/xen-backup",
+		ensure	=> link,
+		target	=> "/usr/local/bin/lvm-snapshot-mount",
 	}
 
 	# define lvm snapshot withOUT mount
