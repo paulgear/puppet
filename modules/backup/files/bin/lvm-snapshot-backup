@@ -12,8 +12,8 @@ set -u
 PATH="/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH"
 PROG=`basename $0`
 HOST=`hostname --short`
-SLEEP=5
-DIVISOR=8
+SLEEP=10
+DIVISOR=5
 BACKUPHOST=""
 DEST=""
 
@@ -89,6 +89,10 @@ if [ -n "$DEST" -a -n "$BACKUPHOST" ]; then
 		dd if=$LV bs=1024k conv=noerror | gzip --fast | \
 			ssh $BACKUPHOST "mkdir -p $DEST/$HOST; dd bs=1024k conv=noerror of=$DEST/$HOST/$DESTNAME.img.gz"
 	done
+
+	log "Saving system disaster recovery info to $BACKUPHOST:$DEST"
+	backup-sysinfo 2>&1 | ssh $BACKUPHOST "cat > $DEST/$HOST/backup-sysinfo.txt"
+
 	log "Finished backups to $BACKUPHOST:$DEST"
 fi
 
