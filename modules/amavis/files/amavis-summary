@@ -1,0 +1,168 @@
+#!/usr/bin/perl -wT
+
+# Summarise amavis logs
+
+use strict;
+use Getopt::Long;
+
+my $DEBUG = 0;
+GetOptions( 'debug' => \$DEBUG );
+
+if ($#ARGV < 0  &&  -t 0) {
+	push @ARGV, "/var/log/mail.log";
+}
+
+# extract the domain part of the given email address
+sub domain ($) {
+	my $ret = shift;
+	$ret =~ s/^[^@]*@//;
+	return $ret;
+}
+
+my (%count, %score, %minscore, %maxscore, %time, %mintime, %maxtime, %dst, %dsttype, %dstdomain, %total, %virus);
+my ($minscore, $maxscore, $mintime, $maxtime) = (9999, -9999, 9999, -9999);
+
+while (<>) {
+
+	next unless /amavis.*->/;
+	next if /WARN: address modified/;
+	next if /(FWD|SEND) via SMTP:/;
+
+	chomp;
+
+# Sample messages
+# May 20 02:34:22 lamech amavis[25448]: (25448-03) Passed CLEAN, [203.20.245.128] [203.20.245.128] <root@daniel.citipointe.new> -> <paulgear@gear.dyndns.org>, Message-ID: <20090519163410.14B31240043@daniel.citipointe.new>, mail_id: V6FcKH2QrxuR, Hits: -1.103, queued_as: 966A64C5297, 9266 ms
+# May 20 02:36:03 lamech amavis[25426]: (25426-04) Passed SPAMMY, [79.16.102.39] [79.16.102.39] <ideologues@kocevska.net> -> <spam@gear.dyndns.org>, Message-ID: <659633617323324806@szekersuli.hu>, mail_id: PtQ8xtmvF+vt, Hits: 5.383, queued_as: B2E4739F37E, 5926 ms
+# May 20 02:51:51 lamech amavis[25448]: (25448-05) Passed SPAM, [190.108.144.53] [190.108.144.53] <fuellingdkp5@dansmath.com> -> <george@gear.dyndns.org>, quarantine: spam-dHdg-+l7UPcC.gz, Message-ID: <000d01c9d8a1$fb47f0e0$6400a8c0@fuellingdkp5>, mail_id: dHdg-+l7UPcC, Hits: 21.125, queued_as: 758B44CEDA4, 4108 ms
+# May 20 03:56:05 lamech amavis[10799]: (10799-02) Blocked SPAM, [66.114.252.251] [76.73.68.111] <incnow@nchinc.com> -> <bigfoot@gear.dyndns.org>, quarantine: spam-PSiTkG0qtd1t.gz, Message-ID: <10829CD0.3824743D@nchinc.com>, mail_id: PSiTkG0qtd1t, Hits: 9.234, 6998 ms
+# May 20 08:54:05 lamech amavis[13908]: (13908-09) Blocked INFECTED (HTML.Phishing.Account-1), [208.124.242.190] [67.81.186.39] <commonwealth@email.commonwealth.com> -> <angela@gear.dyndns.org>, quarantine: virus-34z2AqHJ8gNE, Message-ID: <SERVER2K3Ec7mDLu4iF00001b82@server2k3.gracechurch.local>, mail_id: 34z2AqHJ8gNE, Hits: -, 1861 ms
+
+	# 0 = action
+	# 1 = status
+	# 2 = status detail (virus name)
+	# 3 = ip
+	# 4 = ip2
+	# 5 = src
+	# 6 = dst
+	# 7 = score
+	# 8 = time
+
+	my @F = /amavis\[\d+\]: \S+ (\S+) (\S+)(?: \((.*)\))?, (?:(?:LOCAL )?\[([\d.]+)\] (?:\[([\d.]+|(?:IPv6)?[a-f:\d.]+)\] )?)?<(\S*)> -> <(\S*)>.*Hits: ([\d.-]+).* ([\d.]+) ms/;
+
+	my $score = $F[7];
+	my $time = $F[8] / 1000.0;
+
+	if ($#F == 8) {
+		#print "@F\n";			# print all
+		#print "$score $time\n";	# print score & time
+		#print "$#F -> dst = $F[6]\n" if $#F != 8;
+		#print "field 2:  $F[2]\n" if $F[2];
+	} else {
+		print STDERR "UNMATCHED: $_\n";
+		next;
+	}
+
+	# Score is a placeholder if client is whitelisted
+	$score = 0 if $score eq "-";
+
+	# initialise counters on first encountering a type
+	my $type = "$F[0] $F[1]";
+	unless (defined $count{$type}) {
+		$count{$type} = 0;
+		$score{$type} = 0;
+		$minscore{$type} = 9999;
+		$maxscore{$type} = -9999;
+		$mintime{$type} = 9999;
+		$maxtime{$type} = -9999;
+	}
+
+	$count{$type}++;
+	$score{$type} += $score;
+	$minscore{$type} = $score if $score < $minscore{$type};
+	$maxscore{$type} = $score if $score > $maxscore{$type};
+	$time{$type} += $time;
+	$mintime{$type} = $time if $time < $mintime{$type};
+	$maxtime{$type} = $time if $time > $maxtime{$type};
+	$virus{$F[2]}++ if $F[2];
+
+	$total{'count'}++;
+
+	$total{'score'} += $score;
+	$minscore = $score if $score < $minscore;
+	$maxscore = $score if $score > $maxscore;
+
+	$total{'time'} += $time;
+	$mintime = $time if $time < $mintime;
+	$maxtime = $time if $time > $maxtime;
+
+	for my $dst (split /[<,>]+/, lc $F[6]) {
+		$dst{$dst}++;
+		$dsttype{$dst}->{$type}++;
+		$dstdomain{domain($dst)}++;
+	}
+}
+
+
+my $NUMERIC = " %8.3f";
+my $HEADER_FORMAT  = "%-20s %5s %27s %27s\n";
+my $SUMMARY_FORMAT = "%-20s %5d $NUMERIC$NUMERIC$NUMERIC $NUMERIC$NUMERIC$NUMERIC\n";
+
+printf $HEADER_FORMAT, "Status", "Count", "Scores (min/avg/max)", "Times (min/avg/max)";
+printf $HEADER_FORMAT, "-----", "-----", "-------------------------", "-------------------------";
+for (sort {$count{$b} <=> $count{$a}} keys %count) {
+	printf $SUMMARY_FORMAT, $_, $count{$_},
+		$minscore{$_}, $score{$_}/$count{$_}, $maxscore{$_},
+		$mintime{$_}, $time{$_}/$count{$_}, $maxtime{$_};
+}
+printf $HEADER_FORMAT, "-----", "-----", "-------------------------", "-------------------------";
+printf $SUMMARY_FORMAT, "TOTAL", $total{'count'},
+	$minscore, $total{'score'}/$total{'count'}, $maxscore,
+	$mintime, $total{'time'}/$total{'count'}, $maxtime;
+
+my $FORMAT = "%10d %s\n";
+my $TOP = 10;
+
+print "\n";
+print "Count by virus name\n";
+print "-------------------\n";
+
+my $i = 0;
+for (sort {$virus{$b} <=> $virus{$a}} keys %virus) {
+	printf $FORMAT, $virus{$_}, $_;
+	last if $i++ > $TOP;
+}
+
+print "\n";
+print "Count by destination domain\n";
+print "---------------------------\n";
+$i = 0;
+for (sort {$dstdomain{$b} <=> $dstdomain{$a}} keys %dstdomain) {
+	printf $FORMAT, $dstdomain{$_}, $_;
+	last if $i++ > $TOP;
+}
+print "\n";
+
+print "\n";
+print "Count by recipient\n";
+print "------------------\n";
+
+$i = 0;
+for (sort {$dst{$b} <=> $dst{$a}} keys %dst) {
+	printf $FORMAT, $dst{$_}, $_;
+	last if $i++ > $TOP;
+}
+print "\n";
+
+#for my $addr (sort {
+#	#$dsttype{$b}->{"Passed CLEAN"}  <=> $dsttype{$b}->{"Passed CLEAN"}  ||
+#	#$dsttype{$b}->{"Passed SPAM"}   <=> $dsttype{$b}->{"Passed SPAM"}   ||
+#	#$dsttype{$b}->{"Passed SPAMMY"} <=> $dsttype{$b}->{"Passed SPAMMY"} ||
+#	$dstdomain{domain($b)} cmp $dstdomain{domain($a)} || $dst{$b} <=> $dst{$a}
+#} keys %dst) {
+#	printf $HEADER, $dst{$addr}, $addr;
+#	for my $type (sort keys %count) {
+#	    printf $FORMAT, $dsttype{$addr}->{$type};
+#	}
+#	print "\n";
+#}
+#

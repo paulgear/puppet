@@ -1,11 +1,10 @@
-#
 # puppet class to manage amavisd-new
-#
 
 class amavis {
 	include amavis::package
 	include amavis::service
 	include amavis::groups
+	include amavis::files
 }
 
 class amavis::package {
@@ -62,6 +61,23 @@ class amavis::decoders {
 	package { $pkgs:
 		ensure	=> installed,
 		notify	=> Class["amavis::service"],
+	}
+}
+
+class amavis::files {
+	file { "/usr/local/bin/amavis-summary":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 0755,
+		source	=> "puppet:///modules/amavis/amavis-summary",
+	}
+	cron_job { "amavis-summary":
+		interval	=> "weekly",
+		script		=> "#!/bin/sh
+# Managed by puppet on $server - do not edit locally
+/usr/local/bin/amavis-summary
+",
 	}
 }
 
