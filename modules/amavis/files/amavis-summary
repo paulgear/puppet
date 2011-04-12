@@ -35,6 +35,7 @@ while (<>) {
 		$_ =~ s/\.\.\.$//;
 		my $nextline = <>;
 		my ($next) = ($nextline =~ /\.\.\.(.*)$/);
+		$_ .= $next;
 	}
 
 # Sample messages
