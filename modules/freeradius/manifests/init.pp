@@ -2,7 +2,7 @@
 
 class freeradius {
 	include freeradius::package
-	#include freeradius::service
+	include freeradius::service
 }
 
 class freeradius::package {
@@ -13,5 +13,13 @@ class freeradius::package {
 }
 
 class freeradius::service {
+	include freeradius::package
+	$svc = "freeradius"
+	service { $svc:
+		enable		=> true,
+		hasrestart	=> true,
+		hasstatus	=> true,
+		require		=> Class["freeradius::package"],
+	}
 }
 
