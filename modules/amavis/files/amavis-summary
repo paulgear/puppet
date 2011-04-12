@@ -30,6 +30,13 @@ while (<>) {
 
 	chomp;
 
+	# check for multi-line messages
+	while (/\.\.\.$/) {
+		$_ =~ s/\.\.\.$//;
+		my $nextline = <>;
+		my ($next) = ($nextline =~ /\.\.\.(.*)$/);
+	}
+
 # Sample messages
 # May 20 02:34:22 lamech amavis[25448]: (25448-03) Passed CLEAN, [203.20.245.128] [203.20.245.128] <root@daniel.citipointe.new> -> <paulgear@gear.dyndns.org>, Message-ID: <20090519163410.14B31240043@daniel.citipointe.new>, mail_id: V6FcKH2QrxuR, Hits: -1.103, queued_as: 966A64C5297, 9266 ms
 # May 20 02:36:03 lamech amavis[25426]: (25426-04) Passed SPAMMY, [79.16.102.39] [79.16.102.39] <ideologues@kocevska.net> -> <spam@gear.dyndns.org>, Message-ID: <659633617323324806@szekersuli.hu>, mail_id: PtQ8xtmvF+vt, Hits: 5.383, queued_as: B2E4739F37E, 5926 ms
