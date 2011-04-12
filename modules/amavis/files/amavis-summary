@@ -123,8 +123,8 @@ my $FORMAT = "%10d %s\n";
 my $TOP = 10;
 
 print "\n";
-print "Count by virus name\n";
-print "-------------------\n";
+print "Top $TOP by virus name\n";
+print "----------------------\n";
 
 my $i = 0;
 for (sort {$virus{$b} <=> $virus{$a}} keys %virus) {
@@ -133,8 +133,8 @@ for (sort {$virus{$b} <=> $virus{$a}} keys %virus) {
 }
 
 print "\n";
-print "Count by destination domain\n";
-print "---------------------------\n";
+print "Top $TOP by destination domain\n";
+print "------------------------------\n";
 $i = 0;
 for (sort {$dstdomain{$b} <=> $dstdomain{$a}} keys %dstdomain) {
 	printf $FORMAT, $dstdomain{$_}, $_;
@@ -143,8 +143,8 @@ for (sort {$dstdomain{$b} <=> $dstdomain{$a}} keys %dstdomain) {
 print "\n";
 
 print "\n";
-print "Count by recipient\n";
-print "------------------\n";
+print "Top $TOP by recipient\n";
+print "---------------------\n";
 
 $i = 0;
 for (sort {$dst{$b} <=> $dst{$a}} keys %dst) {
