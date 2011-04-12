@@ -141,7 +141,9 @@ if [ "$MOUNT" -eq 1 ]; then
 fi
 
 if islv $SNAPSHOT_LV; then
-	lvremove --force $SNAPSHOT_LV
+	sleep 1
+	lvremove --debug --force $SNAPSHOT_LV
+	sleep 3
 fi
 
 if [ -n "${PRE_SNAP:-''}" ]; then
