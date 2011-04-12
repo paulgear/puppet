@@ -54,7 +54,6 @@ class amavis::decoders {
 		"p7zip",
 		"p7zip-full",
 		"ripole",
-		"rpm2cpio",
 		"unrar-free",
 		"zoo",
 	]
