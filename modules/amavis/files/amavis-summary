@@ -19,8 +19,8 @@ sub domain ($) {
 	return $ret;
 }
 
-my (%count, %score, %minscore, %maxscore, %time, %mintime, %maxtime, %dst, %dsttype, %dstdomain, %total, %virus);
-my ($minscore, $maxscore, $mintime, $maxtime) = (9999, -9999, 9999, -9999);
+my (%count, %score, %minscore, %maxscore, %size, %minsize, %maxsize, %time, %mintime, %maxtime, %dst, %dsttype, %dstdomain, %total, %virus);
+my ($minscore, $maxscore, $minsize, $maxsize, $mintime, $maxtime) = (9999, -9999, 9999, -9999, 9999, -9999);
 
 while (<>) {
 
@@ -53,14 +53,16 @@ while (<>) {
 	# 5 = src
 	# 6 = dst
 	# 7 = score
-	# 8 = time
+	# 8 = size
+	# 9 = time
 
-	my @F = /amavis\[\d+\]: \S+ (\S+) (\S+)(?: \((.*)\))?, (?:(?:LOCAL )?\[([\d.]+)\] (?:\[([\d.]+|(?:IPv6)?[a-f:\d.]+)\] )?)?<(\S*)> -> <(\S*)>.*Hits: ([\d.-]+).* ([\d.]+) ms/;
+	my @F = /amavis\[\d+\]: \S+ (\S+) (\S+)(?: \((.*)\))?, (?:(?:LOCAL )?\[([\d.]+)\] (?:\[([\d.]+|(?:IPv6)?[a-f:\d.]+)\] )?)?<(\S*)> -> <(\S*)>.*Hits: ([\d.-]+).*size: (\d+).* ([\d.]+) ms/;
 
 	my $score = $F[7];
-	my $time = $F[8] / 1000.0;
+	my $size = $F[8] / 1024.0;	# convert to KB
+	my $time = $F[9] / 1000.0;	# convert to seconds
 
-	if ($#F == 8) {
+	if ($#F == 9) {
 		#print "@F\n";			# print all
 		#print "$score $time\n";	# print score & time
 		#print "$#F -> dst = $F[6]\n" if $#F != 8;
@@ -78,8 +80,11 @@ while (<>) {
 	unless (defined $count{$type}) {
 		$count{$type} = 0;
 		$score{$type} = 0;
+		$size{$type} = 0;
 		$minscore{$type} = 9999;
 		$maxscore{$type} = -9999;
+		$minsize{$type} = 9999;
+		$maxsize{$type} = -9999;
 		$mintime{$type} = 9999;
 		$maxtime{$type} = -9999;
 	}
@@ -88,6 +93,9 @@ while (<>) {
 	$score{$type} += $score;
 	$minscore{$type} = $score if $score < $minscore{$type};
 	$maxscore{$type} = $score if $score > $maxscore{$type};
+	$size{$type} += $size;
+	$minsize{$type} = $size if $size < $minsize{$type};
+	$maxsize{$type} = $size if $size > $maxsize{$type};
 	$time{$type} += $time;
 	$mintime{$type} = $time if $time < $mintime{$type};
 	$maxtime{$type} = $time if $time > $maxtime{$type};
@@ -98,6 +106,10 @@ while (<>) {
 	$total{'score'} += $score;
 	$minscore = $score if $score < $minscore;
 	$maxscore = $score if $score > $maxscore;
+
+	$total{'size'} += $size;
+	$minsize = $size if $size < $minsize;
+	$maxsize = $size if $size > $maxsize;
 
 	$total{'time'} += $time;
 	$mintime = $time if $time < $mintime;
@@ -110,21 +122,27 @@ while (<>) {
 	}
 }
 
+unless (defined $total{'count'}) {
+	print STDERR "No amavis statistics to report\n";
+	exit 0;
+}
 
-my $NUMERIC = " %8.3f";
-my $HEADER_FORMAT  = "%-20s %5s %27s %27s\n";
-my $SUMMARY_FORMAT = "%-20s %5d $NUMERIC$NUMERIC$NUMERIC $NUMERIC$NUMERIC$NUMERIC\n";
+my $FLOAT = " %8.2f";
+my $HEADER_FORMAT  = "%-20s %5s %27s %27s %27s\n";
+my $SUMMARY_FORMAT = "%-20s %5d $FLOAT$FLOAT$FLOAT $FLOAT$FLOAT$FLOAT $FLOAT$FLOAT$FLOAT\n";
 
-printf $HEADER_FORMAT, "Status", "Count", "Scores (min/avg/max)", "Times (min/avg/max)";
-printf $HEADER_FORMAT, "-----", "-----", "-------------------------", "-------------------------";
+printf $HEADER_FORMAT, "Status", "Count", "Score (min/avg/max)", "Size (kb) (min/avg/max)", "Time (s) (min/avg/max)";
+printf $HEADER_FORMAT, "-----", "-----", "-------------------------", "-------------------------", "-------------------------";
 for (sort {$count{$b} <=> $count{$a}} keys %count) {
 	printf $SUMMARY_FORMAT, $_, $count{$_},
 		$minscore{$_}, $score{$_}/$count{$_}, $maxscore{$_},
+		$minsize{$_}, $size{$_}/$count{$_}, $maxsize{$_},
 		$mintime{$_}, $time{$_}/$count{$_}, $maxtime{$_};
 }
-printf $HEADER_FORMAT, "-----", "-----", "-------------------------", "-------------------------";
+printf $HEADER_FORMAT, "-----", "-----", "-------------------------", "-------------------------", "-------------------------";
 printf $SUMMARY_FORMAT, "TOTAL", $total{'count'},
 	$minscore, $total{'score'}/$total{'count'}, $maxscore,
+	$minsize, $total{'size'}/$total{'count'}, $maxsize,
 	$mintime, $total{'time'}/$total{'count'}, $maxtime;
 
 my $FORMAT = "%10d %s\n";
