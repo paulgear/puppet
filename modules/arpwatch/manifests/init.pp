@@ -23,6 +23,7 @@ class arpwatch::service {
 }
 
 define arpwatch::interface ( $interface = "eth0" ) {
+	include arpwatch
 	$cfg = "/etc/default/arpwatch"
 	$check = "/bin/grep -Ee '^ARGS=.*-i $interface' $cfg"
 	exec { "$cfg change interface":
