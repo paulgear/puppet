@@ -16,7 +16,19 @@ class puppet::client {
 "
 	}
 
+	include puppet::client::report
+
 }
+
+class puppet::client::report {
+	$cfg = "/etc/puppet/puppet.conf"
+	exec { "append agent section":
+		command		=> "echo '[agent]\nreport = true\n' >> $cfg",
+		unless		=> "grep -q '^\[agent\]' $cfg",
+		logoutput	=> true,
+	}
+}
+
 
 class puppet::client::daily {
 
