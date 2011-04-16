@@ -23,9 +23,13 @@ class puppet::client {
 class puppet::client::report {
 	include puppet::client::service
 	$cfg = "/etc/puppet/puppet.conf"
+	$tag = $puppetversion ? {
+		0.25.1		=> "puppetd",
+		default		=> "agent",
+	}
 	exec { "append agent section":
-		command		=> "echo '[agent]\nreport = true\n' >> $cfg",
-		unless		=> "grep -q '^\\[agent\\]' $cfg",
+		command		=> "echo '[$tag]\nreport = true\n' >> $cfg",
+		unless		=> "grep -q '^\\[$tag\\]' $cfg",
 		notify		=> Class["puppet::client::service"],
 		logoutput	=> true,
 	}
