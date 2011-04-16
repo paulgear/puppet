@@ -31,7 +31,7 @@ define arpwatch::interface ( $interface = "eth0" ) {
 		logoutput	=> true,
 	}
 	exec { "$cfg add interface":
-		command		=> "sed -r -i -e 's/^(ARGS=\".*)\"$/\1 -i $interface\"/' $cfg",
+		command		=> "sed -r -i -e 's/^(ARGS=\".*)\"$/\\1 -i $interface\"/' $cfg",
 		unless		=> $check,
 		require		=> Exec["$cfg change interface"],
 		logoutput	=> true,
