@@ -21,11 +21,22 @@ class puppet::client {
 }
 
 class puppet::client::report {
+	include puppet::client::service
 	$cfg = "/etc/puppet/puppet.conf"
 	exec { "append agent section":
 		command		=> "echo '[agent]\nreport = true\n' >> $cfg",
 		unless		=> "grep -q '^\\[agent\\]' $cfg",
+		notify		=> Class["puppet::client::service"],
 		logoutput	=> true,
+	}
+}
+
+class puppet::client::service {
+	$svc = "puppet"
+	service { $svc:
+		enable		=> true,
+		hasrestart	=> true,
+		hasstatus	=> true,
 	}
 }
 
