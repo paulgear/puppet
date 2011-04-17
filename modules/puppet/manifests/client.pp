@@ -24,7 +24,7 @@ class puppet::client::report {
 	include puppet::client::service
 	$cfg = "/etc/puppet/puppet.conf"
 	$tag = $puppetversion ? {
-		0.25.1		=> "puppetd",
+		"0.25.1"	=> "puppetd",
 		default		=> "agent",
 	}
 	exec { "append agent section":
