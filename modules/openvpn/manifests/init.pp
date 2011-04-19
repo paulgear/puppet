@@ -34,3 +34,17 @@ class openvpn::config {
 	}
 }
 
+define openvpn::client ( $remotes, $remote_random = "false" ) {
+	include openvpn
+	$cfg = "client.conf"
+	$dir = "/etc/openvpn"
+	file { "$dir/$cfg":
+		mode	=> 644,
+		owner	=> root,
+		group	=> root,
+		require	=> Class["openvpn::package"],
+		notify	=> Class["openvpn::service"],
+		content	=> template("openvpn/$cfg.erb"),
+	}
+}
+

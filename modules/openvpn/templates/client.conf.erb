@@ -1,0 +1,46 @@
+###############################################
+# OpenVPN client config with minimal comments #
+###############################################
+
+client
+
+;dev tap
+dev tun
+
+;dev-node MyTap
+
+;proto tcp
+proto udp
+
+<% remotes.each do |remote| -%>
+remote <%= remote %> 1194
+<% end -%>
+
+<% if remote_random == "true" -%>
+remote-random
+<% end -%>
+
+resolv-retry infinite
+
+nobind
+
+user nobody
+group nobody
+
+persist-key
+persist-tun
+
+;http-proxy-retry # retry on connection failures
+;http-proxy [proxy server] [proxy port #]
+
+mute-replay-warnings
+
+ca ca.crt
+cert client.crt
+key client.key
+
+ns-cert-type server
+
+comp-lzo
+
+verb 3
