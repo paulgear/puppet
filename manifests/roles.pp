@@ -2,6 +2,10 @@
 # Example roles for puppet nodes
 ######################################################################
 
+class role::backuppc::server {
+	include backuppc
+}
+
 class role::fail2ban::postfix {
 	include role::fail2ban::shorewall_route
 	include fail2ban::filters::postfix
