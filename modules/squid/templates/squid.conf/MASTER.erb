@@ -19,6 +19,9 @@
 #################################
 
 http_port 3128
+<% if transparent_port != 0 -%>
+http_port <%= transparent_port %> transparent
+<% end -%>
 hierarchy_stoplist cgi-bin ?
 acl QUERY urlpath_regex cgi-bin \?
 cache_dir ufs /var/spool/squid <%= cache_size %> 16 256

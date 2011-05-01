@@ -38,6 +38,7 @@ class squid {
 	# call this with appropriate parameters to define squid.conf
 	define squid_conf(
 			$basic_auth = "on",
+			$transparent_port = "0",
 			$cache_size = "256",
 			$emulate_httpd_log = "on",
 			$local_networks = [ "192.168.0.0/255.255.0.0" ],
