@@ -7,9 +7,5 @@ class hostname::setfqdn {
 		alias	=> [ $hostname ],
 		ip	=> '127.0.1.1',
 	}
-	host { $hostname:
-		ensure	=> absent,
-		ip	=> '127.0.1.1',
-	}
 }
 
