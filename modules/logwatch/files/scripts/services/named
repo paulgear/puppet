@@ -207,7 +207,6 @@ while (defined($ThisLine = <STDIN>)) {
       ($ThisLine =~ /zone .*: NS '.*' has no address records/) or
       ($ThisLine =~ /.*: not a valid number$/) or
       ($ThisLine =~ /.*: unexpected end of input/) or
-      ($ThisLine =~ /(connection refused|host unreachable) resolving '.*'/) or
       ($ThisLine =~ /reloading zones succeeded/)
    ) {
       # Don't care about these...
@@ -324,6 +323,8 @@ while (defined($ThisLine = <STDIN>)) {
    } elsif ( ($ThisLine =~ /too many timeouts resolving .*: reducing the advertised EDNS UDP packet size to 512 octets/) ) {
       #chomp($ThisLine);
       $EDNSReduce++;
+   } elsif ( ($ThisLine =~ /error \((.*)\) resolving '.*': [\d.#]*/) ) {
+      $GenericResolverError{$1}++;
    } else {
       # Report any unmatched entries...
       # remove PID from named messages
@@ -588,6 +589,13 @@ if ($EDNSReduceSuccess) {
 
 if ($EDNSDisableSuccess) {
       print "   $EDNSDisableSuccess successful name resolutions after disabling EDNS\n";
+}
+
+if ( ( $Detail >= 5 ) and (keys %GenericResolverError) ) {
+   print "\nResolver errors:\n";
+   foreach $ThisOne (sort {$a cmp $b} keys %GenericResolverError) {
+      print "   $ThisOne: $GenericResolverError{$ThisOne} Time(s)\n";
+   }
 }
 
 if (keys %OtherList) {
