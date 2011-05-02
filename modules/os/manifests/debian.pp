@@ -3,6 +3,7 @@
 class os::debian {
 
 	include aptitude
+	include hostname::setfqdn
 	include isp
 
 	# assume all services have a restart and a status, even if it's not true
