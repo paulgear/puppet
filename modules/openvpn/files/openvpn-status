@@ -1,0 +1,16 @@
+#!/bin/sh
+# Description:	Record openvpn connection to a status file whenever the connection comes up
+# Author:	Paul Gear
+# Created:	2011-05-03
+
+PROG=`basename $0`
+IF="$1"
+(
+	STATUS=/var/lib/openvpn/status
+	mkdir -p $STATUS
+	(
+		echo "$@"
+		env | sort
+	) > $STATUS/all.$IF
+) | logger -t $PROG
+exit 0
