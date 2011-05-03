@@ -37,8 +37,7 @@ class openvpn::config {
 
 class openvpn::pingtest {
 	include openvpn::service
-	$files = [ "openvpn-status", "pingtest", ]
-	file { $files:
+	file { [ "openvpn-status", "pingtest", ]:
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
