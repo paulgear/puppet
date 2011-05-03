@@ -59,6 +59,7 @@ define ulb( $source_class ) {
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
+		mode	=> 0755,
 		path	=> "/usr/local/bin/$name",
 		source	=> "puppet:///modules/$source_class/$name",
 	}
