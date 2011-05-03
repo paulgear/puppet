@@ -13,6 +13,7 @@ class openvpn::package {
 }
 
 class openvpn::service {
+	include openvpn::package
 	$svc = "openvpn"
 	service { $svc:
 		enable	=> true,
@@ -34,9 +35,27 @@ class openvpn::config {
 	}
 }
 
-define openvpn::client ( $remotes, $remote_random = "false" ) {
+class openvpn::pingtest {
+	include openvpn::service
+	$file = "/usr/local/bin/pingtest"
+	file { $file:
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		source	=> "puppet:///modules/openvpn/pingtest",
+		require	=> Class["openvpn::service"],
+	}
+	cron_job { "openvpn-pingtest":
+		interval	=> "d",
+		script		=> "# Managed by puppet on $server - do not edit here
+*/10 * * * * root $file
+",
+	}
+}
+
+define openvpn::client ( $cfgname = "client", $remotes, $remote_random = "false" ) {
 	include openvpn
-	$cfg = "client.conf"
+	$cfg = "$cfgname.conf"
 	$dir = "/etc/openvpn"
 	file { "$dir/$cfg":
 		mode	=> 644,
