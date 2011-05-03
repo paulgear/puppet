@@ -38,8 +38,8 @@ class openvpn::config {
 class openvpn::pingtest {
 	include openvpn::service
 	ulb { [ "openvpn-status", "pingtest" ]:
-		class	=> "openvpn",
-		require	=> Class["openvpn::service"],
+		source_class	=> "openvpn",
+		require		=> Class["openvpn::service"],
 	}
 	cron_job { "openvpn-pingtest":
 		interval	=> "d",

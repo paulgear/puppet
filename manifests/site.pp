@@ -54,13 +54,13 @@ define cron_job( $enable = "true", $interval = "daily", $script = "" ) {
 	}
 }
 
-define ulb( $class ) {
-	file { "$fqdn-$class-$name":
+define ulb( $source_class ) {
+	file { "$fqdn-$source_class-$name":
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
 		path	=> "/usr/local/bin/$name",
-		source	=> "puppet:///modules/$class/$name",
+		source	=> "puppet:///modules/$source_class/$name",
 	}
 }
 
