@@ -54,6 +54,16 @@ define cron_job( $enable = "true", $interval = "daily", $script = "" ) {
 	}
 }
 
+define ulb( $class ) {
+	file { "$fqdn-$class-$name":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		path	=> "/usr/local/bin/$name",
+		source	=> "puppet:///modules/$class/$name",
+	}
+}
+
 import "roles"
 import "sites"
 import "nodes"

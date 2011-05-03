@@ -37,13 +37,8 @@ class openvpn::config {
 
 class openvpn::pingtest {
 	include openvpn::service
-	$files = [ "openvpn-status", "pingtest", ]
-	file { $files:
-		ensure	=> file,
-		owner	=> root,
-		group	=> root,
-		path	=> "/usr/local/bin/$name",
-		source	=> "puppet:///modules/openvpn/$name",
+	ulb { [ "openvpn-status", "pingtest" ]:
+		class	=> "openvpn",
 		require	=> Class["openvpn::service"],
 	}
 	cron_job { "openvpn-pingtest":
