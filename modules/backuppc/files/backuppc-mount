@@ -1,0 +1,22 @@
+#!/bin/sh
+# Script to mount/unmount encrypted backuppc drive
+
+#set -e
+set -u
+
+CMD=${1:-on}
+DSK=${2:-sdc1}
+FS=${3:-/var/lib/backuppc}
+
+case "$CMD" in
+    on)
+	cryptsetup luksOpen /dev/$DSK ${DSK}_crypt
+	mount $FS
+	service backuppc start
+	;;
+    off)
+	service backuppc stop
+    	umount $FS
+	cryptsetup luksClose /dev/mapper/${DSK}_crypt
+	;;
+esac
