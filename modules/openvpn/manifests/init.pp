@@ -44,7 +44,7 @@ class openvpn::pingtest {
 	cron_job { "openvpn-pingtest":
 		interval	=> "d",
 		script		=> "# Managed by puppet on $server - do not edit here
-*/10 * * * * root $file
+*/10 * * * * root /usr/local/bin/pingtest
 ",
 	}
 }
