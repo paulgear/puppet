@@ -8,7 +8,8 @@ use Getopt::Long;
 my $DEBUG = 0;
 GetOptions( 'debug' => \$DEBUG );
 
-if ($#ARGV < 0  &&  -t 0) {
+# set the default log file name
+if ($#ARGV < 0) {
 	push @ARGV, "/var/log/mail.log";
 }
 
