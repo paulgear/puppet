@@ -13,6 +13,8 @@ WAIT_TIME=3600
 (( WAIT_COUNT=WAIT_TIME/SLEEP_TIME ))
 REPAIR=1
 CHECK=1
+WAIT_REPAIR=1
+WAIT_CHECK=1
 
 # return all the volumes with non-zero mismatch_cnt values
 get_mismatch_vols()
@@ -51,6 +53,12 @@ action()
 
 	info "Running $SYNC_ACTION on $VOL"
 	echo $SYNC_ACTION > /sys/block/$VOL/md/sync_action
+}
+
+wait_idle()
+{
+	SYNC_ACTION="$1"
+	VOL="$2"
 	sleep $SLEEP_TIME
 	CURR_ACTION=`head -n 1 /sys/block/$VOL/md/sync_action|awk '{print $1}'`
 	count=1
@@ -70,19 +78,31 @@ action()
 # process command line
 for arg; do
 	case $arg in
+		--no-check)
+			CHECK=0
+			;;
+		--no-wait-check)
+			WAIT_CHECK=0
+			;;
 		--no-repair)
 			REPAIR=0
 			;;
-		--no-check)
-			CHECK=0
+		--no-wait-repair)
+			WAIT_REPAIR=0
 			;;
 	esac
 done
 
-#do check here if necessary
+# TODO: add pre-check here
 
 VOLS=`get_mismatch_vols`
 for VOL in $VOLS; do
+	# reset variables to defaults for each volume checked
+	repair=$REPAIR
+	check=$CHECK
+	wait_repair=$WAIT_REPAIR
+	wait_check=$WAIT_CHECK
+
 	# only repair arrays that are clean or active
 	STATE=`head -n 1 /sys/block/$VOL/md/array_state`
 	case $STATE in
@@ -95,22 +115,40 @@ for VOL in $VOLS; do
 			;;
 	esac
 
-	# only repair arrays that are not syncing already
+	# only repair arrays that are not repairing already
 	ACTION=`head -n 1 /sys/block/$VOL/md/sync_action`
-	if [ "$ACTION" != "idle" ]; then
-		info "$VOL is performing '$ACTION' - not repairing"
-		continue
-	fi
+	case $ACTION in
+		idle)
+			;;
+		repair)
+			info "$VOL is already in '$STATE' state - skipping repair"
+			repair=0
+			;;
+		*)
+			info "$VOL is performing '$ACTION' - not repairing"
+			continue
+			;;
+	esac
 
 	# start the repair
 	info "Mismatch count for $VOL is `cat /sys/block/$VOL/md/mismatch_cnt`"
-	if [ "$REPAIR" -eq 1 ]; then
+	if [ "$repair" -eq 1 ]; then
 		action repair $VOL
 	fi
 
+	# wait for repair to complete
+	if [ "$wait_repair" -eq 1 ]; then
+		wait_idle repair $VOL
+	fi
+
 	# repair is done - do a check
-	if [ "$CHECK" -eq 1 ]; then
+	if [ "$check" -eq 1 ]; then
 		action check $VOL
+	fi
+
+	# wait for the check to complete
+	if [ "$wait_check" -eq 1 ]; then
+		wait_idle check $VOL
 		# report status of check
 		info "New mismatch count for $VOL is `cat /sys/block/$VOL/md/mismatch_cnt`"
 	fi
