@@ -11,6 +11,8 @@ PROG=`basename $0`
 SLEEP_TIME=10
 WAIT_TIME=3600
 (( WAIT_COUNT=WAIT_TIME/SLEEP_TIME ))
+REPAIR=1
+CHECK=1
 
 # return all the volumes with non-zero mismatch_cnt values
 get_mismatch_vols()
@@ -65,6 +67,18 @@ action()
 	done
 }
 
+# process command line
+for arg; do
+	case $arg in
+		--no-repair)
+			REPAIR=0
+			;;
+		--no-check)
+			CHECK=0
+			;;
+	esac
+done
+
 #do check here if necessary
 
 VOLS=`get_mismatch_vols`
@@ -90,19 +104,23 @@ for VOL in $VOLS; do
 
 	# start the repair
 	info "Mismatch count for $VOL is `cat /sys/block/$VOL/md/mismatch_cnt`"
-	action repair $VOL
+	if [ "$REPAIR" -eq 1 ]; then
+		action repair $VOL
+	fi
 
 	# repair is done - do a check
-	action check $VOL
-
-	# report status of repair
-	info "Repaired volume $VOL; current mismatch_cnt: `cat /sys/block/$VOL/md/mismatch_cnt`"
+	if [ "$CHECK" -eq 1 ]; then
+		action check $VOL
+		# report status of check
+		info "New mismatch count for $VOL is `cat /sys/block/$VOL/md/mismatch_cnt`"
+	fi
 done
 
 if [ -n "$VOLS" ]; then
-	info "RAID repairs complete, checked volumes: $VOLS"
+	info "Checked volumes: $VOLS"
 	ERR_VOLS=`get_mismatch_vols`
 	if [ -n "$ERR_VOLS" ]; then
 		error "Remaining errored volumes: $ERR_VOLS"
 	fi
 fi
+
