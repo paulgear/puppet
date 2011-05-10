@@ -55,7 +55,7 @@ define cron_job( $enable = "true", $interval = "daily", $script = "" ) {
 }
 
 define ulb( $source_class, $mode = 0755, $owner = root, $group = root ) {
-	file { "ulb-$fqdn-$source_class-$name":
+	file { "/usr/local/bin/$name":
 		ensure	=> file,
 		owner	=> $owner,
 		group	=> $group,
@@ -66,7 +66,7 @@ define ulb( $source_class, $mode = 0755, $owner = root, $group = root ) {
 }
 
 define ule( $source_class, $mode = 0644, $owner = root, $group = root ) {
-	file { "ule-$fqdn-$source_class-$name":
+	file { "/usr/local/etc/$name":
 		ensure	=> file,
 		owner	=> $owner,
 		group	=> $group,
