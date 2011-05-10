@@ -1,0 +1,102 @@
+#!/bin/bash
+#
+# Description:	Check for RAID volumes with mismatched blocks and automatically repair them
+# Author:	Paul Gear
+# Created:	2011-05-10
+
+set -e
+set -u
+
+PROG=`basename $0`
+SLEEP_TIME=10
+WAIT_TIME=3600
+(( WAIT_COUNT=WAIT_TIME/SLEEP_TIME ))
+
+# return all the volumes with non-zero mismatch_cnt values
+get_mismatch_vols()
+{
+	grep -l '[1-9]' /sys/block/*/md/mismatch_cnt 2>/dev/null|cut -d/ -f4
+}
+
+log()
+{
+	LEVEL="$1"
+	shift
+	logger -t $PROG -p local0.$LEVEL $STDERR "$@"
+}
+
+error()
+{
+	log error "$@"
+	exit 1
+}
+
+info()
+{
+	if [ -t 0 ]; then
+		STDERR=-s
+	else
+		STDERR=""
+	fi
+	log info "$@"
+}
+
+
+action()
+{
+	SYNC_ACTION="$1"
+	VOL="$2"
+
+	info "Running $SYNC_ACTION on $VOL"
+	echo $SYNC_ACTION > /sys/block/$VOL/md/sync_action
+	sleep $SLEEP_TIME
+	CURR_ACTION=`head -n 1 /sys/block/$VOL/md/sync_action|awk '{print $1}'`
+	count=1
+	while [ "$CURR_ACTION" != "idle" ]; do
+		sleep $SLEEP_TIME
+		CURR_ACTION=`head -n 1 /sys/block/$VOL/md/sync_action|awk '{print $1}'`
+		if [ "$CURR_ACTION" = "idle" ]; then
+			break
+		fi
+		(( ++count ))
+		if [ "$count" -ge "$WAIT_COUNT" ]; then
+			error "Waited $WAIT_TIME seconds for $VOL to $SYNC_ACTION but it's still $CURR_ACTION - exiting"
+		fi
+	done
+}
+
+#do check here if necessary
+
+VOLS=`get_mismatch_vols`
+for VOL in $VOLS; do
+	# only repair arrays that are clean and idle
+	STATE=`head -n 1 /sys/block/$VOL/md/array_state|awk '{print $1}'`
+	if [ "$STATE" != "clean" ]; then
+		info "$VOL is in '$STATE' state - not repairing"
+		continue
+	fi
+
+	ACTION=`head -n 1 /sys/block/$VOL/md/sync_action|awk '{print $1}'`
+	if [ "$ACTION" != "idle" ]; then
+		info "$VOL is performing '$ACTION' - not repairing"
+		continue
+	fi
+
+	# start the repair
+	info "Mismatch count for $VOL is `cat /sys/block/$VOL/md/mismatch_cnt`"
+	action repair $VOL
+
+	# repair is done - do a check
+	action check $VOL
+
+	# report status of repair
+	info "Repaired volume $VOL; current mismatch_cnt: `cat /sys/block/$VOL/md/mismatch_cnt`"
+done
+
+if [ -n "$VOLS" ]; then
+	info "RAID repairs complete, checked volumes: $VOLS"
+	ERR_VOLS=`get_mismatch_vols`
+	if [ -n "$ERR_VOLS" ]; then
+		error "Remaining errored volumes: $ERR_VOLS"
+	fi
+fi
