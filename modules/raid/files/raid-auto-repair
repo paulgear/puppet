@@ -69,14 +69,20 @@ action()
 
 VOLS=`get_mismatch_vols`
 for VOL in $VOLS; do
-	# only repair arrays that are clean and idle
-	STATE=`head -n 1 /sys/block/$VOL/md/array_state|awk '{print $1}'`
-	if [ "$STATE" != "clean" ]; then
-		info "$VOL is in '$STATE' state - not repairing"
-		continue
-	fi
+	# only repair arrays that are clean or active
+	STATE=`head -n 1 /sys/block/$VOL/md/array_state`
+	case $STATE in
+		clean|active)
+			info "$VOL is in '$STATE' state"
+			;;
+		*)
+			info "$VOL is in '$STATE' state - not repairing"
+			continue
+			;;
+	esac
 
-	ACTION=`head -n 1 /sys/block/$VOL/md/sync_action|awk '{print $1}'`
+	# only repair arrays that are not syncing already
+	ACTION=`head -n 1 /sys/block/$VOL/md/sync_action`
 	if [ "$ACTION" != "idle" ]; then
 		info "$VOL is performing '$ACTION' - not repairing"
 		continue
