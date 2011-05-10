@@ -155,10 +155,10 @@ for VOL in $VOLS; do
 done
 
 if [ -n "$VOLS" ]; then
-	info "Checked volumes: $VOLS"
+	info "Checked volumes:" $VOLS
 	ERR_VOLS=`get_mismatch_vols`
 	if [ -n "$ERR_VOLS" ]; then
-		error "Remaining errored volumes: $ERR_VOLS"
+		error "Remaining errored volumes:" $ERR_VOLS
 	fi
 fi
 
