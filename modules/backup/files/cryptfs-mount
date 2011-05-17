@@ -9,42 +9,52 @@ set -u
 
 PROG=`basename $0`
 
-if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
-	echo "Usage: $PROG /dev/xxxxx [label] [/mnt/point]" >&2
+usage()
+{
+	echo "Usage: $PROG /dev/xxxxx label" >&2
 	exit 1
+}
+
+if [ "$#" -ne 2 ]; then
+	usage
 fi
 
 DEVICE="$1"
-LABEL="${2:-''}"
-MOUNTP="${3:-''}"
-FSTYPE="${4:-'ext3'}"
+LABEL="$2"
 
-CRYPT_BASE=`basename $DEVICE`_crypt
-CRYPT_DEV=/dev/mapper/$CRYPT_BASE
+. /usr/local/bin/cryptfs-common
 
-is_mounted()
+unmount()
 {
-	mount | grep -q "^$1[ 	]"
+	warning "Unmounting $1"
+	umount $1
 }
 
-crypt_open()
+mount_it()
 {
-	cryptsetup luksOpen $DEVICE $CRYPT_BASE
+	warning "Mounting $1"
+	mount $1
 }
 
 #
 # Main
 #
 
-
-if is_mounted $CRYPT_DEV; then
-	echo "$CRYPT_DEV already mounted, doing nothing"
-	exit 0
-fi
-crypt_open $DEVICE
-if [ -n "$LABEL" ]; then
-	mount LABEL=$LABEL
-else
-	mount $CRYPT_DEV
-fi
+case $PROG in
+	*umount)
+		is_mounted $CRYPT_DEV && unmount $CRYPT_DEV
+		crypt_close $CRYPT_DEV
+		;;
+	*mount)
+		if is_mounted $CRYPT_DEV; then
+			echo "$CRYPT_DEV already mounted, doing nothing"
+			exit 0
+		fi
+		crypt_open $DEVICE $CRYPT_DEV
+		mount_it LABEL=$LABEL
+		;;
+	*)
+		usage
+		;;
+esac
 

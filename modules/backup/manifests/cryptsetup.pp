@@ -5,7 +5,7 @@ class backup::cryptsetup {
 }
 
 class backup::cryptsetup::files {
-	ulb { [ "cryptfs-create", "cryptfs-mount", ]:
+	ulb { [ "cryptfs-common", "cryptfs-create", "cryptfs-mount", ]:
 		source_class	=> "backup",
 	}
 	file { "/usr/local/bin/cryptfs-umount":

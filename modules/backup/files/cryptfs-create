@@ -9,77 +9,53 @@ set -u
 
 PROG=`basename $0`
 
-if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
-	echo "Usage: $PROG /dev/xxxxx /mnt/point [label]" >&2
+if [ "$#" -ne 3 ]; then
+	echo "Usage: $PROG /dev/xxxxx /mnt/point label" >&2
 	exit 1
 fi
 
 DEVICE="$1"
 MOUNTP="$2"
-LABEL="${3:-''}"
-FSTYPE="${4:-'ext3'}"
+LABEL="$3"
+FSTYPE="ext3"
 
-CRYPT_BASE=`basename $DEVICE`_crypt
-CRYPT_DEV=/dev/mapper/$CRYPT_BASE
+. /usr/local/bin/cryptfs-common
 
+# usage: show_warning /dev/raw_device /dev/mapper/device_crypt
 show_warning()
 {
-	cat >&2 <<EOF
-*****************************************************************************
-* WARNING: $1 is about to be overwritten with an encrypted filesystem. This *
-*          This procedure is irreversible and will destroy all data on $1.  *
-*          Currently, we know the following about $1:                       *
-*****************************************************************************
-EOF
-	ls -la $1
-	df -m $1
-	mount | grep "^$1[ 	]"
-	cat >&2 <<EOF
-*****************************************************************************
-* Type YES (in upper case) to continue.                                     *
-*****************************************************************************
-EOF
-	read response
-	if [ "$response" != "YES" ]; then
-		exit 1
-	fi
+	warning "WARNING: $1 is about to be overwritten with an encrypted filesystem.
+	    This procedure is irreversible and will destroy all data on $1.
+	    Currently, we know the following about $1:"
+	set +e
+	ls -la $1 $2 2>/dev/null
+	df -m | grep -we "$1" -e "$2"
+	mount | grep -Ee "^($1|$2)[ 	]"
+	set -e
 }
 
-is_mounted()
-{
-	mount | grep -q "^$1[ 	]"
-}
-
+# usage: crypt_setup /dev/raw_device
 crypt_setup()
 {
-	# align on 256K boundaries
-	echo cryptsetup luksFormat --align-payload=512 $DEVICE
+	warning "Creating encrypted device for $1"
+	# align crypto device on 256K boundaries
+	cryptsetup luksFormat --align-payload=512 $1
 }
 
-crypt_open()
-{
-	echo cryptsetup luksOpen $DEVICE $CRYPT_BASE
-}
-
+# usage: make_filesystem /dev/mapper/device_crypt label ext3
 make_filesystem()
 {
-	if [ "$#" -gt 1 ]; then
-		LABEL="-L $2"
-	else
-		LABEL=""
-	fi
-	echo mkfs -t $FSTYPE $LABEL $1
+	warning "Creating filesystem on $1"
+	mkfs -t $3 -L $2 $1
 }
 
+# usage: update_fstab label /mount/point ext3
 update_fstab()
 {
-	if [ "$#" -gt 2 ]; then
-		DEVICE="LABEL=$LABEL"
-	else
-		DEVICE=$CRYPT_DEV
-	fi
-	if ! grep -q "^$DEVICE[ 	]" /etc/fstab; then
-		echo "$DEVICE $2 $FSTYPE noatime,nodiratime,noauto 0 0" >> /etc/fstab
+	local DEVICE="LABEL=$1" FSTAB="/etc/fstab"
+	if ! grep -q "^$DEVICE[ 	]" $FSTAB; then
+		warning "Adding entry for $DEVICE to $FSTAB"
+		echo "$DEVICE $2 $3 noatime,nodiratime,noauto 0 0" >> $FSTAB
 	fi
 }
 
@@ -88,15 +64,18 @@ update_fstab()
 #
 
 # Sanity checks
-echo test -e $DEVICE || error "$DEVICE does not exist"
-echo test -w $DEVICE || error "$DEVICE not writable"
-echo test -L $DEVICE -o -b $DEVICE || error "$DEVICE is not a block device or symlink"
+test -e $DEVICE || error "$DEVICE does not exist"
+test -w $DEVICE || error "$DEVICE not writable"
+test -L $DEVICE -o -b $DEVICE || error "$DEVICE is not a block device or symlink"
+test -e $CRYPT_DEV && error "$CRYPT_DEV already exists"
 
-show_warning $DEVICE
+show_warning $DEVICE $CRYPT_DEV
 is_mounted $DEVICE && umount $DEVICE
 crypt_setup $DEVICE
-crypt_open $DEVICE
-make_filesystem $DEVICE $LABEL
-update_fstab $DEVICE $MOUNTP $LABEL
-mount $DEVICE
+crypt_open $DEVICE $CRYPT_DEV
+make_filesystem $CRYPT_DEV $LABEL $FSTYPE
+update_fstab $LABEL $MOUNTP $FSTYPE
+mkdir -p $MOUNTP
+crypt_close $CRYPT_BASE
+cryptfs-mount $DEVICE $LABEL
 
