@@ -1,0 +1,50 @@
+#!/bin/sh
+# Description:	Mount an encrypted file system
+# Author:	Paul Gear <github@libertysys.com.au>
+# Created:	2011-05-17
+# License:	GPLv3
+
+set -e
+set -u
+
+PROG=`basename $0`
+
+if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
+	echo "Usage: $PROG /dev/xxxxx [label] [/mnt/point]" >&2
+	exit 1
+fi
+
+DEVICE="$1"
+LABEL="${2:-''}"
+MOUNTP="${3:-''}"
+FSTYPE="${4:-'ext3'}"
+
+CRYPT_BASE=`basename $DEVICE`_crypt
+CRYPT_DEV=/dev/mapper/$CRYPT_BASE
+
+is_mounted()
+{
+	mount | grep -q "^$1[ 	]"
+}
+
+crypt_open()
+{
+	cryptsetup luksOpen $DEVICE $CRYPT_BASE
+}
+
+#
+# Main
+#
+
+
+if is_mounted $CRYPT_DEV; then
+	echo "$CRYPT_DEV already mounted, doing nothing"
+	exit 0
+fi
+crypt_open $DEVICE
+if [ -n "$LABEL" ]; then
+	mount LABEL=$LABEL
+else
+	mount $CRYPT_DEV
+fi
+

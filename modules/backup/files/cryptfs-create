@@ -1,0 +1,102 @@
+#!/bin/sh
+# Description:	Create encrypted file system on a device
+# Author:	Paul Gear <github@libertysys.com.au>
+# Created:	2011-05-17
+# License:	GPLv3
+
+set -e
+set -u
+
+PROG=`basename $0`
+
+if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
+	echo "Usage: $PROG /dev/xxxxx /mnt/point [label]" >&2
+	exit 1
+fi
+
+DEVICE="$1"
+MOUNTP="$2"
+LABEL="${3:-''}"
+FSTYPE="${4:-'ext3'}"
+
+CRYPT_BASE=`basename $DEVICE`_crypt
+CRYPT_DEV=/dev/mapper/$CRYPT_BASE
+
+show_warning()
+{
+	cat >&2 <<EOF
+*****************************************************************************
+* WARNING: $1 is about to be overwritten with an encrypted filesystem. This *
+*          This procedure is irreversible and will destroy all data on $1.  *
+*          Currently, we know the following about $1:                       *
+*****************************************************************************
+EOF
+	ls -la $1
+	df -m $1
+	mount | grep "^$1[ 	]"
+	cat >&2 <<EOF
+*****************************************************************************
+* Type YES (in upper case) to continue.                                     *
+*****************************************************************************
+EOF
+	read response
+	if [ "$response" != "YES" ]; then
+		exit 1
+	fi
+}
+
+is_mounted()
+{
+	mount | grep -q "^$1[ 	]"
+}
+
+crypt_setup()
+{
+	# align on 256K boundaries
+	echo cryptsetup luksFormat --align-payload=512 $DEVICE
+}
+
+crypt_open()
+{
+	echo cryptsetup luksOpen $DEVICE $CRYPT_BASE
+}
+
+make_filesystem()
+{
+	if [ "$#" -gt 1 ]; then
+		LABEL="-L $2"
+	else
+		LABEL=""
+	fi
+	echo mkfs -t $FSTYPE $LABEL $1
+}
+
+update_fstab()
+{
+	if [ "$#" -gt 2 ]; then
+		DEVICE="LABEL=$LABEL"
+	else
+		DEVICE=$CRYPT_DEV
+	fi
+	if ! grep -q "^$DEVICE[ 	]" /etc/fstab; then
+		echo "$DEVICE $2 $FSTYPE noatime,nodiratime,noauto 0 0" >> /etc/fstab
+	fi
+}
+
+#
+# Main
+#
+
+# Sanity checks
+echo test -e $DEVICE || error "$DEVICE does not exist"
+echo test -w $DEVICE || error "$DEVICE not writable"
+echo test -L $DEVICE -o -b $DEVICE || error "$DEVICE is not a block device or symlink"
+
+show_warning $DEVICE
+is_mounted $DEVICE && umount $DEVICE
+crypt_setup $DEVICE
+crypt_open $DEVICE
+make_filesystem $DEVICE $LABEL
+update_fstab $DEVICE $MOUNTP $LABEL
+mount $DEVICE
+
