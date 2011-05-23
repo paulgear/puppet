@@ -1,0 +1,60 @@
+#!/bin/sh
+# Description:	Mount an encrypted file system
+# Author:	Paul Gear <github@libertysys.com.au>
+# Created:	2011-05-17
+# License:	GPLv3
+
+set -e
+set -u
+
+PROG=`basename $0`
+
+usage()
+{
+	echo "Usage: $PROG /dev/xxxxx label" >&2
+	exit 1
+}
+
+if [ "$#" -ne 2 ]; then
+	usage
+fi
+
+DEVICE="$1"
+LABEL="$2"
+
+. /usr/local/bin/cryptfs-common
+
+unmount()
+{
+	warning "Unmounting $1"
+	umount $1
+}
+
+mount_it()
+{
+	warning "Mounting $1"
+	mount $1
+}
+
+#
+# Main
+#
+
+case $PROG in
+	*umount)
+		is_mounted $CRYPT_DEV && unmount $CRYPT_DEV
+		crypt_close $CRYPT_DEV
+		;;
+	*mount)
+		if is_mounted $CRYPT_DEV; then
+			echo "$CRYPT_DEV already mounted, doing nothing"
+			exit 0
+		fi
+		crypt_open $DEVICE $CRYPT_DEV
+		mount_it LABEL=$LABEL
+		;;
+	*)
+		usage
+		;;
+esac
+

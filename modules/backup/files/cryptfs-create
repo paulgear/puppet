@@ -1,0 +1,81 @@
+#!/bin/sh
+# Description:	Create encrypted file system on a device
+# Author:	Paul Gear <github@libertysys.com.au>
+# Created:	2011-05-17
+# License:	GPLv3
+
+set -e
+set -u
+
+PROG=`basename $0`
+
+if [ "$#" -ne 3 ]; then
+	echo "Usage: $PROG /dev/xxxxx /mnt/point label" >&2
+	exit 1
+fi
+
+DEVICE="$1"
+MOUNTP="$2"
+LABEL="$3"
+FSTYPE="ext3"
+
+. /usr/local/bin/cryptfs-common
+
+# usage: show_warning /dev/raw_device /dev/mapper/device_crypt
+show_warning()
+{
+	warning "WARNING: $1 is about to be overwritten with an encrypted filesystem.
+	    This procedure is irreversible and will destroy all data on $1.
+	    Currently, we know the following about $1:"
+	set +e
+	ls -la $1 $2 2>/dev/null
+	df -m | grep -we "$1" -e "$2"
+	mount | grep -Ee "^($1|$2)[ 	]"
+	set -e
+}
+
+# usage: crypt_setup /dev/raw_device
+crypt_setup()
+{
+	warning "Creating encrypted device for $1"
+	# align crypto device on 256K boundaries
+	cryptsetup luksFormat --align-payload=512 $1
+}
+
+# usage: make_filesystem /dev/mapper/device_crypt label ext3
+make_filesystem()
+{
+	warning "Creating filesystem on $1"
+	mkfs -t $3 -L $2 $1
+}
+
+# usage: update_fstab label /mount/point ext3
+update_fstab()
+{
+	local DEVICE="LABEL=$1" FSTAB="/etc/fstab"
+	if ! grep -q "^$DEVICE[ 	]" $FSTAB; then
+		warning "Adding entry for $DEVICE to $FSTAB"
+		echo "$DEVICE $2 $3 noatime,nodiratime,noauto 0 0" >> $FSTAB
+	fi
+}
+
+#
+# Main
+#
+
+# Sanity checks
+test -e $DEVICE || error "$DEVICE does not exist"
+test -w $DEVICE || error "$DEVICE not writable"
+test -L $DEVICE -o -b $DEVICE || error "$DEVICE is not a block device or symlink"
+test -e $CRYPT_DEV && error "$CRYPT_DEV already exists"
+
+show_warning $DEVICE $CRYPT_DEV
+is_mounted $DEVICE && umount $DEVICE
+crypt_setup $DEVICE
+crypt_open $DEVICE $CRYPT_DEV
+make_filesystem $CRYPT_DEV $LABEL $FSTYPE
+update_fstab $LABEL $MOUNTP $FSTYPE
+mkdir -p $MOUNTP
+crypt_close $CRYPT_BASE
+cryptfs-mount $DEVICE $LABEL
+

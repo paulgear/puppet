@@ -1,0 +1,43 @@
+# Description:	shell functions common to cryptfs-* programs
+# Author:	Paul Gear <github@libertysys.com.au>
+# Created:	2011-05-17
+# License:	GPLv3
+
+# $PROG and $DEVICE must be set by the caller
+
+CRYPT_BASE=`basename $DEVICE`_crypt
+CRYPT_DEV=/dev/mapper/$CRYPT_BASE
+
+# usage: error "Error message"
+error()
+{
+	echo "$PROG: ERROR -" "$@" >&2
+	exit 1
+}
+
+# usage: warning "Warning message"
+warning()
+{
+	echo "***** $@"
+}
+
+# returns true if the given device is mounted
+is_mounted()
+{
+	mount | grep -q "^$1[ 	]"
+}
+
+# usage: crypt_open /dev/raw_device /dev/mapper/device_crypt
+crypt_open()
+{
+	warning "Opening encrypted device for $1 ($2)"
+	cryptsetup luksOpen $1 `basename $2`
+}
+
+# usage: crypt_close /dev/mapper/device_crypt
+crypt_close()
+{
+	warning "Closing encrypted device for $1"
+	cryptsetup luksClose $1
+}
+
