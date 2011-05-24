@@ -11,10 +11,13 @@ class raid::repair::weekly {
 	# this can take a while, so we run it at the end of the weekly run
 	cron_job { "zzzzz-puppet-raid-auto-repair":
 		require		=> Class["raid::repair"],
-		interval	=> "daily",
+		interval	=> "weekly",
 		script		=> "#!/bin/sh
 /usr/local/bin/raid-auto-repair
 ",
+	}
+	file { "/etc/cron.daily/zzzzz-puppet-raid-auto-repair":
+		ensure		=> absent,
 	}
 }
 
