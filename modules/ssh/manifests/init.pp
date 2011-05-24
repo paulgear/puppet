@@ -40,7 +40,7 @@ class ssh {
 			$user = "root",
 			$type = "rsa",
 			$storedir = "$ssh::storedir",
-			$options = "absent"
+			$options = ""
 				) {
 		ssh_authorized_key { "$name":
 			ensure	=> $ensure,
