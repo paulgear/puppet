@@ -34,6 +34,19 @@ class dhcp::server::service {
 	}
 }
 
+class dhcp::server::restarter {
+	include dhcp::server
+	ulb { "dhcpd-check-restart":
+		source_class	=> "dhcp",
+	}
+	cron_job { "dhcpd-check-restart":
+		interval	=> "d",
+		script		=> "# Created by puppet on $server - do not edit here
+* * * * * root /usr/local/bin/dhcpd-check-restart
+",
+	}
+}
+
 class dhcp::server::config {
 	include dhcp::server
 	$cfg = $operatingsystem ? {
