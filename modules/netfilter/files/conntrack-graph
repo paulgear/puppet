@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# generate rrd graph for ip connection tracking
+
+set -e
+set -u
+
+DIR=${1:-$HOME}
+FILE=$HOME/ipconntrack.rrd
+BASE=$DIR/ipconntrack
+
+graph()
+{
+	interval=$1
+	shift
+	rrdtool graph "$@" \
+		--start=e-1$i \
+		--lower-limit=0 \
+		--alt-autoscale-max \
+		--title="conntrack: count vs max ($interval)" \
+			"DEF:cnt=$FILE:count:LAST" \
+			"DEF:max=$FILE:max:LAST" \
+			"VDEF:countmin=cnt,MINIMUM" \
+			"VDEF:countavg=cnt,AVERAGE" \
+			"VDEF:countmax=cnt,MAXIMUM" \
+			"GPRINT:countmin:%6.2lf min" \
+			"GPRINT:countavg:%6.2lf avg" \
+			"GPRINT:countmax:%6.2lf max\n" \
+			"LINE1:cnt#00FF00:count\n" \
+			"LINE2:max#000000:maximum entries  " >/dev/null
+}
+
+for i in hour week month; do
+	graph $i $BASE-$i.png
+done
+
+for i in day; do
+	graph $i $BASE-$i.png \
+		--width=900 \
+		--height=250
+done
+
