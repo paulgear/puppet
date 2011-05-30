@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# create rrd file to track ip connection tracking
+
+set -e
+set -u
+
+STEP=60					# one sample per minute
+(( SAMPLES=60 * 24 * 33 ))		# 33 days' worth
+XFF=0.9
+FILE=$HOME/ipconntrack.rrd
+
+rrdtool create $FILE --step $STEP \
+	$(ls /proc/sys/net/ipv4/netfilter|while read metric; do
+		met=$(echo $metric|sed -e 's/ip_conntrack_//g' -e 's/_//g' -e 's/timeout/tmout/g')
+		echo DS:$met:GAUGE:$STEP:0:U;
+	done) \
+		"RRA:LAST:$XFF:1:$SAMPLES" \
+		"RRA:MIN:$XFF:1:$SAMPLES" \
+		"RRA:MAX:$XFF:1:$SAMPLES" \
+		"RRA:AVERAGE:$XFF:1:$SAMPLES"
+
+# Original names of metrics:
+#ip_conntrack_buckets
+#ip_conntrack_count
+#ip_conntrack_generic_timeout
+#ip_conntrack_icmp_timeout
+#ip_conntrack_log_invalid
+#ip_conntrack_max
+#ip_conntrack_tcp_be_liberal
+#ip_conntrack_tcp_loose
+#ip_conntrack_tcp_max_retrans
+#ip_conntrack_tcp_timeout_close
+#ip_conntrack_tcp_timeout_close_wait
+#ip_conntrack_tcp_timeout_established
+#ip_conntrack_tcp_timeout_fin_wait
+#ip_conntrack_tcp_timeout_last_ack
+#ip_conntrack_tcp_timeout_max_retrans
+#ip_conntrack_tcp_timeout_syn_recv
+#ip_conntrack_tcp_timeout_syn_sent
+#ip_conntrack_tcp_timeout_time_wait
+#ip_conntrack_udp_timeout
+#ip_conntrack_udp_timeout_stream
+
+# Shortened names:
+#buckets
+#count
+#generictmout
+#icmptmout
+#loginvalid
+#max
+#tcpbeliberal
+#tcploose
+#tcpmaxretrans
+#tcptmoutclose
+#tcptmoutclosewait
+#tcptmoutestablished
+#tcptmoutfinwait
+#tcptmoutlastack
+#tcptmoutmaxretrans
+#tcptmoutsynrecv
+#tcptmoutsynsent
+#tcptmouttimewait
+#udptmout
+#udptmoutstream
+

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# update rrd file for ip connection tracking
+
+set -e
+set -u
+
+FILE=$HOME/ipconntrack.rrd
+
+cd /proc/sys/net/ipv4/netfilter
+
+tmpl=""
+vals=""
+
+TMPF=`mktemp`
+trap 'rm -f $TMPF' 0 1 2 15
+grep . * | sed -e 's/:/ /' > $TMPF
+
+while read metric value; do
+	met="$(echo $metric|sed -e 's/ip_conntrack_//g' -e 's/_//g' -e 's/timeout/tmout/g')"
+	#echo $met $tmpl
+	if [ -n "$tmpl" ]; then
+		tmpl="$tmpl:$met"
+		vals="$vals:$value"
+	else
+		tmpl="$met"
+		vals="$value"
+	fi
+done < $TMPF
+DATE=`date +%s`
+((MINUTE=DATE/60*60))	# round to nearest minute to ensure no gaps in RRD
+rrdtool update $FILE --template "$tmpl" "$MINUTE:$vals"
+
