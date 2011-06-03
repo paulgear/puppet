@@ -41,5 +41,13 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 		logoutput	=> on_failure,
 	}
 
+	cron_job { "$pkg-git-gc":
+		interval	=> weekly,
+		script		=> "#!/bin/sh
+cd /etc
+git gc
+",
+	}
+
 }
 
