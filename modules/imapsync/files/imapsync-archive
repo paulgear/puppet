@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+# sync imap accounts
+# used to transfer messages daily to an archive server - designed to be run from the archive
+# server
+#
+# Author:	Paul Gear
+# Created:	2011-06-07
+#
+
+#set -e
+set -u
+
+PROG=`basename $0`
+
+error()
+{
+	echo "$PROG: ERROR - $@" >&2
+}
+
+fatal()
+{
+	error "$@"
+	exit 1
+}
+
+HOST1=src.example.com
+AUTHUSER1=""			# may be set
+HOST2=localhost
+AUTHUSER2=admin			# must be set
+
+# read configuration
+if [ -r /usr/local/etc/$PROG.conf ]; then
+	. /usr/local/etc/$PROG.conf
+fi
+
+(( DAYS=366 / 2 ))		# 6 months
+(( BUF=1024 * 1024 * 10 ))	# 10 MB
+
+# create temporary directory, remove on exit
+TMP=`mktemp -d`
+chmod 700 $TMP
+trap 'ret=$?; /bin/rm -rf $TMP/; exit $ret' 0 1 2 3 15
+
+# check permissions
+FILES="$HOME/$HOST1.imappassword $HOME/$HOST1.authpassword $HOME/$HOST2.authpassword"
+for i in $FILES; do
+	if [ ! -r $i ]; then
+		continue
+	fi
+	PERMS=`stat $HOME/$HOST1.imappassword | awk '/^Access:/ {print $2; exit 0}'`
+	if ! echo $PERMS | grep -q -e '---)'; then
+		# Should look something like this:
+		#Access: (0640/-rw-r-----)  Uid: (    0/    root)   Gid: (   42/  shadow)
+		fatal "Permission problem on $i: $PERMS.  Should be 0600 or 0640."
+	fi
+done
+
+# sync user accounts
+while read user1 pass1 user2 dummy; do
+	if [ -z "$pass1" -o -n "$AUTHUSER1" ]; then
+		cat $HOME/$HOST1.authpassword >$TMP/passfile1
+		authuser1="--authuser1 $AUTHUSER1"
+	else
+		echo $pass1 > $TMP/passfile1
+		authuser1=""
+	fi
+	test -z "$user2" && user2="$user1"
+
+	# call imapsync
+	nice imapsync \
+		--allowsizemismatch \
+		--buffersize $BUF \
+		--subscribe_all \
+		--minage $DAYS \
+		--noreleasecheck \
+		--exclude "Calendar" \
+		--exclude "Contacts" \
+		--exclude "Notes" \
+		--exclude "Tasks" \
+		--exclude "Other Users" \
+		--host1 "$HOST1" \
+			--user1 "$user1" \
+			--passfile1 $TMP/passfile1 \
+			--authmech1 PLAIN \
+			--ssl1 \
+			$authuser1 \
+		--host2 "$HOST2" \
+			--user2 "$user2" \
+			--passfile2 $HOME/$HOST2.authpassword \
+			--authuser2 "$AUTHUSER2" \
+		--regexflag 's/\\X-.*//g'
+
+#	--authmech1 PLAIN \
+#	--authmech2 PLAIN \
+#	--debugimap \
+#	--delete1 \
+#	--delete2 \
+#	--expunge \
+#	--expunge1 \
+#	--justlogin \
+#	--minage $DAYS \
+#	--noauthmd5 \
+#	--skipheader '^(?!Message-ID)' \
+#	--ssl1 \
+#	--ssl2 \
+#	--useheader 'Message-Id' --useheader 'Message-ID' --useheader 'Received' \
+
+done < $HOME/$HOST1.imappassword
+
