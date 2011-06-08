@@ -25,6 +25,6 @@ restrict <%= localnet %> nomodify notrap
 # End local networks
 
 # Peers
-<%= default_peers.join("\n") %>
-<%= custom_peers.join("\n") %>
+	<%= default_peers.join("\n\t") %>
+	<%= custom_peers.join("\n\t") %>
 # End peers
