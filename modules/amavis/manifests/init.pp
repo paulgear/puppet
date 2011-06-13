@@ -72,11 +72,13 @@ class amavis::files {
 		mode	=> 0755,
 		source	=> "puppet:///modules/amavis/amavis-summary",
 	}
+	file { "/etc/cron.weekly/amavis-summary":
+		ensure	=> absent,
+	}
 	cron_job { "amavis-summary":
-		interval	=> "weekly",
-		script		=> "#!/bin/sh
-# Managed by puppet on $server - do not edit locally
-/usr/local/bin/amavis-summary
+		interval	=> "d",
+		script		=> "# Managed by puppet on $server - do not edit locally
+7 0 * * 0 root /usr/local/bin/amavis-summary
 ",
 	}
 }
