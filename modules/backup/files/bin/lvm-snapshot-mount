@@ -37,6 +37,10 @@ CONF="/usr/local/etc/$PROG.conf"
 JUST_UMOUNT=0
 JUST_MOUNT=0
 
+TMP1=`mktemp`
+TMP2=`mktemp`
+trap 'rm -f $TMP1 $TMP2' 0 1 2 15
+
 # if the program name ends in -mount, default to mounting the LV, otherwise leave it unmounted
 if [ ${PROG%%"-mount"} = $PROG ]; then
 	MOUNT=0
@@ -107,6 +111,9 @@ for i in $VARLIST; do
 	fi
 done
 
+# save LV list
+lvs > $TMP1
+
 if [ $JUST_UMOUNT -ne 0 ]; then
 	# if we're called with the umount argument, just umount the snapshot and exit
 	if ismounted $SNAPSHOT_DIR; then
@@ -176,4 +183,8 @@ fi
 if [ "$MOUNT" -eq 1 ]; then
 	mount -o ro $SNAPSHOT_LV $SNAPSHOT_DIR
 fi
+
+# show LV changes
+lvs > $TMP2
+comm -3 $TMP1 $TMP2
 
