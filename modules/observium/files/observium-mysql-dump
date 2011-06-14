@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Back up observium mysql database - assumes mysql is running on the same host as observium
 
@@ -11,17 +11,15 @@ DUMPFILE=${3:-"$BASE/observium.mysql.dump"}
 
 # This is probably insecure.  If you put shell code exploits
 # in your observium config.php, you're on your own.
-if [ ! -r $MY_CNF ]; then
-	eval `awk -F\" '
-		/^[:space:]*#/ {next}
-		/db_host/ {print "HOST=" $2}
-		/db_name/ {print "NAME=" $2}
-		/db_pass/ {print "PASS=" $2}
-		/db_user/ {print "USER=" $2}
-	' $BASE/config.php`
-	echo "[client]
+eval `awk -F\" '
+	/^[:space:]*#/ {next}
+	/db_host/ {print "HOST=\"" $2 "\""}
+	/db_name/ {print "NAME=\"" $2 "\""}
+	/db_pass/ {print "PASS=\"" $2 "\""}
+	/db_user/ {print "USER=\"" $2 "\""}
+' $BASE/config.php`
+echo "[client]
 password=$PASS" > $MY_CNF
-fi
 
 mysqldump --defaults-extra-file=$MY_CNF -h $HOST -u $USER $NAME > $DUMPFILE
 
