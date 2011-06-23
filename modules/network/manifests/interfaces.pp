@@ -1,10 +1,8 @@
 #
-# puppet class to create static bond/bridge network interfaces
+# puppet class to manage network interfaces file
 #
 
 class network::interfaces {
-
-	include network::static
 
 	file { "/etc/network/interfaces":
 		ensure	=> file,
