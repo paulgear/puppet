@@ -1,30 +1,35 @@
-#
 # puppet class to install and enable apache
-#
-# DONE: Checked for Ubuntu compatibility
-#
 
 class apache {
+	include apache::service
+}
 
-	# set package names appropriately
+class apache::config {
 	case $operatingsystem {
 		centos: {
-			$apache_pkg = "httpd"
-			$apache_svc = "httpd"
+			$pkg = "httpd"
+			$svc = "httpd"
 		}
 		default: {
-			$apache_pkg = "apache2"
-			$apache_svc = "apache2"
+			$pkg = "apache2"
+			$svc = "apache2"
 		}
 	}
+}
 
-	package { $apache_pkg:
+class apache::package {
+	include apache::config
+	package { ${apache::config::pkg}:
 		ensure	=> installed,
 	}
+}
 
-	service { $apache_svc:
+class apache::service {
+	include apache::config
+	include apache::package
+	service { ${apache::config::svc}:
 		enable	=> true,
+		require	=> Class["apache::package"],
 	}
-
 }
 
