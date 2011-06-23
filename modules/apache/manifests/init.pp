@@ -19,7 +19,7 @@ class apache::config {
 
 class apache::package {
 	include apache::config
-	package { ${apache::config::pkg}:
+	package { "${apache::config::pkg}":
 		ensure	=> installed,
 	}
 }
@@ -27,7 +27,7 @@ class apache::package {
 class apache::service {
 	include apache::config
 	include apache::package
-	service { ${apache::config::svc}:
+	service { "${apache::config::svc}":
 		enable	=> true,
 		require	=> Class["apache::package"],
 	}
