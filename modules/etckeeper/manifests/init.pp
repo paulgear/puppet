@@ -45,7 +45,9 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 		interval	=> weekly,
 		script		=> "#!/bin/sh
 cd /etc
-git gc
+du -mx .git
+git gc --quiet
+du -mx .git
 ",
 	}
 
