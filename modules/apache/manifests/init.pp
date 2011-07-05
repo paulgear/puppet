@@ -33,3 +33,13 @@ class apache::service {
 	}
 }
 
+define apache::vhost () {
+	include apache::config
+	include apache::service
+	file { "${apache::config::vhost}/$name":
+		mode	=> 640,
+		owner	=> "${apache::config::owner}",
+		group	=> "${apache::config::group}",
+	}
+}
+
