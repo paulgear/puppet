@@ -1,10 +1,8 @@
 #
-# puppet class to create network interfaces file
+# puppet class to manage network interfaces file
 #
 
 class network::interfaces {
-
-	include network::static
 
 	file { "/etc/network/interfaces":
 		ensure	=> file,

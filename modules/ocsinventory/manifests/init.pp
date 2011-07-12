@@ -21,3 +21,16 @@ define ocsinventory::client ( $server ) {
 	}
 }
 
+class ocsinventory::server {
+	include ocsinventory::server::package
+}
+
+
+class ocsinventory::server::package {
+	include mysql::client
+	$pkg = "ocsinventory-server"
+	package { $pkg:
+		ensure	=> installed,
+	}
+}
+
