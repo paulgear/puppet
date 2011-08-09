@@ -59,6 +59,7 @@ while (<SMB>) {
 		$recycle =~ s/[\/%].*//;		# chop off everything after the first slash or percent
 		# FIXME: this assumes there's something meaningful before the first slash or percent
 		#debug "Found recycle $recycle";
+		next;
 	}
 }
 close SMB or warn "Cannot close $SMB_CONF: $!";
