@@ -51,7 +51,7 @@ while (<SMB>) {
 	if (/^\s*path\s*=\s*(\S+)/) {
 		$path = $1;
 		$path =~ s/%.*//;		# chop off everything after the first percent
-		if (-e $path) {
+		if (! -e $path) {
 			debug "Warning - $path does not exist";
 			$path = undef;
 		}
