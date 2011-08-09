@@ -49,7 +49,7 @@ while (<SMB>) {
 	}
 	# path spec
 	if (/^\s*path\s*=\s*(\S+)/) {
-		$path = $1;
+		$path = $1 if -e $path;
 		#debug "Found path $path";
 		next;
 	}
@@ -75,7 +75,11 @@ for my $share (sort keys %shares) {
 	close PIPE or warn "Cannot close find results: $!";
 }
 
-# print the results
-my $cmd = "tmpwatch --mtime $TEST $HOURS " . join(" ", @dirs);
-#debug "Running $cmd";
-system($cmd);
+if ($#dirs > -1) {
+	my $cmd = "tmpwatch --mtime $TEST $HOURS " . join(" ", @dirs);
+	#debug "Running $cmd";
+	system($cmd);
+}
+else {
+	debug "No recycle directories found";
+}
