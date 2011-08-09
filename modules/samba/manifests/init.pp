@@ -49,3 +49,15 @@ class samba::config {
 	}
 }
 
+class samba::recycle {
+	ulb { "empty-recycle-bin":
+		source_class	=> "samba",
+	}
+	cron_job { "samba-empty-recycle-bin":
+		interval	=> "weekly",
+		script		=> "#!/bin/sh
+/usr/local/bin/empty-recycle-bin
+",
+	}
+}
+
