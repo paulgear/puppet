@@ -1,0 +1,80 @@
+#!/usr/bin/perl -w
+#
+# Description:	Remove old files from Samba network recycle bins
+# Author:	Paul Gear <github@libertysys.com.au>
+# Date:		2011-08-09
+# Dependencies:	tmpwatch <https://fedorahosted.org/tmpwatch/>
+# Disclaimer:	Though i've tried to be conservative with this script, i
+#		can't escape a nagging feeling that it's possible that it
+#		will remove the wrong files.  Run it in test mode for a
+#		while before you let it loose, folks.
+#
+
+sub debug ($)
+{
+	print "$0: $_[0]\n" if -t 0;
+}
+
+my $SMB_CONF = "/etc/samba/smb.conf";
+my $HOURS = 24 * 7 * 4;		# 4 weeks in hours
+my $TEST = "--test";		# run tmpwatch in test mode
+
+# don't run if smb.conf doesn't exist
+if (! -r $SMB_CONF) {
+	exit 0;
+}
+
+chdir "/" or die "Cannot change to root directory: $!";
+
+open SMB, "<$SMB_CONF" or die "Cannot open $SMB_CONF: $!";
+
+# parse config to find shares
+my $path = undef;
+my $recycle = undef;
+my %shares;
+
+# parse the config
+debug "Parsing $SMB_CONF";
+while (<SMB>) {
+	# start of share	
+	if (/^\s*\[\S+\]/) {
+		# we had a previous share - gather its config
+		if (defined $path and defined $recycle and $recycle ne "") {
+			$shares{$path} = $recycle;
+			#debug "$path -> $recycle";
+		}
+		$path = undef;
+		$recycle = undef;
+		next;
+	}
+	# path spec
+	if (/^\s*path\s*=\s*(\S+)/) {
+		$path = $1;
+		#debug "Found path $path";
+		next;
+	}
+	# recycle spec
+	if (/^\s*recycle:repository\s*=\s*(\S+)/) {
+		$recycle = $1;
+		$recycle =~ s/[\/%].*//;		# chop off everything after the first slash or percent
+		# FIXME: this assumes there's something meaningful before the first slash or percent
+		#debug "Found recycle $recycle";
+	}
+}
+close SMB or warn "Cannot close $SMB_CONF: $!";
+
+# find the recycle bins
+debug "Finding recycle bins in " . join(" ", sort keys %shares);
+my @dirs;
+for my $share (sort keys %shares) {
+	open PIPE, "find $share -type d -name '$shares{$share}'|" or die "Cannot open find results: $!";
+	my @d = <PIPE>;
+	chomp @d;
+	push @dirs, @d;
+	close PIPE or warn "Cannot close find results: $!";
+}
+
+# print the results
+my $cmd = "tmpwatch --mtime $TEST $HOURS " . join(" ", @dirs);
+#debug "Running $cmd";
+system($cmd);
