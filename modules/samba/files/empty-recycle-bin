@@ -49,7 +49,11 @@ while (<SMB>) {
 	}
 	# path spec
 	if (/^\s*path\s*=\s*(\S+)/) {
-		$path = $1 if -e $path;
+		$path = $1;
+		unless (-e $path) {
+			debug "Warning - $path does not exist";
+			$path = undef;
+		}
 		#debug "Found path $path";
 		next;
 	}
