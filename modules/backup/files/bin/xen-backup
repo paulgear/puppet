@@ -100,8 +100,7 @@ done
 
 log "Changes in LV use:"
 $LVS > $TMPDIR/after
-#diff $TMPDIR/before $TMPDIR/after | grep -Eve '^(\+\+\+|---|@@)'
-comm -3 $TMPDIR/before $TMPDIR/after
+diff $TMPDIR/before $TMPDIR/after
 rm -rf $TMPDIR/
 
 # save snapshots to external media
