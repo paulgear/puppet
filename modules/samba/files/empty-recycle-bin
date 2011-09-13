@@ -27,15 +27,17 @@ sub debug ($)
 }
 
 my $SMB_CONF = "/etc/samba/smb.conf";
-my $HOURS = 24 * 7 * 4;		# 4 weeks in hours
 my $TEST = "";			# to run tmpwatch in test mode, add --test here or on the command line
 
 # command line parameters
 my $testflag = 0;
 my $dotfiles_only = 1;
-GetOptions("test" => \$testflag, "dotfiles-only" => \$dotfiles_only)
+my $days = 7;
+GetOptions("test" => \$testflag, "dotfiles-only" => \$dotfiles_only, "days=i" => \$days)
 	or die "Invalid command line options specified";
+
 $TEST = "--test" if $testflag;
+my $HOURS = 24 * $days;		# tmpwatch uses hours
 
 # don't run if smb.conf doesn't exist
 if (! -r $SMB_CONF) {
