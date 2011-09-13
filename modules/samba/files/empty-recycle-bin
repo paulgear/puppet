@@ -33,8 +33,15 @@ my $TEST = "";			# to run tmpwatch in test mode, add --test here or on the comma
 my $testflag = 0;
 my $dotfiles_only = 1;
 my $days = 7;
-GetOptions("test" => \$testflag, "dotfiles-only" => \$dotfiles_only, "days=i" => \$days)
-	or die "Invalid command line options specified";
+my $exec = 1;
+GetOptions(
+
+	"days=i"		=> \$days,
+	"dotfiles-only!"	=> \$dotfiles_only,
+	"exec!"			=> \$exec,
+	"test!"			=> \$testflag,
+
+) or die "Invalid command line options specified";
 
 $TEST = "--test" if $testflag;
 my $HOURS = 24 * $days;		# tmpwatch uses hours
@@ -56,17 +63,6 @@ my %shares;
 # parse the config
 debug "Parsing $SMB_CONF";
 while (<SMB>) {
-	# start of share	
-	if (/^\s*\[\S+\]/) {
-		# we had a previous share - gather its config
-		if (defined $path and defined $recycle and $recycle ne "") {
-			$shares{$path} = $recycle;
-			#debug "$path -> $recycle";
-		}
-		$path = undef;
-		$recycle = undef;
-		next;
-	}
 	# path spec
 	if (/^\s*path\s*=\s*(\S+)/) {
 		$path = $1;
@@ -74,9 +70,10 @@ while (<SMB>) {
 		if (! -e $path) {
 			debug "Warning - $path does not exist";
 			$path = undef;
+			$recycle = undef;
+			next;
 		}
 		#debug "Found path $path";
-		next;
 	}
 	# recycle spec
 	if (/^\s*recycle:repository\s*=\s*(\S+)/) {
@@ -84,34 +81,51 @@ while (<SMB>) {
 		$recycle =~ s/[\/%].*//;		# chop off everything after the first slash or percent
 		# FIXME: this assumes there's something meaningful before the first slash or percent
 		#debug "Found recycle $recycle";
-		next;
+		if ($dotfiles_only) {
+			unless ($recycle =~ /^\./) {
+				warn "Directory name does not begin with a dot - skipping: $path ($recycle)";
+				$path = undef;
+				$recycle = undef;
+				next;
+			}
+		}
+	}
+
+	# have a valid share path and recycle path
+	if (defined $path and defined $recycle and $recycle ne "") {
+		$shares{$path} = $recycle;
+		debug "$path -> $recycle";
+		$path = undef;
+		$recycle = undef;
 	}
 }
 close SMB or warn "Cannot close $SMB_CONF: $!";
 
 # find the recycle bins
 debug "Finding recycle bins in " . join(" ", sort keys %shares);
-my @dirs;
+my %dirs;
 for my $share (sort keys %shares) {
-	open PIPE, "find $share -type d -name '$shares{$share}'|" or die "Cannot open find results: $!";
+	my $cmd = "find $share/ -type d -name '$shares{$share}'";
+	debug "Running $cmd";
+	open PIPE, "$cmd|" or die "Cannot open find results: $!";
 	my @d = <PIPE>;
 	chomp @d;
-	for my $dir (@d) {
-		if ($dotfiles_only) {
-			unless (basename($dir) =~ /^\./) {
-				warn "Directory name does not begin with a dot - skipping: $dir";
-				next;
-			}
-		}
-		push @dirs, $dir;
+	for my $d (@d) {
+		$dirs{$d} = 1;
 	}
 	close PIPE or warn "Cannot close find results: $!";
 }
 
+my @dirs = sort keys %dirs;
 if ($#dirs > -1) {
 	my $cmd = "tmpwatch --mtime $TEST $HOURS " . join(" ", @dirs);
-	debug "Running $cmd";
-	system($cmd);
+	if ($exec) {
+		debug "Running $cmd";
+		system($cmd);
+	}
+	else {
+		debug "Not running $cmd";
+	}
 }
 else {
 	debug "No recycle directories found";
