@@ -1,0 +1,116 @@
+#!/usr/bin/perl -w
+#
+# Description:	Remove old files from Samba network recycle bins
+# Author:	Paul Gear <github@libertysys.com.au>
+# Date:		2011-08-09
+# Dependencies:	tmpwatch <https://fedorahosted.org/tmpwatch/>
+# Disclaimer:	Though i've tried to be conservative with this script, i can't
+#		escape a nagging feeling that it's possible that it will
+#		remove the wrong files.  Run it in test mode for a while
+#		before you let it loose, folks.  To ensure that it does not
+#		delete user files, i've made an arbitrary decision that the
+#		directories used as recycle bins must begin with a dot.  This
+#		makes it unlikely that any files created by users on Windows
+#		systems will be affected, even if the script starts deleting
+#		the wrong thing.  You can never have too many good backups!
+#
+
+use strict;
+use File::Basename;
+use Getopt::Long;
+
+my $PROG = basename $0;
+
+sub debug ($)
+{
+	print "$PROG: $_[0]\n" if -t 0;
+}
+
+my $SMB_CONF = "/etc/samba/smb.conf";
+my $HOURS = 24 * 7 * 4;		# 4 weeks in hours
+my $TEST = "";			# to run tmpwatch in test mode, add --test here or on the command line
+
+# command line parameters
+my $testflag = 0;
+my $dotfiles_only = 1;
+GetOptions("test" => \$testflag, "dotfiles-only" => \$dotfiles_only)
+	or die "Invalid command line options specified";
+$TEST = "--test" if $testflag;
+
+# don't run if smb.conf doesn't exist
+if (! -r $SMB_CONF) {
+	exit 0;
+}
+
+chdir "/" or die "Cannot change to root directory: $!";
+
+open SMB, "<$SMB_CONF" or die "Cannot open $SMB_CONF: $!";
+
+# parse config to find shares
+my $path = undef;
+my $recycle = undef;
+my %shares;
+
+# parse the config
+debug "Parsing $SMB_CONF";
+while (<SMB>) {
+	# start of share	
+	if (/^\s*\[\S+\]/) {
+		# we had a previous share - gather its config
+		if (defined $path and defined $recycle and $recycle ne "") {
+			$shares{$path} = $recycle;
+			#debug "$path -> $recycle";
+		}
+		$path = undef;
+		$recycle = undef;
+		next;
+	}
+	# path spec
+	if (/^\s*path\s*=\s*(\S+)/) {
+		$path = $1;
+		$path =~ s/%.*//;		# chop off everything after the first percent
+		if (! -e $path) {
+			debug "Warning - $path does not exist";
+			$path = undef;
+		}
+		#debug "Found path $path";
+		next;
+	}
+	# recycle spec
+	if (/^\s*recycle:repository\s*=\s*(\S+)/) {
+		$recycle = $1;
+		$recycle =~ s/[\/%].*//;		# chop off everything after the first slash or percent
+		# FIXME: this assumes there's something meaningful before the first slash or percent
+		#debug "Found recycle $recycle";
+		next;
+	}
+}
+close SMB or warn "Cannot close $SMB_CONF: $!";
+
+# find the recycle bins
+debug "Finding recycle bins in " . join(" ", sort keys %shares);
+my @dirs;
+for my $share (sort keys %shares) {
+	open PIPE, "find $share -type d -name '$shares{$share}'|" or die "Cannot open find results: $!";
+	my @d = <PIPE>;
+	chomp @d;
+	for my $dir (@d) {
+		if ($dotfiles_only) {
+			unless (basename($dir) =~ /^\./) {
+				warn "Directory name does not begin with a dot - skipping: $dir";
+				next;
+			}
+		}
+		push @dirs, $dir;
+	}
+	close PIPE or warn "Cannot close find results: $!";
+}
+
+if ($#dirs > -1) {
+	my $cmd = "tmpwatch --mtime $TEST $HOURS " . join(" ", @dirs);
+	debug "Running $cmd";
+	system($cmd);
+}
+else {
+	debug "No recycle directories found";
+}

@@ -21,6 +21,8 @@ cat /proc/mdstat
 
 heading LVM summary
 lvs
+vgs
+pvs
 
 heading LVM detailed view
 vgdisplay -v
