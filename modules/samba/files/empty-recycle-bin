@@ -94,7 +94,7 @@ while (<SMB>) {
 	# have a valid share path and recycle path
 	if (defined $path and defined $recycle and $recycle ne "") {
 		$shares{$path} = $recycle;
-		debug "$path -> $recycle";
+		#debug "$path -> $recycle";
 		$path = undef;
 		$recycle = undef;
 	}
@@ -106,7 +106,7 @@ debug "Finding recycle bins in " . join(" ", sort keys %shares);
 my %dirs;
 for my $share (sort keys %shares) {
 	my $cmd = "find $share/ -type d -name '$shares{$share}'";
-	debug "Running $cmd";
+	#debug "Running $cmd";
 	open PIPE, "$cmd|" or die "Cannot open find results: $!";
 	my @d = <PIPE>;
 	chomp @d;
