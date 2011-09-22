@@ -30,6 +30,8 @@ class dhcp::server::service {
 	}
 	service { $svc:
 		enable	=> true,
+		hasstatus => false,
+		hasrestart => false,
 		require	=> Class["dhcp::server::package"],
 	}
 }
