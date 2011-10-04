@@ -37,12 +37,15 @@ my $testflag = 0;
 my $dotfiles_only = 1;
 my $days = 7;
 my $exec = 1;
+my @extradirs = ();
 GetOptions(
 
 	"days=i"		=> \$days,
 	"debug+"		=> \$debug,
+	"dir=s"			=> \@extradirs,
 	"dotfiles-only!"	=> \$dotfiles_only,
 	"exec!"			=> \$exec,
+	"extra-dir=s"		=> \@extradirs,
 	"test!"			=> \$testflag,
 
 ) or die "Invalid command line options specified";
@@ -104,6 +107,14 @@ while (<SMB>) {
 	}
 }
 close SMB or warn "Cannot close $SMB_CONF: $!";
+
+# add the extra dirs - assume name of .recycle
+for my $share (@extradirs) {
+	unless (exists $shares{$share}) {
+		$shares{$share} = '.recycle';
+		debug "$share -> $shares{$share}", 2;
+	}
+}
 
 # find the recycle bins
 debug "Finding recycle bins in " . join(" ", sort keys %shares);
