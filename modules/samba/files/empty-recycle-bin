@@ -20,10 +20,13 @@ use File::Basename;
 use Getopt::Long;
 
 my $PROG = basename $0;
+my $debug = -t 0;
 
-sub debug ($)
+sub debug
 {
-	print "$PROG: $_[0]\n" if -t 0;
+	my ($msg, $lvl) = @_;
+	$lvl = 1 unless defined $lvl;
+	print "$PROG: $msg\n" if $debug >= $lvl;
 }
 
 my $SMB_CONF = "/etc/samba/smb.conf";
@@ -37,6 +40,7 @@ my $exec = 1;
 GetOptions(
 
 	"days=i"		=> \$days,
+	"debug+"		=> \$debug,
 	"dotfiles-only!"	=> \$dotfiles_only,
 	"exec!"			=> \$exec,
 	"test!"			=> \$testflag,
@@ -73,14 +77,14 @@ while (<SMB>) {
 			$recycle = undef;
 			next;
 		}
-		#debug "Found path $path";
+		debug "Found path $path", 3;
 	}
 	# recycle spec
 	if (/^\s*recycle:repository\s*=\s*(\S+)/) {
 		$recycle = $1;
 		$recycle =~ s/[\/%].*//;		# chop off everything after the first slash or percent
 		# FIXME: this assumes there's something meaningful before the first slash or percent
-		#debug "Found recycle $recycle";
+		debug "Found recycle repository $recycle", 3;
 		if ($dotfiles_only) {
 			unless ($recycle =~ /^\./) {
 				warn "Directory name does not begin with a dot - skipping: $path ($recycle)";
@@ -94,7 +98,7 @@ while (<SMB>) {
 	# have a valid share path and recycle path
 	if (defined $path and defined $recycle and $recycle ne "") {
 		$shares{$path} = $recycle;
-		#debug "$path -> $recycle";
+		debug "$path -> $recycle", 2;
 		$path = undef;
 		$recycle = undef;
 	}
@@ -106,7 +110,7 @@ debug "Finding recycle bins in " . join(" ", sort keys %shares);
 my %dirs;
 for my $share (sort keys %shares) {
 	my $cmd = "find $share/ -type d -name '$shares{$share}'";
-	#debug "Running $cmd";
+	debug "Running $cmd", 2;
 	open PIPE, "$cmd|" or die "Cannot open find results: $!";
 	my @d = <PIPE>;
 	chomp @d;
