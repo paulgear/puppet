@@ -21,7 +21,7 @@ fi
 if [ $CONF -nt $TIMESTAMP ]; then
 	$COPY $CONF $TIMESTAMP
 	if [ `ps -e|awk '$NF == "dhcpd"'|wc -l` -ne 0 ]; then
-		/etc/init.d/isc-dhcpd-server restart 2>&1 | grep -v \
+		/etc/init.d/isc-dhcp-server restart 2>&1 | grep -v \
 			-e 'Shutting down DHCP server ..done' \
 			-e 'Starting DHCP server \[chroot\]..done' \
 			-e 'Stopping ISC DHCP server: dhcpd' \
