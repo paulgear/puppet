@@ -10,11 +10,11 @@ class ntp::client {
 
 	# install ntpdate command, ensure ntp server is not running
 	package { $ntp::ntpdate_pkg:
-		ensure	=> installed;
+		ensure	=> installed,
 	}
 	service { $ntp::ntpd_pkg:
-		ensure	=> stopped;
-		enabled	=> false;
+		ensure	=> stopped,
+		enabled	=> false,
 	}
 
 	define cron( $minutes = 5, $ntp_servers = $ntp::default_ntp_servers ) {
