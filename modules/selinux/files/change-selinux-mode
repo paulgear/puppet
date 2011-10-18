@@ -1,0 +1,33 @@
+#!/bin/sh
+# Script to change current and bootup setting for selinux
+
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+usage()
+{
+	echo "Usage: $0 [Permissive|Enforcing]" 2>&1
+	exit 1
+}
+
+if [ "$#" -ne 1 ]; then
+	usage
+fi
+
+set -e
+set -u
+
+LCNEWMODE=`echo $1 | perl -wne 'print lc;'`
+TCNEWMODE=`echo $LCNEWMODE | perl -wne 'print ucfirst;'`
+case "$LCNEWMODE" in
+	permissive|enforcing)
+		;;
+	*)
+		usage
+		;;
+esac
+
+CURMODE=`getenforce`
+if [ "$TCNEWMODE" != "$CURMODE" ]; then
+	sed -ri.BAK -e "s/^SELINUX=.*/SELINUX=$LCNEWMODE/" /etc/selinux/config
+	setenforce $TCNEWMODE
+fi
