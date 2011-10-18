@@ -30,6 +30,15 @@ class openvpn::config {
 		group	=> root,
 		require	=> Class["openvpn::package"],
 	}
+	file { "$dir/client.crt":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 644,
+		source	=> "puppet:///modules/openvpn/files/$fqdn.crt",
+		require	=> Class["openvpn::package"],
+		notify	=> Class["openvpn::service"],
+	}
 	file { "$dir/client.key":
 		ensure	=> file,
 		owner	=> root,
@@ -37,6 +46,7 @@ class openvpn::config {
 		mode	=> 600,
 		source	=> "puppet:///modules/openvpn/files/$fqdn.key",
 		require	=> Class["openvpn::package"],
+		notify	=> Class["openvpn::service"],
 	}
 	file { "$dir/ca.crt":
 		ensure	=> file,
@@ -45,6 +55,7 @@ class openvpn::config {
 		mode	=> 644,
 		source	=> "puppet:///modules/openvpn/files/ca.crt",
 		require	=> Class["openvpn::package"],
+		notify	=> Class["openvpn::service"],
 	}
 }
 
