@@ -35,7 +35,7 @@ class openvpn::config {
 		owner	=> root,
 		group	=> root,
 		mode	=> 644,
-		source	=> "puppet:///modules/openvpn/files/$fqdn.crt",
+		source	=> "puppet:///modules/openvpn/$fqdn.crt",
 		require	=> Class["openvpn::package"],
 		notify	=> Class["openvpn::service"],
 	}
@@ -44,7 +44,7 @@ class openvpn::config {
 		owner	=> root,
 		group	=> root,
 		mode	=> 600,
-		source	=> "puppet:///modules/openvpn/files/$fqdn.key",
+		source	=> "puppet:///modules/openvpn/$fqdn.key",
 		require	=> Class["openvpn::package"],
 		notify	=> Class["openvpn::service"],
 	}
@@ -53,7 +53,7 @@ class openvpn::config {
 		owner	=> root,
 		group	=> root,
 		mode	=> 644,
-		source	=> "puppet:///modules/openvpn/files/ca.crt",
+		source	=> "puppet:///modules/openvpn/ca.crt",
 		require	=> Class["openvpn::package"],
 		notify	=> Class["openvpn::service"],
 	}
