@@ -26,12 +26,25 @@ class openvpn::config {
 	$dir = "/etc/openvpn"
 	file { $dir:
 		ensure	=> directory,
-		recurse	=> true,
 		owner	=> root,
 		group	=> root,
-		source	=> "puppet:///modules/openvpn/$fqdn",
 		require	=> Class["openvpn::package"],
-		notify	=> Class["openvpn::service"],
+	}
+	file { "$dir/client.key":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 600,
+		source	=> "puppet:///modules/openvpn/files/$fqdn.key",
+		require	=> Class["openvpn::package"],
+	}
+	file { "$dir/ca.crt":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 644,
+		source	=> "puppet:///modules/openvpn/files/ca.crt",
+		require	=> Class["openvpn::package"],
 	}
 }
 
@@ -54,7 +67,8 @@ define openvpn::client ( $cfgname = "client", $remotes, $remote_random = "false"
 	$cfg = "$cfgname.conf"
 	$dir = "/etc/openvpn"
 	file { "$dir/$cfg":
-		mode	=> 644,
+		ensure	=> file,
+		mode	=> 640,
 		owner	=> root,
 		group	=> root,
 		require	=> Class["openvpn::package"],
