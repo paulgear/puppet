@@ -3,6 +3,7 @@
 set -e
 set -u
 
+PROG=`basename $0`
 CONF=/etc/dhcp/dhcpd.conf
 TIMESTAMP=/var/local/`basename $CONF`.timestamp
 COPY="rsync -t"
@@ -21,6 +22,7 @@ fi
 if [ $CONF -nt $TIMESTAMP ]; then
 	$COPY $CONF $TIMESTAMP
 	if [ `ps -e|awk '$NF == "dhcpd"'|wc -l` -ne 0 ]; then
+		echo "$CONF changed: restarting DHCP server"
 		/etc/init.d/isc-dhcp-server restart 2>&1 | grep -v \
 			-e 'Shutting down DHCP server ..done' \
 			-e 'Starting DHCP server \[chroot\]..done' \
@@ -28,5 +30,5 @@ if [ $CONF -nt $TIMESTAMP ]; then
 			-e 'Starting ISC DHCP server: dhcpd' \
 				|| true
 	fi
-fi
+fi 2>&1 | logger -t $PROG -p user.info
 
