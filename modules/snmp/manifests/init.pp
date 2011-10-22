@@ -14,6 +14,7 @@ class snmp {
 			case $lsbdistcodename {
 				squeeze: {
 					include snmp::set_debug_level
+					include snmp::mibs
 				}
 				lenny: {
 					include snmp::no_loopback
@@ -50,6 +51,13 @@ class snmp::service {
 		hasrestart	=> true,
 		hasstatus	=> false,
 		require		=> Class["snmp::package"],
+	}
+}
+
+# install snmp mib package
+class snmp::mibs {
+	package { "snmp-mibs-downloader":
+		ensure	=> installed,
 	}
 }
 
