@@ -69,6 +69,7 @@ class clamav::centos {
 			group		=> root,
 			mode		=> 644,
 			source		=> "puppet:///modules/clamav/freshclam.logrotate",
+			require		=> Class["clamav::package"],
 		}
 
 		file { "/var/clamav":
@@ -77,12 +78,14 @@ class clamav::centos {
 			group		=> clamav,
 			recurse		=> true,
 			ignore		=> "clmilter.socket",
+			require		=> Class["clamav::package"],
 		}
 
 		$remove_files = [ "daily.cld", "daily.cvd.rpmnew", "main.cld", "main.cvd.rpmnew" ]
 		define remove_file () {
 			file { "/var/clamav/$name":
 				ensure		=> absent,
+				require		=> Class["clamav::package"],
 			}
 		}
 		remove_file { $remove_files: }
