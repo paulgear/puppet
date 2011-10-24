@@ -35,7 +35,6 @@ class observium::packages {
 		"php5-xcache",
 		"sipcalc",
 		"snmp",
-		"snmp-mibs-downloader",
 		"whois",
 
 	]
