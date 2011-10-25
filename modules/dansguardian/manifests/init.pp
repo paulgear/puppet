@@ -9,9 +9,6 @@ class dansguardian {
 	$basedir = "/etc/dansguardian"
 	$listdir = "$basedir/lists"
 	$puppetdir = "/etc/puppet/modules/dansguardian"
-	$pkg = "dansguardian"
-	$svc = "dansguardian"
-	$notify = "dansguardian reload"
 	$user = $operatingsystem ? {
 		centos	=> "nobody",
 		default	=> "dansguardian",
@@ -26,7 +23,7 @@ class dansguardian {
 	}
 
 	include utils
-	include dansguardian::package
+	include dansguardian::service
 	include dansguardian::files
 	include dansguardian::directories
 	include dansguardian::cron
@@ -34,6 +31,8 @@ class dansguardian {
 
 	# define the local configuration
 	define config ( $type = 'normal', $allowbypass = 1 ) {
+		include dansguardian::package
+		include dansguardian::reload
 
 		# make DG user a member of the clamav group to enable virus scanning
 		user { "$dansguardian::user":
@@ -91,8 +90,8 @@ class dansguardian {
 			owner	=> root,
 			group	=> $dansguardian::group,
 			mode	=> 644,
-			require	=> Package[$dansguardian::pkg],
-			notify	=> Exec[$dansguardian::notify],
+			require	=> Class["dansguardian::package"],
+			notify	=> Class["dansguardian::reload"],
 			content	=> template("dansguardian/dansguardian.conf.erb"),
 		}
 
@@ -103,8 +102,8 @@ class dansguardian {
 			owner	=> root,
 			group	=> $dansguardian::group,
 			mode	=> 644,
-			require	=> Package[$dansguardian::pkg],
-			notify	=> Exec[$dansguardian::notify],
+			require	=> Class["dansguardian::package"],
+			notify	=> Class["dansguardian::reload"],
 			content	=> template("dansguardian/filtergroupslist.erb"),
 		}
 
@@ -125,6 +124,8 @@ class dansguardian::cron {
 }
 
 class dansguardian::directories {
+	include dansguardian::package
+	include dansguardian::reload
 
 	# manage the entire dansguardian lists directory
 	file { "$dansguardian::listdir":
@@ -132,8 +133,8 @@ class dansguardian::directories {
 		owner		=> root,
 		group		=> $dansguardian::group,
 		mode		=> 755,
-		require		=> Package[$dansguardian::pkg],
-		notify		=> Exec[$dansguardian::notify],
+		require		=> Class["dansguardian::package"],
+		notify		=> Class["dansguardian::reload"],
 		recurse		=> true,
 		ignore		=> [ ".*.swp" ],
 		source		=> "puppet:///modules/dansguardian/lists",
@@ -146,13 +147,15 @@ class dansguardian::directories {
 		group		=> $dansguardian::group,
 		mode		=> 755,
 		recurse		=> true,
-		require		=> Package[$dansguardian::pkg],
-		notify		=> Exec[$dansguardian::notify],
+		require		=> Class["dansguardian::package"],
+		notify		=> Class["dansguardian::reload"],
 	}
 
 }
 
 class dansguardian::files {
+	include dansguardian::package
+	include dansguardian::reload
 
 	# the template file for the page which is displayed when a site is blocked
 	file { "${dansguardian::langdir}/ukenglish/bypasstemplate.html":
@@ -160,8 +163,8 @@ class dansguardian::files {
 		owner	=> root,
 		group	=> root,
 		mode	=> 644,
-		require	=> Package[$dansguardian::pkg],
-		notify	=> Exec[$dansguardian::notify],
+		require	=> Class["dansguardian::package"],
+		notify	=> Class["dansguardian::reload"],
 		source	=> "puppet:///modules/dansguardian/bypasstemplate.html",
 	}
 
@@ -170,8 +173,8 @@ class dansguardian::files {
 		owner	=> root,
 		group	=> root,
 		mode	=> 644,
-		require	=> Package[$dansguardian::pkg],
-		notify	=> Exec[$dansguardian::notify],
+		require	=> Class["dansguardian::package"],
+		notify	=> Class["dansguardian::reload"],
 		source	=> "puppet:///modules/dansguardian/nobypasstemplate.html",
 	}
 
@@ -180,8 +183,8 @@ class dansguardian::files {
 		owner	=> root,
 		group	=> $dansguardian::group,
 		mode	=> 644,
-		require	=> Package[$dansguardian::pkg],
-		notify	=> Exec[$dansguardian::notify],
+		require	=> Class["dansguardian::package"],
+		notify	=> Class["dansguardian::reload"],
 		source	=> "puppet:///modules/dansguardian/clamdscan.conf",
 	}
 
@@ -190,40 +193,46 @@ class dansguardian::files {
 		owner	=> root,
 		group	=> root,
 		mode	=> 644,
-		require	=> Package[$dansguardian::pkg],
+		require	=> Class["dansguardian::package"],
 		source	=> "puppet:///modules/dansguardian/dansguardian.logrotate",
 	}
 
 }
 
+# ensure package is installed
 class dansguardian::package {
-
-	# ensure package is installed
-	package { "$dansguardian::pkg":
+	$pkg = "dansguardian"
+	package { $pkg:
 		ensure	=> installed,
 	}
+}
 
-	# ensure service starts on boot
-	service { "$dansguardian::svc":
+# ensure service is enabled
+class dansguardian::service {
+	include dansguardian::package
+	$svc = "dansguardian"
+	service { "$svc":
 		enable		=> true,
 		hasrestart	=> true,
-		require		=> Package[$dansguardian::pkg],
+		require		=> Class["dansguardian::package"],
 	}
+}
 
+class dansguardian::reload {
+	include dansguardian::package
 	# run a soft refresh (for use during business hours)
-	exec { "$dansguardian::notify":
+	exec { "dansguardian reload":
 		command		=> "/usr/sbin/dansguardian -g",
 		logoutput	=> true,
 		refreshonly	=> true,
+		require		=> Class["dansguardian::package"],
 	}
-
 	# run a full restart (for use outside business hours)
 #	exec { "dansguardian restart":
 #		command		=> "/usr/sbin/dansguardian -r",
 #		logoutput	=> true,
 #		refreshonly	=> true,
 #	}
-
 }
 
 class dansguardian::groups {
@@ -232,13 +241,15 @@ class dansguardian::groups {
 	define list_file ($basename, $filtergroup, $default_blacklists, $default_categories,
 			$extra_blacklists, $extra_categories, $blacklist_type,
 			$puppetdir = $dansguardian::puppetdir) {
+		include dansguardian::package
+		include dansguardian::reload
 		file { "$dansguardian::listdir/$name":
 			ensure	=> file,
 			owner	=> root,
 			group	=> $dansguardian::group,
 			mode	=> 644,
-			require	=> Package[$dansguardian::pkg],
-			notify	=> Exec[$dansguardian::notify],
+			require	=> Class["dansguardian::package"],
+			notify	=> Class["dansguardian::reload"],
 			content	=> template("dansguardian/list-master.erb"),
 		}
 	}
@@ -252,14 +263,16 @@ class dansguardian::groups {
 				"parked-domains", "porn", "proxy-bypass", "vendor-ip", ],
 			$extra_blacklists = [],
 			$extra_categories = []) {
+		include dansguardian::package
+		include dansguardian::reload
 		# create this filtergroup's config file
 		file { "$dansguardian::basedir/dansguardianf$filtergroup.conf":
 			ensure	=> file,
 			owner	=> root,
 			group	=> $dansguardian::group,
 			mode	=> 644,
-			require	=> Package[$dansguardian::pkg],
-			notify	=> Exec[$dansguardian::notify],
+			require	=> Class["dansguardian::package"],
+			notify	=> Class["dansguardian::reload"],
 			content	=> template("dansguardian/dansguardianf1.conf.erb"),
 		}
 
