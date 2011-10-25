@@ -112,15 +112,21 @@ class dansguardian {
 }
 
 class dansguardian::cron {
-
+	include dansguardian::package
 	# update the blacklists nightly
+	$cmd = "rsync -rtz squidguard.mesd.k12.or.us::filtering /etc/dansguardian/lists/blacklists/"
 	cron_job { "dansguardian-update":
 		interval	=> "d",
 		script		=> "# created by puppet
-0 2 * * * root /usr/local/bin/randomsleep 3600; rsync -rtz squidguard.mesd.k12.or.us::filtering /etc/dansguardian/lists/blacklists/ && /usr/sbin/dansguardian -r
+0 2 * * * root /usr/local/bin/randomsleep 3600; $cmd && /usr/sbin/dansguardian -r
 ",
 	}
-
+	exec { "dansguardian-cron-blacklists-seed":
+		command		=> "$cmd",
+		creates		=> "/etc/dansguardian/lists/blacklists/porn/domains",
+		logoutput	=> true,
+		require		=> Class["dansguardian::package"],
+	}
 }
 
 class dansguardian::directories {
