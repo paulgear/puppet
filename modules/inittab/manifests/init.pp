@@ -1,7 +1,4 @@
 # puppet module to mangle inittab
-class inittab {
-	# empty class to force reading of this file
-}
 
 define inittab::setdefault( $level ) {
 	include text
