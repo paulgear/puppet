@@ -27,6 +27,6 @@ define inittab::ctrlaltdel( $enable ) {
 			file		=> "/etc/inittab",
 			pattern		=> "^ca::ctrlaltdel:",
 		}
-	]
+	}
 }
 
