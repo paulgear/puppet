@@ -18,8 +18,7 @@ define inittab::ctrlaltdel( $enable ) {
 			pattern		=> "^#.*ca::ctrlaltdel:",
 			replace		=> "ca::ctrlaltdel:",
 		}
-	}
-	else {
+	} else {
 		text::comment_lines { "disable ctrlaltdel":
 			file		=> "/etc/inittab",
 			pattern		=> "^ca::ctrlaltdel:",
