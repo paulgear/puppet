@@ -8,6 +8,7 @@ class inittab::notify {
 }
 
 define inittab::setdefault( $level ) {
+	include inittab::notify
 	include text
 	text::replace_lines { "set default runlevel":
 		file		=> "/etc/inittab",
@@ -20,6 +21,7 @@ define inittab::setdefault( $level ) {
 }
 
 define inittab::ctrlaltdel( $enable ) {
+	include inittab::notify
 	include text
 	if $enable {
 		text::replace_lines { "enable ctrlaltdel":
