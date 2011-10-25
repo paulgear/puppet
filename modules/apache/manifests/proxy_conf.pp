@@ -26,7 +26,7 @@ define apache::proxy_conf(
 		owner	=> root,
 		group	=> root,
 		mode	=> 644,
-		require	=> [ Class["apache::package"], File["$proxy_conf_dir"],
+		require	=> [ Class["apache::package"], File["$proxy_conf_dir"] ],
 		notify	=> Class["apache::service"],
 		content	=> "# Managed by puppet on $servername - do not edit here
 NameVirtualHost *:80
