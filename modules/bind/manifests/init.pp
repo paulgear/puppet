@@ -91,6 +91,8 @@ define bind::config::options (
 		$forwarder_set = "opendns-basic",
 		$forwarders = [],
 		$global_notify = "no",
+		$recursion = "",
+		$include_file = "",
 		$edns_udp_size = "512",
 		$max_udp_size = "512"
 		) {
@@ -152,6 +154,21 @@ class bind::config::named_conf_local {
 		group	=> "${bind::config::group}",
 		mode	=> 640,
 		notify	=> Class["bind::service"],
+	}
+}
+
+# add fragment to named.conf.local
+define bind::local::fragment ( $content, $order = "" ) {
+	include concat::setup
+	include bind::config
+	include bind::config::named_conf_local
+	concat::fragment { $name:
+		target	=> "${bind::config::local}",
+		content	=> $content,
+		order	=> $order ? {
+			default	=> $order,
+			""	=> 10,
+		},
 	}
 }
 

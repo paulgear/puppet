@@ -37,5 +37,11 @@ end -%>
 <% if max_udp_size.length > 0 then -%>
 	max-udp-size <%= max_udp_size %>;
 <% end -%>
+<% if recursion.length > 0 then -%>
+	recursion <%= recursion %>;
+<% end -%>
+<% if include_file.length > 0 then -%>
+	include "<%= include_file %>";
+<% end -%>
 };
 
