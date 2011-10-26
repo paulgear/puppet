@@ -92,7 +92,7 @@ define bind::config::options (
 		$forwarders = [],
 		$global_notify = "no",
 		$recursion = "",
-		$include_file = "",
+		$options_file = "",
 		$edns_udp_size = "512",
 		$max_udp_size = "512"
 		) {
