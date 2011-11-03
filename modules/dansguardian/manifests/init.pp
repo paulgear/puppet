@@ -33,10 +33,12 @@ class dansguardian {
 	define config ( $type = 'normal', $allowbypass = 1 ) {
 		include dansguardian::package
 		include dansguardian::reload
+		include clamav::package
 
 		# make DG user a member of the clamav group to enable virus scanning
 		user { "$dansguardian::user":
-			groups	=>	"clamav",
+			groups	=> "clamav",
+			require	=> Class["clamav::package"],
 		}
 
 		$numfiltergroups = 5
