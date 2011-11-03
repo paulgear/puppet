@@ -7,6 +7,9 @@ class clamav {
 }
 
 class clamav::package {
+	if $operatingsystem == "CentOS" {
+		include utils
+	}
 	$pkgs = $operatingsystem ? {
 		centos		=> "clamd",
 		debian		=> [ "clamav-daemon", "clamav-freshclam", ],
@@ -14,6 +17,10 @@ class clamav::package {
 	}
 	package { $pkgs:
 		ensure		=> installed,
+		require		=> $operatingsystem ? {
+			CentOS	=> Class["utils"],
+			default	=> undef,
+		}
 	}
 }
 
