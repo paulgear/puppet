@@ -16,7 +16,7 @@ class quagga::package {
 
 class quagga::service {
 	$svc = $operatingsystem ? {
-		default	=> "quagga",
+		default	=> "zebra",
 	}
 	service { $svc:
 		enable		=> true,
