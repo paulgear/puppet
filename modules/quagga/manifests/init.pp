@@ -1,11 +1,11 @@
 # puppet class to install quagga
 
-class quagga::server {
-	include quagga::server::package
-	include quagga::server::service
+class quagga {
+	include quagga::package
+	include quagga::service
 }
 
-class quagga::server::package {
+class quagga::package {
 	$pkg = $operatingsystem ? {
 		default	=> "quagga",
 	}
@@ -14,13 +14,13 @@ class quagga::server::package {
 	}
 }
 
-class quagga::server::service {
+class quagga::service {
 	$svc = $operatingsystem ? {
 		default	=> "quagga",
 	}
 	service { $svc:
 		enable		=> true,
-		require		=> Class["quagga::server::package"],
+		require		=> Class["quagga::package"],
 	}
 }
 
