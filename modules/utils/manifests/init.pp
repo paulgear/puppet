@@ -11,7 +11,7 @@ class utils {
 
 		yumrepo { "epel":
 			enabled		=> 1,
-			includepkgs	=> 'epel-release,fail2ban*,git*,lzo*,openvpn*,perl-Git*,php-pecl-apc,pkcs11-helper*,rsnapshot',
+			includepkgs	=> 'epel-release,augeas*,fail2ban*,fping,git*,imapsync,libselinux-ruby*,lua*,lzo*,monitor-edid,ocsinventory*,openvpn*,perl*,php-pecl-apc,pkcs11-helper*,rsnapshot',
 			require		=> Package["epel-release"],
 		}
 
@@ -21,7 +21,7 @@ class utils {
 
 		yumrepo { "rpmforge":
 			enabled		=> 1,
-			includepkgs	=> 'rpmforge-release,clam*,graphviz,ifplugd,imapsync,lua*,memtester*,perl-*,rrdtool*,sarg*',
+			includepkgs	=> 'rpmforge-release,clam*,graphviz,ifplugd,memtester*,perl-*,rrdtool*,sarg*',
 			require		=> Package["rpmforge-release"],
 		}
 
