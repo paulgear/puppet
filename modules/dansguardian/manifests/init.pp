@@ -209,9 +209,11 @@ class dansguardian::files {
 
 # ensure package is installed
 class dansguardian::package {
+	include utils
 	$pkg = "dansguardian"
 	package { $pkg:
 		ensure	=> installed,
+		require	=> Class["utils"],
 	}
 }
 
