@@ -22,5 +22,11 @@ class logwatch {
 
 	logwatch_dir{ [ "conf", "scripts" ]: }
 
+	if ($operatingsystem == "Debian" && $lsbmajdistrelease == 6) {
+		file { "/etc/logwatch/scripts/services/clam-update":
+			ensure	=> absent,
+		}
+	}
+
 }
 
