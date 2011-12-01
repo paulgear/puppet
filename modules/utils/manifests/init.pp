@@ -11,7 +11,7 @@ class utils {
 
 		yumrepo { "epel":
 			enabled		=> 1,
-			includepkgs	=> 'epel-release,augeas*,fail2ban*,fping,git*,imapsync,libselinux-ruby*,lua*,lzo*,monitor-edid,ocsinventory*,openvpn*,perl*,php-pecl-apc,pkcs11-helper*,rsnapshot',
+			includepkgs	=> 'epel-release,augeas*,facter*,fail2ban*,fping,git*,imapsync,libselinux-ruby*,lua*,lzo*,monitor-edid,ocsinventory*,openvpn*,perl*,php-pecl-apc,pkcs11-helper*,puppet,rsnapshot',
 			require		=> Package["epel-release"],
 		}
 
