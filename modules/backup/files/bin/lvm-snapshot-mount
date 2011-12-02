@@ -186,5 +186,5 @@ fi
 
 # show LV changes
 lvs > $TMP2
-comm -3 $TMP1 $TMP2
+diff $TMP1 $TMP2
 
