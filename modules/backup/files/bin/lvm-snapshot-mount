@@ -37,9 +37,9 @@ CONF="/usr/local/etc/$PROG.conf"
 JUST_UMOUNT=0
 JUST_MOUNT=0
 
-TMP1=`mktemp`
-TMP2=`mktemp`
-trap 'rm -f $TMP1 $TMP2' 0 1 2 15
+#TMP1=`mktemp`
+#TMP2=`mktemp`
+#trap 'rm -f $TMP1 $TMP2' 0 1 2 15
 
 # if the program name ends in -mount, default to mounting the LV, otherwise leave it unmounted
 if [ ${PROG%%"-mount"} = $PROG ]; then
@@ -112,7 +112,7 @@ for i in $VARLIST; do
 done
 
 # save LV list
-lvs > $TMP1
+#lvs > $TMP1
 
 if [ $JUST_UMOUNT -ne 0 ]; then
 	# if we're called with the umount argument, just umount the snapshot and exit
@@ -185,6 +185,6 @@ if [ "$MOUNT" -eq 1 ]; then
 fi
 
 # show LV changes
-lvs > $TMP2
-diff $TMP1 $TMP2
+#lvs > $TMP2
+#diff $TMP1 $TMP2
 
