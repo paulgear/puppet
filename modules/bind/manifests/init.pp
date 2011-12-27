@@ -86,6 +86,7 @@ class bind::config {
 # generate named.conf.options (used on both CentOS & Debian/Ubuntu)
 # set arguments to empty string/array to disable them
 define bind::config::options (
+		$binddir = "/var/cache/bind",
 		$check_names = [ "master fail", "slave warn", "response ignore" ],
 		$forward = "first",
 		$forwarder_set = "opendns-basic",
