@@ -15,6 +15,12 @@ class isp {
 			$debianbackports = "$mirrorbase/pub/debian/debian-backports"
 		}
 
+		"bigpond": {
+			$mirrorbase = "http://mirror.aarnet.edu.au/"
+			$debianbase = "$mirrorbase/pub/debian"
+			$debianbackports = "$mirrorbase/pub/debian-backports"
+		}
+
 		default: {
 			$mirrorbase = "http://ftp.au.debian.org"
 			$debianbase = "$mirrorbase/debian"
