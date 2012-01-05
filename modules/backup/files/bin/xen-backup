@@ -11,11 +11,10 @@
 set -u
 
 PATH="/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH"
-VG="vm00"
 BACKUPVOL="/media/vmbackup"
 XENDIR="/var/lib/xen/images"
 SLEEP=5
-DIVISOR=8
+DIVISOR=5
 
 if [ "$#" -gt 0 ]; then
 	DOMAINS="$@"
@@ -31,6 +30,11 @@ log()
 islv()
 {
 	lvdisplay "$@" >/dev/null 2>&1
+}
+
+find_vg()
+{
+	lvs | awk -vLV=$1 '$1 == LV {print $2}'
 }
 
 ismounted()
@@ -71,6 +75,7 @@ for domain in $DOMAINS; do
 
 	# check what sort of backup to do
 	LV_SHORT="$domain-disk"
+	VG=`find_vg $LV_SHORT`
 	LV="/dev/$VG/$LV_SHORT"
 	if islv "$LV"; then
 		# snapshot is a portion of the original LV size - this may need tuning above
