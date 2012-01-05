@@ -1,0 +1,33 @@
+#!/usr/bin/perl -wT
+#
+# autoformat - simple program to reformat text so that columns are aligned
+#
+# Author:	Paul Gear <puppet@libertysys.com.au>
+# License:	GPLv3
+# Copyright:	(c) 2011 Gear Consulting Pty Ltd <http://libertysys.com.au/>
+#
+
+use strict;
+
+my @max;
+
+while (<>) {
+	my @F = split /\s+/;
+	my @len = map { length($_) } @F;
+
+	for (my $i = 0; $i <= $#F; ++$i) {
+		$max[$i] = $len[$i] if ! defined $max[$i] or $len[$i] > $max[$i];
+		my $fmt;
+		if ($F[$i] =~ /^\d+%?$/) {
+			$fmt = "*d";
+		}
+		elsif ($F[$i] =~ /^[-+]\d+(.\d+)?%?$/) {
+			$fmt = "*f";
+		}
+		else {
+			$fmt = "-*s";
+		}
+		printf "%$fmt%s", $max[$i], $F[$i], $i < $#F ? " " : "";
+	}
+	print "\n";
+}
