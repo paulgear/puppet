@@ -42,6 +42,13 @@ define syslog::add_config( $content ) {
 	}
 }
 
+define syslog::remove_config() {
+	include syslog
+	file { "${syslog::confdir}/00-puppet-$name.conf":
+		ensure		=> absent,
+	}
+}
+
 class syslog::migrate_old_sysmgt {
 	exec { "migrate old sysmgt":
 		command		=> "mv -f /var/opt/sysmgt/log ${syslog::logdir}",
@@ -153,7 +160,6 @@ ${syslog::logdir}/* {
 }
 
 define syslog::tty ( $tty = "tty12" ) {
-	include syslog
 	syslog::add_config { "tty":
 		content	=> "# Created by puppet on $server - do not edit here
 *.info /dev/$tty
@@ -162,11 +168,14 @@ define syslog::tty ( $tty = "tty12" ) {
 }
 
 define syslog::remote ( $host ) {
-	include syslog
 	syslog::add_config { "remote":
 		content => "# Created by puppet on $server - do not edit here
 *.info	@$host
 ",
 	}
+}
+
+class syslog::noremote {
+	syslog::remove_config { "remote": }
 }
 
