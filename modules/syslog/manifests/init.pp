@@ -42,10 +42,116 @@ define syslog::add_config( $content ) {
 	}
 }
 
+define syslog::dir ( $mode = 755 ) {
+	include syslog
+	include syslog::migrate_old_sysmgt
+	file { $name:
+		ensure		=> directory,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
+		mode		=> $mode,
+		require		=> Class["syslog::migrate_old_sysmgt"],
+	}
+}
+
+define syslog::file ( $mode = 644 ) {
+	include syslog
+	file { "$syslog::logdir/$name":
+		ensure		=> file,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
+		mode		=> $mode,
+		require		=> File["$syslog::logdir"],
+	}
+}
+
+define syslog::files (
+		$files = [
+			"auth",
+			"cron",
+			"daemon",
+			"ftp",
+			"kern",
+			"local0",
+			"local1",
+			"local2",
+			"local3",
+			"local4",
+			"local5",
+			"local6",
+			"local7",
+			"lpr",
+			"mail",
+			"news",
+			"syslog",
+			"user",
+			"uucp",
+		],
+		$priv_files = [
+			"all",
+			"authpriv",
+		]
+) {
+	include syslog
+	include syslog::migrate_old_sysmgt
+	include syslog::remove_old_puppet
+
+	$logrotate = "/etc/logrotate.d/00-puppet-sysmgt"
+
+	# create dirs
+	syslog::dir { [ "$syslog::logdir", "$syslog::rotdir" ]: }
+
+	# create files
+	syslog::file { $files: }
+	syslog::file { $priv_files: mode => 640 }
+
+	# logrotate configuration for the local files
+	file { $logrotate:
+		ensure		=> file,
+		owner		=> "$syslog::owner",
+		group		=> "$syslog::group",
+		mode		=> 644,
+		content		=> "# Managed by puppet - do not edit here
+${syslog::logdir}/* {
+	rotate 52
+	weekly
+	dateext
+	compress
+	delaycompress
+	missingok
+	notifempty
+	olddir ${syslog::rotdir}/
+}
+",
+	}
+
+	syslog::add_config { "sysmgt":
+		content		=> template("syslog/sysmgt.conf.erb"),
+	}
+
+}
+
+define syslog::remote ( $host ) {
+	syslog::add_config { "remote":
+		content => "# Created by puppet on $server - do not edit here
+*.info	@$host
+",
+	}
+}
+
 define syslog::remove_config() {
 	include syslog
 	file { "${syslog::confdir}/00-puppet-$name.conf":
 		ensure		=> absent,
+		notify		=> Class["$syslog::notifier"],
+	}
+}
+
+define syslog::tty ( $tty = "tty12" ) {
+	syslog::add_config { "tty":
+		content	=> "# Created by puppet on $server - do not edit here
+*.info /dev/$tty
+",
 	}
 }
 
@@ -75,103 +181,12 @@ class syslog::remove_old_puppet {
 }
 
 class syslog::local_files {
-	include syslog
-	include syslog::migrate_old_sysmgt
-	include syslog::remove_old_puppet
-
-	$logrotate = "/etc/logrotate.d/00-puppet-sysmgt"
-
-	$priv_files = [
-		"all",
-		"authpriv",
-	]
-
-	$files = [
-		"auth",
-		"cron",
-		"daemon",
-		"ftp",
-		"kern",
-		"local0",
-		"local1",
-		"local2",
-		"local3",
-		"local4",
-		"local5",
-		"local6",
-		"local7",
-		"lpr",
-		"mail",
-		"news",
-		"syslog",
-		"user",
-		"uucp",
-	]
-
-	# create dirs
-	define syslog_dir ( $mode = 755 ) {
-		file { $name:
-			ensure		=> directory,
-			owner		=> "$syslog::owner",
-			group		=> "$syslog::group",
-			mode		=> $mode,
-			require		=> Class["syslog::migrate_old_sysmgt"],
-		}
-	}
-	syslog_dir { [ "$syslog::logdir", "$syslog::rotdir" ]: }
-
-	# create files
-	define syslog_file ( $mode = 644 ) {
-		file { "$syslog::logdir/$name":
-			ensure		=> file,
-			owner		=> "$syslog::owner",
-			group		=> "$syslog::group",
-			mode		=> $mode,
-			require		=> File["$syslog::logdir"],
-		}
-	}
-	syslog_file { $files: }
-	syslog_file { $priv_files: mode => 640 }
-
-	# logrotate configuration for the local files
-	file { $logrotate:
-		ensure		=> file,
-		owner		=> "$syslog::owner",
-		group		=> "$syslog::group",
-		mode		=> 644,
-		content		=> "# Managed by puppet - do not edit here
-${syslog::logdir}/* {
-	rotate 52
-	weekly
-	dateext
-	compress
-	delaycompress
-	missingok
-	notifempty
-	olddir ${syslog::rotdir}/
-}
-",
-	}
-
-	syslog::add_config { "sysmgt":
-		content		=> template("syslog/sysmgt.conf.erb"),
-	}
-
+	syslog::files { $fqdn: }
 }
 
-define syslog::tty ( $tty = "tty12" ) {
-	syslog::add_config { "tty":
-		content	=> "# Created by puppet on $server - do not edit here
-*.info /dev/$tty
-",
-	}
-}
-
-define syslog::remote ( $host ) {
-	syslog::add_config { "remote":
-		content => "# Created by puppet on $server - do not edit here
-*.info	@$host
-",
+class syslog::limited_local_files {
+	syslog::files { $fqdn:
+		files	=> [],
 	}
 }
 
