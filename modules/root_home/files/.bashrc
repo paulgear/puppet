@@ -52,3 +52,8 @@ function paul
 	export LESS=-eiMRX
 }
 
+function pdate
+{
+	perl -we 'print localtime($ARGV[0]) . "\n";' "$@"
+}
+
