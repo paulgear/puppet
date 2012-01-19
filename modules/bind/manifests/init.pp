@@ -100,6 +100,7 @@ define bind::config::options (
 	include bind
 
 	$forwarder_list = $forwarder_set ? {
+		"dyndns-guide"		=> [ "216.146.35.35", "216.146.36.36" ],
 		"opendns-familyfilter"	=> [ "208.67.222.123", "208.67.220.123" ],
 		"opendns-basic"		=> [ "208.67.222.222", "208.67.220.220" ],
 		"custom"		=> $forwarders,
