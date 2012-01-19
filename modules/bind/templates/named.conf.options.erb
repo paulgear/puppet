@@ -15,7 +15,7 @@ check_names.each do |cn| -%>
 	check-names <%= cn %>;
 <% end
 end -%>
-<% if forward.length > 0 then -%>
+<% if forward.length > 0 and forwarder_list.length > 0 then -%>
 	forward <%= forward %>;
 <% end -%>
 <% if forwarder_set.length > 0 then -%>
