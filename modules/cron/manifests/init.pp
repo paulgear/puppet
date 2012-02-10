@@ -8,6 +8,6 @@ define cron::crontab ( $hour ) {
 	text::replace_lines { $crontab:
 		file		=> $crontab,
 		pattern		=> "^([0-9]+)[ 	]+[0-9]+[ 	]+",
-		replace		=> "\1 $hour ",
+		replace		=> "\\1 $hour ",
 	}
 }
