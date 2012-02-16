@@ -10,7 +10,7 @@ class fail2ban::filters::postfix {
 	}
 	# block hosts greylisted by postgrey
 	fail2ban::filter { "postfix-postgrey":
-		failregex	=> 'reject: RCPT from (.*)\[<HOST>\]: 450 4\.7\.1',
+		failregex	=> 'reject: RCPT from (.*)\[<HOST>\]: 450 4\.(7\.1|2\.0)',
 	}
 	# block hosts attempting to send to invalid users
 	fail2ban::filter { "postfix-invalid-user":
