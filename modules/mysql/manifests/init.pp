@@ -3,7 +3,6 @@
 class mysql::server {
 	include mysql::server::package
 	include mysql::server::service
-	include mysql::server::scripts
 }
 
 class mysql::server::package {
