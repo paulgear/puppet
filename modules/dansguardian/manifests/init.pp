@@ -1,10 +1,9 @@
 #
 # puppet class to manage Dan's Guardian
 #
-# DONE: Checked for Ubuntu compatibility
-#
 
 class dansguardian {
+
 	# configuration variables
 	$basedir = "/etc/dansguardian"
 	$listdir = "$basedir/lists"
@@ -107,6 +106,45 @@ class dansguardian {
 			require	=> Class["dansguardian::package"],
 			notify	=> Class["dansguardian::reload"],
 			content	=> template("dansguardian/filtergroupslist.erb"),
+		}
+
+	}
+
+	# cut-down configuration
+	define config::basic ( $allowbypass = 1 ) {
+		include dansguardian::package
+		include dansguardian::reload
+		include clamav::package
+
+		# make DG user a member of the clamav group to enable virus scanning
+		user { "$dansguardian::user":
+			groups	=> "clamav",
+			require	=> Class["clamav::package"],
+		}
+
+		$numfiltergroups = 1
+		$filtergroups_description = "
+# filter1 = unfiltered, no blanket IP block, bypass allowed = $allowbypass
+"
+
+		dansguardian::groups::filter_conf { "f1":
+			filtergroup		=> 1,
+			groupmode		=> 2,
+			default_blacklists	=> [],
+			default_categories	=> [],
+			extra_categories	=> [],
+			allowbypass		=> $allowbypass,
+		}
+
+		# master config file
+		file { "$dansguardian::basedir/dansguardian.conf":
+			ensure	=> file,
+			owner	=> root,
+			group	=> $dansguardian::group,
+			mode	=> 644,
+			require	=> Class["dansguardian::package"],
+			notify	=> Class["dansguardian::reload"],
+			content	=> template("dansguardian/dansguardian.conf.erb"),
 		}
 
 	}
