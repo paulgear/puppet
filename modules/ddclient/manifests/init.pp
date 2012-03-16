@@ -3,6 +3,10 @@
 class ddclient {
 	include ddclient::package
 	include ddclient::service
+	$owner = $operatingsystem ? {
+		CentOS	=> "ddclient",
+		default	=> "root",
+	}
 	$group = $operatingsystem ? {
 		CentOS	=> "ddclient",
 		default	=> "root",
@@ -30,7 +34,7 @@ class ddclient::config {
 	$templatedir = "/etc/puppet/modules/ddclient/templates"
 	file { $cfg:
 		ensure	=> file,
-		owner	=> root,
+		owner	=> $ddclient::owner,
 		group	=> $ddclient::group,
 		mode	=> 640,
 		content	=> template("ddclient/ddclient.conf.erb"),
@@ -45,7 +49,7 @@ define ddclient::customconfig ( $template ) {
 	$templatedir = "/etc/puppet/modules/ddclient/templates"
 	file { $cfg:
 		ensure	=> file,
-		owner	=> root,
+		owner	=> $ddclient::owner,
 		group	=> $ddclient::group,
 		mode	=> 640,
 		content	=> template("ddclient/$template.erb"),
