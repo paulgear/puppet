@@ -3,6 +3,10 @@
 class ddclient {
 	include ddclient::package
 	include ddclient::service
+	$group = $operatingsystem ? {
+		CentOS	=> "ddclient",
+		default	=> "root",
+	}
 }
 
 class ddclient::package {
@@ -27,8 +31,8 @@ class ddclient::config {
 	file { $cfg:
 		ensure	=> file,
 		owner	=> root,
-		group	=> root,
-		mode	=> 600,
+		group	=> $ddclient::group,
+		mode	=> 640,
 		content	=> template("ddclient/ddclient.conf.erb"),
 		notify	=> Class["ddclient::service"],
 		require	=> Class["ddclient::package"],
@@ -42,8 +46,8 @@ define ddclient::customconfig ( $template ) {
 	file { $cfg:
 		ensure	=> file,
 		owner	=> root,
-		group	=> root,
-		mode	=> 600,
+		group	=> $ddclient::group,
+		mode	=> 640,
 		content	=> template("ddclient/$template.erb"),
 		notify	=> Class["ddclient::service"],
 		require	=> Class["ddclient::package"],
