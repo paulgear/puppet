@@ -35,3 +35,18 @@ class ddclient::config {
 	}
 }
 
+define ddclient::customconfig ( $template ) {
+	include ddclient
+	$cfg = "/etc/ddclient.conf"
+	$templatedir = "/etc/puppet/modules/ddclient/templates"
+	file { $cfg:
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 600,
+		content	=> template("ddclient/$template.erb"),
+		notify	=> Class["ddclient::service"],
+		require	=> Class["ddclient::package"],
+	}
+}
+
