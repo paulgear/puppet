@@ -9,13 +9,13 @@ update-master master m:
 	$(GIT) checkout master
 	$(GIT) merge next
 	$(GIT) checkout next
-	$(GIT) gc
 	$(GIT) push
+	$(GIT) gc
 
 update-next next n:
 	$(GIT) checkout next
 	$(GIT) merge master
 	$(GIT) checkout master
-	$(GIT) gc
 	$(GIT) push
+	$(GIT) gc
 
