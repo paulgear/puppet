@@ -16,7 +16,7 @@ class openvm::tools::package {
 
 class openvm::tools::service {
 	$svc = "open-vm-tools"
-	service { $svc
+	service { $svc:
 		enable	=> true,
 	}
 }
