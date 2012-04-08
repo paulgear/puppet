@@ -115,6 +115,7 @@ if ismounted $BACKUPVOL; then
 	for i in $SNAPSHOT_LIST; do
 		base=`basename $i`
 		log "Starting backup of $i"
+		mv -f $BACKUPVOL/images/$base.img.gz $BACKUPVOL/images/$base.img.gz.prev || true
 		dd if=$i bs=1024k conv=noerror | gzip --fast > $BACKUPVOL/images/$base.img.gz
 	done
 	log "Finished snapshot backups to $BACKUPVOL"
