@@ -9,7 +9,7 @@ DAYS=99
 PRI=local0.info
 DIR=/share/backup/mysql
 DATE=`date +%Y%m%d.%H%M`
-DBS="${@:-`cd /var/lib/mysql; ls -1d */|cut -d/ -f1`}"
+DBS="${@:-`cd /var/lib/mysql; ls -1d */|cut -d/ -f1|grep -v lost+found`}"
 
 message()
 {
