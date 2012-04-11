@@ -35,7 +35,7 @@ class ocsinventory::server::package {
 	}
 }
 
-class ocsinventory::server::purge_old {
+class ocsinventory::server::delete_old {
 	$file = "/etc/ocsinventory/delete_old.php"
 	file { $file:
 		ensure	=> file,
