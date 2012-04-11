@@ -22,6 +22,7 @@ define ocsinventory::client ( $server ) {
 }
 
 class ocsinventory::server {
+	include php5
 	include ocsinventory::server::package
 }
 
