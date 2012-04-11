@@ -17,7 +17,7 @@ define ocsinventory::client ( $server ) {
 		group	=> root,
 		mode	=> 600,
 		require	=> Class["ocsinventory::package"],
-		content	=> "# Managed by puppet - do not edit here!\nserver=$server\n",
+		content	=> "# Managed by puppet on $servername - do not edit here\nserver=$server\n",
 	}
 }
 
@@ -48,7 +48,7 @@ class ocsinventory::server::delete_old {
 	cron_job { "ocsinventory-delete-old":
 		interval	=> daily,
 		script		=> "#!/bin/sh
-# created by puppet on $server - do not edit here
+# Managed by puppet on $servername - do not edit here
 cd `dirname $file`
 php -f $file
 ",

@@ -19,7 +19,7 @@ class samba::datadirs {
 		}
 		cron_job { "samba-$name-update":
 			interval	=> "d",
-			script		=> "# Managed by puppet - do not edit!
+			script		=> "# Managed by puppet on $servername - do not edit here
 $minute $hour * * * root /usr/local/bin/randomsleep $sleep; rsync -az $extra $server::$name \"$dest\"/ 2>&1 | logger -p local0.info -t rsync
 ",
 		}

@@ -76,7 +76,7 @@ class amavis::files {
 	}
 	cron_job { "amavis-summary":
 		interval	=> "d",
-		script		=> "# Managed by puppet on $server - do not edit locally
+		script		=> "# Managed by puppet on $servername - do not edit here
 7 0 * * 0 root /usr/local/bin/amavis-summary
 ",
 	}
