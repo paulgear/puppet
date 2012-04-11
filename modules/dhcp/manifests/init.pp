@@ -41,7 +41,7 @@ class dhcp::server::restarter {
 	}
 	cron_job { "dhcpd-check-restart":
 		interval	=> "d",
-		script		=> "# Created by puppet on $server - do not edit here
+		script		=> "# Managed by puppet on $servername - do not edit here
 * * * * * root /usr/local/bin/dhcpd-check-restart
 ",
 	}
