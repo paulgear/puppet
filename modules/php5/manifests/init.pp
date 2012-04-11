@@ -7,8 +7,8 @@ class php5 {
 class php5::package {
 	$pkg = $operatingsystem ? {
 		centos	=> "php",
-		debian	=> "libapache2-mod-php5",
-		ubuntu	=> "libapache2-mod-php5",
+		debian	=> [ "libapache2-mod-php5", "php5-cli" ],
+		ubuntu	=> [ "libapache2-mod-php5", "php5-cli" ],
 	}
 	package { $pkg:
 		ensure		=> installed,

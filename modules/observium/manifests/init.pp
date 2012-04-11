@@ -28,7 +28,6 @@ class observium::packages {
 		"ipmitool",
 		"mtr-tiny",
 		"mysql-client",
-		"php5-cli",
 		"php5-gd",
 		"php5-mysql",
 		"php5-snmp",
