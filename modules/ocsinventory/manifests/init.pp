@@ -49,7 +49,7 @@ class ocsinventory::server::delete_old {
 		interval	=> daily,
 		script		=> "#!/bin/sh
 # created by puppet on $server - do not edit here
-cd `basename $file`
+cd `dirname $file`
 php -f $file
 ",
 	}
