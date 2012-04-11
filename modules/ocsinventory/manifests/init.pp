@@ -35,3 +35,22 @@ class ocsinventory::server::package {
 	}
 }
 
+class ocsinventory::server::purge_old {
+	$file = "/etc/ocsinventory/delete_old.php"
+	file { $file:
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 600,
+		require	=> Class["ocsinventory::server"],
+		source	=> "puppet:///modules/ocsinventory/delete_old.php",
+	}
+	cron_job { "ocsinventory-delete-old":
+		interval	=> daily,
+		script		=> "#!/bin/sh
+cd `basename $file`
+php -f $file
+",
+	}
+}
+
