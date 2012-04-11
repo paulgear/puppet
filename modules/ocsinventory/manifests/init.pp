@@ -48,6 +48,7 @@ class ocsinventory::server::delete_old {
 	cron_job { "ocsinventory-delete-old":
 		interval	=> daily,
 		script		=> "#!/bin/sh
+# created by puppet on $server - do not edit here
 cd `basename $file`
 php -f $file
 ",
