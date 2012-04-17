@@ -7,7 +7,8 @@ class os {
 	case $operatingsystem {
 
 	    centos, debian, ubuntu: {
-		    info( "OS distro for $fqdn is $operatingsystem, codename $lsbdistcodename" )
+		    info( "OS distro for $fqdn is $operatingsystem $operatingsystemrelease ($lsbdistcodename)" )
+		    include mail::newaliases
 		    include "os::$operatingsystem"
 		    include "os::${operatingsystem}::packages"
 	    }
