@@ -24,7 +24,7 @@ if [ -f /etc/debian_version ]; then
 	fi
 else
 	# Assume RPM-based distribution
-	INSTALLED=`rpm -q kernel kernel-PAE|tail -1|sed -e 's/^kernel-(PAE-)?//'`
+	INSTALLED="`rpm -q kernel kernel-PAE|grep -v is.not.installed|tail -1|sed -e 's/^kernel-//' -e 's/^PAE-//' -e 's/.x86_64$//'`"
 	RUNNING=`uname -r`
 	if [ $INSTALLED != $RUNNING -a $INSTALLED != ${RUNNING}PAE ]; then
 		echo "Reboot IS required - kernel running is $RUNNING, but $INSTALLED is installed"
