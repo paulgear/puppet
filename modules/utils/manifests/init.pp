@@ -10,7 +10,7 @@ class utils {
 		yumrepo { "epel":
 			enabled		=> 1,
 			includepkgs	=> absent,
-			excludepkgs	=> 'clam*',
+			exclude		=> 'clam*',
 			require		=> Package["epel-release"],
 		}
 
