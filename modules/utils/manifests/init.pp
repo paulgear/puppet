@@ -3,8 +3,6 @@
 #
 # This is an icky class - it should be removed
 #
-# DONE: Edited for Ubuntu compatibility
-#
 
 class utils {
 	if ($operatingsystem == "CentOS") {
@@ -33,16 +31,13 @@ class utils {
 	}
 
 	# utility scripts
-	define ulb_file () {
-		file { "/usr/local/bin/$name":
-			ensure	=> file,
-			owner	=> root,
-			group	=> root,
-			mode	=> 755,
-			source	=> "puppet:///modules/utils/$name",
-		}
-	}
-	ulb_file { [ 'check-kernel-version', 'fix-tun-devices', 'randomsleep', 'upgrade-dansguardian' ]: }
+	$files = [
+		'check-reboot-required',
+		'fix-tun-devices',
+		'randomsleep',
+		'upgrade-dansguardian',
+	]
+	ulb { $files: source_class => utils }
 
 }
 
