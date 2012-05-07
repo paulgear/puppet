@@ -32,11 +32,11 @@ find . -type d -print0 | xargs chmod g+s
 	cron_job { "puppetmaster-restart":
 		interval	=> "daily",
 		script		=> "#!/bin/sh
-/etc/init.d/puppetmaster restart
+/etc/init.d/puppetmaster restart >/dev/null
 ",
 	}
 
-	# report on missing clients daily
+	# report on missing clients daily - deprecated
 	cron_job { "puppetlast":
 		interval	=> "daily",
 		script		=> "#!/bin/sh
