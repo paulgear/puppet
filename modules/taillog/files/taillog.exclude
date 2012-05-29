@@ -28,6 +28,7 @@ puppetd\[[0-9]+\]: \(/File\[/var/lib/puppet/lib\]\) Failed to retrieve current s
 snmpd\[[0-9]+\]: Connection from UDP: \[127\.0\.1\.1
 snmpd\[[0-9]+\]: diskio.c: don't know how to handle [0-9]+ request
 snmpd\[[0-9]+\]: error on subcontainer 'ia_addr' insert \(-1\)
+snmpd\[[0-9]+\]: .*/\.gvfs: Permission denied
 snmpd\[[0-9]+\]: ipSystemStatsTable node ipSystemStatsOutFragOKs not implemented: skipping
 snmpd\[[0-9]+\]: send response:  
 snmpd\[[0-9]+\]: truncating integer value > 32 bits
