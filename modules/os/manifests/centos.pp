@@ -1,8 +1,6 @@
 # centos-specific configuration
 
 class os::centos {
-	include centos::yumrepo
-
 	# assume all services have a restart and a status
 	Service {
 		hasrestart	=> true,
