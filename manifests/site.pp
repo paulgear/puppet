@@ -55,24 +55,38 @@ define cron_job( $enable = "true", $interval = "daily", $script = "" ) {
 }
 
 define ulb( $source_class, $mode = 0755, $owner = root, $group = root, $ensure = file ) {
-	file { "/usr/local/bin/$name":
-		ensure	=> $ensure,
-		owner	=> $owner,
-		group	=> $group,
-		mode	=> $mode,
-		path	=> "/usr/local/bin/$name",
-		source	=> "puppet:///modules/$source_class/$name",
+	if $ensure == "absent" {
+		file { "/usr/local/bin/$name":
+			ensure	=> $ensure,
+		}
+	}
+	else {
+		file { "/usr/local/bin/$name":
+			ensure	=> $ensure,
+			owner	=> $owner,
+			group	=> $group,
+			mode	=> $mode,
+			path	=> "/usr/local/bin/$name",
+			source	=> "puppet:///modules/$source_class/$name",
+		}
 	}
 }
 
 define ule( $source_class, $mode = 0644, $owner = root, $group = root, $ensure = file ) {
-	file { "/usr/local/etc/$name":
-		ensure	=> $ensure,
-		owner	=> $owner,
-		group	=> $group,
-		mode	=> $mode,
-		path	=> "/usr/local/etc/$name",
-		source	=> "puppet:///modules/$source_class/$name",
+	if $ensure == "absent" {
+		file { "/usr/local/etc/$name":
+			ensure	=> $ensure,
+		}
+	}
+	else {
+		file { "/usr/local/etc/$name":
+			ensure	=> $ensure,
+			owner	=> $owner,
+			group	=> $group,
+			mode	=> $mode,
+			path	=> "/usr/local/etc/$name",
+			source	=> "puppet:///modules/$source_class/$name",
+		}
 	}
 }
 
