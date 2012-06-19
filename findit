@@ -1,0 +1,2 @@
+#!/bin/sh
+find . -path ./.git -prune -o -name '*.sqlite' -prune -o -type f -print
