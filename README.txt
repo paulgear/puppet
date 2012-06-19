@@ -51,7 +51,6 @@ NOTES
     a separate license - see the documentation in each module for details.
     Directories currently containing code covered under separate licenses are:
     	modules/aptitude
-	modules/backup/files/rsnapgraph-0.6
 	modules/logwatch
 	modules/puppet-concat
 	modules/resolver
