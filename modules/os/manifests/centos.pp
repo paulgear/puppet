@@ -17,3 +17,14 @@ class os::centos::packages {
 		ensure	=> installed,
 	}
 }
+
+define os::centos::initstyle ( $style = "color" ) {
+	include text
+	$file = "/etc/sysconfig/init"
+	text::replace_add_line { $file:
+		file	=> $file,
+		pattern => "^BOOTUP=",
+		line	=> "BOOTUP=$style",
+	}
+}
+
