@@ -13,7 +13,10 @@ class syslog {
 	$mail_logfile = "/var/log/maillog"
 
 	$class = $operatingsystem ? {
-		centos		=> "sysklogd",
+		centos		=> $operatingsystemrelease ? {
+			/^5/	=>	"sysklogd",
+			default	=>	"rsyslog",
+		},
 		ubuntu		=> "rsyslog",
 		debian		=> "rsyslog",
 	}
@@ -132,7 +135,6 @@ class rsyslog {
         postrotate
 		/etc/init.d/rsyslog reload >/dev/null 2>&1 || true
 		kill -HUP `cat /var/run/rsyslogd.pid`
-                #reload rsyslog >/dev/null 2>&1 || true
         endscript
 }
 ",
