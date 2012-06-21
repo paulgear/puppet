@@ -63,6 +63,9 @@ class rsyslog {
 	$pkg = "rsyslog"
 	$svc = "rsyslog"
 
+	$conf = "/etc/rsyslog.conf"
+	$rsyslog_dir = "/etc/rsyslog.d"
+
 	package { $pkg:
 		ensure		=> installed
 	}
@@ -73,7 +76,17 @@ class rsyslog {
 		hasstatus	=> true,
 	}
 
-	$rsyslog_dir = "/etc/rsyslog.d"
+	file { $rsyslog_dir:
+		ensure		=> directory,
+		require		=> Package[$pkg],
+	}
+
+	text::append_if_no_such_line { $conf:
+		file		=> $conf,
+		line		=> '$IncludeConfig /etc/rsyslog.d/*.conf',
+		require		=> File[$rsyslog_dir],
+		notify		=> Service[$svc],
+	}
 
 	file { "$rsyslog_dir/00-puppet-kernel.conf":
 		ensure		=> file,
