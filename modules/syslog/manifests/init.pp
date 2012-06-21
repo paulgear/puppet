@@ -9,7 +9,10 @@ class syslog {
 	$group = "root"
 
 	$provider = $operatingsystem ? {
-		"CentOS"	=> "sysklogd",
+		"CentOS"	=> $operatingsystemrelease ? {
+			/^5/	=>	"sysklogd",
+			default	=>	"rsyslog",
+		},
 		"Debian"	=> "rsyslog",
 		"Ubuntu"	=> "rsyslog",
 	}
@@ -145,6 +148,41 @@ define syslog::remove_config() {
 		ensure		=> absent,
 		notify		=> Class["$syslog::notifier"],
 	}
+
+	$rsyslog_logrotate = "/etc/logrotate.d/rsyslog"
+	file { $rsyslog_logrotate:
+		ensure		=> file,
+		owner		=> root,
+		group		=> root,
+		mode		=> 644,
+		content		=> "# Managed by puppet - do not edit here
+/var/log/syslog
+/var/log/mail.info
+/var/log/mail.warn
+/var/log/mail.err
+/var/log/mail.log
+/var/log/maillog
+/var/log/daemon.log
+/var/log/kern.log
+/var/log/auth.log
+/var/log/user.log
+/var/log/lpr.log
+/var/log/cron.log
+/var/log/debug
+/var/log/messages
+{
+        rotate 52
+        weekly
+	dateext
+        missingok
+        notifempty
+        compress
+        delaycompress
+        sharedscripts
+        postrotate
+		/etc/init.d/rsyslog reload >/dev/null 2>&1 || true
+		kill -HUP `cat /var/run/rsyslogd.pid`
+        endscript
 }
 
 define syslog::tty ( $tty = "tty12" ) {
