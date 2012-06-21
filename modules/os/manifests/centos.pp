@@ -9,7 +9,7 @@ class os::centos {
 }
 
 class os::centos::packages {
-	$packages = [ 'lsscsi', 'man', 'mlocate', 'screen', 'strace', 'vim-enhanced', 'wireshark', ]
+	$packages = [ 'bind-utils', 'lsscsi', 'man', 'mlocate', 'screen', 'strace', 'vim-enhanced', 'wireshark', ]
 
 	package { $packages:
 		ensure	=> installed,
