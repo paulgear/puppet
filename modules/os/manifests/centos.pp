@@ -26,7 +26,7 @@ define os::centos::initstyle ( $style = "color" ) {
 	}
 }
 
-class os::centos::6::yumrepos {
+class os::centos::yumrepos {
 	include isp
 
 	$default_repo_file = "/etc/yum.repos.d/CentOS-Base"
