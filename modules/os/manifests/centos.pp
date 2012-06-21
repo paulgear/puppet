@@ -29,7 +29,7 @@ define os::centos::initstyle ( $style = "color" ) {
 class os::centos::yumrepos {
 	include isp
 
-	$default_repo_file = "/etc/yum.repos.d/CentOS-Base"
+	$default_repo_file = "/etc/yum.repos.d/CentOS-Base.repo"
 	$repobase = "$isp::mirrorbase/$operatingsystemrelease"
 
 	file { $default_repo_file:
@@ -38,6 +38,7 @@ class os::centos::yumrepos {
 
 	yumrepo { "centos-base-puppet":
 		baseurl		=> "$repobase/os/$architecture/",
+		descr		=> "CentOS 6 - Base",
 		enabled		=> 1,
 		gpgcheck	=> 1,
 		gpgkey		=> "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6",
@@ -47,6 +48,7 @@ class os::centos::yumrepos {
 
 	yumrepo { "centos-updates-puppet":
 		baseurl		=> "$repobase/updates/$architecture/",
+		descr		=> "CentOS 6 - Updates",
 		enabled		=> 1,
 		gpgcheck	=> 1,
 		gpgkey		=> "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6",
@@ -56,6 +58,7 @@ class os::centos::yumrepos {
 
 	yumrepo { "centos-extras-puppet":
 		baseurl		=> "$repobase/extras/$architecture/",
+		descr		=> "CentOS 6 - Extras",
 		enabled		=> 1,
 		gpgcheck	=> 1,
 		gpgkey		=> "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6",
@@ -65,6 +68,7 @@ class os::centos::yumrepos {
 
 	yumrepo { "centos-centosplus-puppet":
 		baseurl		=> "$repobase/centosplus/$architecture/",
+		descr		=> "CentOS 6 - CentOS Plus",
 		enabled		=> 0,
 		gpgcheck	=> 1,
 		gpgkey		=> "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6",
@@ -74,6 +78,7 @@ class os::centos::yumrepos {
 
 	yumrepo { "centos-contrib-puppet":
 		baseurl		=> "$repobase/contrib/$architecture/",
+		descr		=> "CentOS 6 - Contrib",
 		enabled		=> 0,
 		gpgcheck	=> 1,
 		gpgkey		=> "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6",
