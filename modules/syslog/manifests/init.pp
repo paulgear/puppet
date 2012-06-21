@@ -187,7 +187,7 @@ define syslog::remove_config() {
 
 define syslog::tty ( $tty = "tty12" ) {
 	syslog::add_config { "tty":
-		content	=> "# Created by puppet on $server - do not edit here
+		content	=> "# Created by puppet on $servername - do not edit here
 *.info /dev/$tty
 ",
 	}
