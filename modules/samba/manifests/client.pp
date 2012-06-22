@@ -6,7 +6,10 @@ class samba::client {
 
 class samba::client::package {
 	$pkg = $operatingsystem ? {
-		centos	=> "samba-client",
+		centos	=> $operatingsystemrelease ? {
+			/^5/	=> "samba3-client",
+			default	=> "samba-client",
+		},
 		debian	=> "smbfs",
 		ubuntu	=> "smbfs",
 	}
