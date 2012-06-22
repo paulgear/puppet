@@ -7,8 +7,8 @@ class samba::client {
 class samba::client::package {
 	$pkg = $operatingsystem ? {
 		centos	=> $operatingsystemrelease ? {
-			/^5/	=> "samba3-client",
-			default	=> "samba-client",
+			/^5/	=> "samba3-cifsmount",
+			default	=> "cifs-utils",
 		},
 		debian	=> "smbfs",
 		ubuntu	=> "smbfs",
