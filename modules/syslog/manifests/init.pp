@@ -143,7 +143,7 @@ define syslog::remote ( $host ) {
 }
 
 # NOTE: Will break sysklogd - use only for rsyslog
-define syslog::remote_receive () {
+class syslog::remote_receive {
 	syslog::add_config { "remote_receive":
 		content => "# Created by puppet on $servername - do not edit here
 # provides UDP syslog reception
