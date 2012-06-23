@@ -136,7 +136,7 @@ ${syslog::logdir}/* {
 
 define syslog::remote ( $host ) {
 	syslog::add_config { "remote":
-		content => "# Created by puppet on $server - do not edit here
+		content => "# Created by puppet on $servername - do not edit here
 *.info	@$host
 ",
 	}
