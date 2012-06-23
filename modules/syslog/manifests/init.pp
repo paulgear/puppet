@@ -142,6 +142,21 @@ define syslog::remote ( $host ) {
 	}
 }
 
+# NOTE: Will break sysklogd - use only for rsyslog
+define syslog::remote_receive () {
+	syslog::add_config { "remote_receive":
+		content => "# Created by puppet on $servername - do not edit here
+# provides UDP syslog reception
+$ModLoad imudp
+$UDPServerRun 514
+
+# provides TCP syslog reception
+$ModLoad imtcp
+$InputTCPServerRun 514
+",
+	}
+}
+
 define syslog::remove_config() {
 	include syslog
 	file { "${syslog::confdir}/00-puppet-$name.conf":
