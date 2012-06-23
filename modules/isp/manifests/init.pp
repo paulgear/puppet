@@ -9,6 +9,12 @@ class isp {
 			$debianbackports = "$mirrorbase/pub/debian-backports"
 		}
 
+		"internode": {
+			$mirrorbase = "http://mirror.internode.on.net"
+			$debianbase = "$mirrorbase/pub/debian"
+			$debianbackports = "http://ftp.au.debian.org/backports.org"
+		}
+
 		"exetel": {
 			$mirrorbase = "http://mirror.exetel.com.au/"
 			$debianbase = "$mirrorbase/pub/debian/debian"
