@@ -147,12 +147,12 @@ define syslog::remote_receive () {
 	syslog::add_config { "remote_receive":
 		content => "# Created by puppet on $servername - do not edit here
 # provides UDP syslog reception
-$ModLoad imudp
-$UDPServerRun 514
+\$ModLoad imudp
+\$UDPServerRun 514
 
 # provides TCP syslog reception
-$ModLoad imtcp
-$InputTCPServerRun 514
+\$ModLoad imtcp
+\$InputTCPServerRun 514
 ",
 	}
 }
