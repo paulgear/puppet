@@ -157,10 +157,17 @@ class os::debian::physical {
 }
 
 class os::debian::lenny {
-	os::debian::base	{ "lenny": }
-	os::debian::security	{ "lenny": }
+	$components = ["main", "contrib", "non-free"]
+	aptitude::source { "lenny-main":
+		ensure		=> file,
+		comment		=> "$operatingsystem base distribution",
+		uri		=> "http://archive.debian.org/",
+		distribution	=> "$name",
+		components	=> $components,
+	}
+	#os::debian::security	{ "lenny": }
 	os::debian::volatile	{ "lenny": }
-	os::debian::backports	{ "lenny": }
+	#os::debian::backports	{ "lenny": }
 
 	$packages = [ "sysvconfig" ]
 	package { $packages: ensure => installed }
