@@ -17,14 +17,14 @@ class isp {
 		}
 
 		"exetel": {
-			$mirrorbase = "http://mirror.exetel.com.au/"
+			$mirrorbase = "http://mirror.exetel.com.au"
 			$centosbase = "http://mirror.aarnet.edu.au/pub/centos"
 			$debianbase = "$mirrorbase/pub/debian/debian"
 			$debianbackports = "$mirrorbase/pub/debian/debian-backports"
 		}
 
 		"bigpond": {
-			$mirrorbase = "http://mirror.aarnet.edu.au/"
+			$mirrorbase = "http://mirror.aarnet.edu.au"
 			$centosbase = "$mirrorbase/pub/centos"
 			$debianbase = "$mirrorbase/pub/debian"
 			$debianbackports = "http://ftp.iinet.net.au/pub/debian-backports"
