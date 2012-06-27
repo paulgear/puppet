@@ -67,6 +67,7 @@ define openvpn::configdir ( $source = "puppet:///modules/openvpn/$fqdn" ) {
 		ensure	=> directory,
 		owner	=> root,
 		group	=> root,
+		recurse	=> true,
 		source	=> $source,
 		require	=> Class["openvpn::package"],
 		notify	=> Class["openvpn::service"],
