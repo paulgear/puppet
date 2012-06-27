@@ -1,6 +1,7 @@
 # puppet class to install openvpn
 
 class openvpn {
+	$dir = "/etc/openvpn"
 	include	openvpn::package
 	include openvpn::service
 }
@@ -54,6 +55,19 @@ class openvpn::config {
 		group	=> root,
 		mode	=> 644,
 		source	=> "puppet:///modules/openvpn/ca.crt",
+		require	=> Class["openvpn::package"],
+		notify	=> Class["openvpn::service"],
+	}
+}
+
+# WARNING: Do not use in conjunction with openvpn::config
+define openvpn::configdir ( $source = "puppet:///modules/openvpn/$fqdn" ) {
+	include openvpn
+	file { "$openvpn::dir":
+		ensure	=> directory,
+		owner	=> root,
+		group	=> root,
+		source	=> $source,
 		require	=> Class["openvpn::package"],
 		notify	=> Class["openvpn::service"],
 	}
