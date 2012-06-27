@@ -161,13 +161,31 @@ class os::debian::lenny {
 	aptitude::source { "lenny-main":
 		ensure		=> file,
 		comment		=> "$operatingsystem base distribution",
-		uri		=> "http://archive.debian.org/",
+		uri		=> "http://archive.debian.org/debian",
 		distribution	=> "lenny",
 		components	=> $components,
 	}
-	#os::debian::security	{ "lenny": }
-	#os::debian::volatile	{ "lenny": }
-	#os::debian::backports	{ "lenny": }
+	aptitude::source { "lenny-security":
+		ensure		=> file,
+		comment		=> "$operatingsystem security",
+		uri		=> "http://archive.debian.org/debian-security",
+		distribution	=> "lenny/updates",
+		components	=> $components,
+	}
+	aptitude::source { "lenny-volatile":
+		ensure		=> file,
+		comment		=> "$operatingsystem volatile",
+		uri		=> "http://archive.debian.org/debian-volatile",
+		distribution	=> "lenny/volatile",
+		components	=> $components,
+	}
+	aptitude::source { "lenny-backports":
+		ensure		=> file,
+		comment		=> "$operatingsystem backports",
+		uri		=> "http://archive.debian.org/debian-backports",
+		distribution	=> "lenny-backports",
+		components	=> $components,
+	}
 
 	$packages = [ "sysvconfig" ]
 	package { $packages: ensure => installed }
