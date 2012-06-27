@@ -162,11 +162,11 @@ class os::debian::lenny {
 		ensure		=> file,
 		comment		=> "$operatingsystem base distribution",
 		uri		=> "http://archive.debian.org/",
-		distribution	=> "$name",
+		distribution	=> "lenny",
 		components	=> $components,
 	}
 	#os::debian::security	{ "lenny": }
-	os::debian::volatile	{ "lenny": }
+	#os::debian::volatile	{ "lenny": }
 	#os::debian::backports	{ "lenny": }
 
 	$packages = [ "sysvconfig" ]
