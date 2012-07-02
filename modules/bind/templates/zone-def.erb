@@ -20,5 +20,19 @@ zone "<%= zone %>" {
 <% end -%>
 	};
 <% end -%>
+<% if allow_notify.length > 0 then -%>
+	allow-notify {
+<% allow_notify.each do |an| -%>
+		<%= an %>;
+<% end -%>
+	};
+<% end -%>
+<% if allow_transfer.length > 0 then -%>
+	allow-transfer {
+<% allow_transfer.each do |at| -%>
+		<%= at %>;
+<% end -%>
+	};
+<% end -%>
 };
 

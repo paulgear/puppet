@@ -87,17 +87,20 @@ class bind::config {
 # generate named.conf.options (used on both CentOS & Debian/Ubuntu)
 # set arguments to empty string/array to disable them
 define bind::config::options (
-		$binddir = "/var/cache/bind",
-		$check_names = [ "master fail", "slave warn", "response ignore" ],
-		$forward = "first",
-		$forwarder_set = "opendns-basic",
-		$forwarders = [],
-		$global_notify = "no",
-		$recursion = "",
-		$options_file = "",
-		$edns_udp_size = "512",
-		$max_udp_size = "512"
-		) {
+	$binddir = "/var/cache/bind",
+	$check_names = [ "master fail", "slave warn", "response ignore" ],
+	$forward = "first",
+	$forwarder_set = "opendns-basic",
+	$forwarders = [],
+	$global_notify = "no",
+	$recursion = "",
+	$allow_recursion = [],
+	$allow_query = [],
+	$allow_query_cache = [],
+	$options_file = "",
+	$edns_udp_size = "512",
+	$max_udp_size = "512"
+) {
 	include bind
 
 	$forwarder_list = $forwarder_set ? {
@@ -164,7 +167,10 @@ class bind::config::named_conf_local {
 }
 
 # add fragment to named.conf.local
-define bind::local::fragment ( $content, $order = "" ) {
+define bind::local::fragment (
+	$content,
+	$order = ""
+) {
 	include concat::setup
 	include bind::config
 	include bind::config::named_conf_local
@@ -186,6 +192,8 @@ define bind::zone (
 	$forwarders = [],
 	$masters = [],
 	$zone_notify = "",
+	$allow_notify = [],
+	$allow_transfer = [],
 	$order = ""
 ) {
 	include concat::setup
@@ -202,7 +210,12 @@ define bind::zone (
 	}
 }
 
-define bind::master_zone ( $zone = "", $order = "", $zone_notify = "yes" ) {
+define bind::master_zone (
+	$zone = "",
+	$order = "",
+	$zone_notify = "yes",
+	$allow_transfer = []
+) {
 	include bind::config
 	$zonename = $zone ? {
 		default	=> $zone,
@@ -213,12 +226,19 @@ define bind::master_zone ( $zone = "", $order = "", $zone_notify = "yes" ) {
 		zonefile	=> "master/$zonename",
 		zone		=> $zonename,
 		zone_notify	=> $zone_notify,
+		allow_transfer	=> $allow_transfer,
 		order		=> $order,
 		require		=> File["${bind::config::masterdir}"],
 	}
 }
 
-define bind::slave_zone ( $zone = "", $order = "", $masters, $zone_notify = "no" ) {
+define bind::slave_zone (
+	$zone = "",
+	$order = "",
+	$masters,
+	$zone_notify = "no",
+	$allow_notify = []
+) {
 	include bind::config
 	$zonename = $zone ? {
 		default	=> $zone,
@@ -230,12 +250,17 @@ define bind::slave_zone ( $zone = "", $order = "", $masters, $zone_notify = "no"
 		masters		=> $masters,
 		zone		=> $zonename,
 		zone_notify	=> $zone_notify,
+		allow_notify	=> $allow_notify,
 		order		=> $order,
 		require		=> File["${bind::config::slavedir}"],
 	}
 }
 
-define bind::forward_zone ( $zone = "", $order = "", $forwarders ) {
+define bind::forward_zone (
+	$zone = "",
+	$order = "",
+	$forwarders
+) {
 	$zonename = $zone ? {
 		default	=> $zone,
 		""	=> $name,
