@@ -43,5 +43,26 @@ end -%>
 <% if options_file.length > 0 then -%>
 	include "<%= options_file %>";
 <% end -%>
+<% if allow_query.length > 0 then -%>
+	allow-query {
+<% allow_query.each do |aq| -%>
+		<%= aq %>;
+<% end -%>
+	};
+<% end -%>
+<% if allow_query_cache.length > 0 then -%>
+	allow-query-cache {
+<% allow_query_cache.each do |aqc| -%>
+		<%= aqc %>;
+<% end -%>
+	};
+<% end -%>
+<% if allow_recursion.length > 0 then -%>
+	allow-recursion {
+<% allow_recursion.each do |ar| -%>
+		<%= ar %>;
+<% end -%>
+	};
+<% end -%>
 };
 
