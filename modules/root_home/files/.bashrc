@@ -28,19 +28,19 @@ esac
 alias pt='kp; tp'
 alias rm='rm -i'
 alias taillog='tme|grep -Evf ~/taillog.exclude'
-alias td='tail --follow=name /var/log/dansguardian/access.log'
-alias tk='tail --follow=name /var/log/kernel.log'
-alias tma='tail --follow=name /var/log/maillog'
+alias td='tail -F /var/log/dansguardian/access.log'
+alias tk='tail -F /var/log/kernel.log'
+alias tma='tail -F /var/log/maillog'
 case "`facter operatingsystem`" in
 Ubuntu|Debian)
-	alias tme='tail --follow=name /var/log/syslog'
+	alias tme='tail -F /var/log/syslog'
 	;;
 *)
-	alias tme='tail --follow=name /var/log/messages'
+	alias tme='tail -F /var/log/messages'
 	;;
 esac
-alias trad='tail --follow=name /var/log/radius/radius.log'
-alias ts='tail --follow=name /var/log/squid/access.log'
+alias trad='tail -F /var/log/radius/radius.log'
+alias ts='tail -F /var/log/squid/access.log'
 alias vi='vim'
 
 export EDITOR=vim
