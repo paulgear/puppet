@@ -28,12 +28,12 @@ esac
 alias pt='kp; tp'
 alias rm='rm -i'
 alias taillog='tme|grep -Evf ~/taillog.exclude'
-alias td='tail --follow=name /var/log/dansguardian/access.log'
-alias tk='tail --follow=name /var/log/sysmgt/kern'
-alias tma='tail --follow=name /var/log/sysmgt/mail'
-alias tme='tail --follow=name /var/log/sysmgt/all'
-alias trad='tail --follow=name /var/log/radius/radius.log'
-alias ts='tail --follow=name /var/log/squid/access.log'
+alias td='tail -F /var/log/dansguardian/access.log'
+alias tk='tail -F /var/log/sysmgt/kern'
+alias tma='tail -F /var/log/sysmgt/mail'
+alias tme='tail -F /var/log/sysmgt/all'
+alias trad='tail -F /var/log/radius/radius.log'
+alias ts='tail -F /var/log/squid/access.log'
 alias vi='vim'
 
 export EDITOR=vim
