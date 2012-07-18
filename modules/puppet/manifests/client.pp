@@ -59,6 +59,8 @@ class puppet::client::bucket_clean {
 	cron_job { "puppet-clientbucket-clean":
 		interval	=> "weekly",
 		script		=> "#!/bin/sh
+set -e
+set -u
 cd /var/lib/puppet/clientbucket
 du -mxs .
 df -m .
