@@ -60,11 +60,11 @@ class puppet::client::bucket_clean {
 		interval	=> "weekly",
 		script		=> "#!/bin/sh
 cd /var/lib/puppet/clientbucket
-du -mx
+du -mxs .
 df -m .
 find . -type f -mtime +99 -print0 | xargs -0 rm -f
 find . -type d -print0 | xargs -0 rmdir 2>/dev/null
-du -mx
+du -mxs .
 df -m .
 "
 	}
