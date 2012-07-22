@@ -50,6 +50,14 @@ if [ -d $HOME/bin ]; then
 	PATH=$HOME/bin:$PATH
 fi
 
+VTYSH="`which vtysh 2>/dev/null`"
+if [ -x "$VTYSH" ]; then
+	function show
+	{
+		$VTYSH -c "show $*"
+	}
+fi
+
 function paul
 {
 	alias dir='ls -Fabl'
