@@ -19,7 +19,8 @@ eval `awk -F\" '
 	/db_user/ {print "USER=\"" $2 "\""}
 ' $BASE/config.php`
 echo "[client]
+user=$USER
 password=$PASS" > $MY_CNF
 
-mysqldump --defaults-extra-file=$MY_CNF -h $HOST -u $USER $NAME > $DUMPFILE
+mysqldump --defaults-extra-file=$MY_CNF -h $HOST $NAME > $DUMPFILE
 
