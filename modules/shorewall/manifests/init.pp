@@ -6,7 +6,10 @@ class shorewall {
 
 	$email = "root@localhost"
 	$pkg = $operatingsystem ? {
-		centos	=> "shorewall-perl",
+		centos	=> $operatingsystemrelease ? {
+			/^5/	=> "shorewall-perl",
+			default	=> "shorewall",
+		},
 		debian	=> $lsbdistcodename ? {
 			lenny	=> "shorewall-perl",
 			squeeze	=> "shorewall",
