@@ -127,7 +127,10 @@ class bind::package {
 	$pkg = $operatingsystem ? {
 		debian		=> "bind9",
 		ubuntu		=> "bind9",
-		centos		=> [ "bind", "caching-nameserver", ],
+		centos          => $operatingsystemrelease ? {
+			/^5/	=> [ "bind", "caching-nameserver", ],
+			default	=> [ "bind", "bind-chroot", ],
+		}
 	}
 	package { $pkg:
 		ensure		=> installed,
