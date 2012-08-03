@@ -30,7 +30,12 @@ class os::centos::yumrepos {
 	include isp
 
 	$default_repo_file = "/etc/yum.repos.d/CentOS-Base.repo"
-	$repobase = "$isp::centosbase/$operatingsystemrelease"
+	$release = $operatingsystemrelease ? {
+		/^5/	=> 5,
+		/^6/	=> 6,
+		default	=> undef,
+	}
+	$repobase = "$isp::centosbase/$release"
 
 	file { $default_repo_file:
 		ensure		=> absent,
