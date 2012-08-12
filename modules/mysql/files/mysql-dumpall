@@ -1,0 +1,38 @@
+#!/bin/sh
+
+set -e
+set -u
+
+#PATH=$PATH:$HOME/bin:/usr/sbin         # add /usr/sbin for tmpwatch
+PROG="$0"
+DAYS=66
+PRI=local0.info
+DIR=/share/backup/mysql
+DATE=`date +%Y%m%d.%H%M`
+DBS="${@:-`cd /var/lib/mysql; ls -1d */|cut -d/ -f1|grep -v '^lost.*found$'`}"
+
+message()
+{
+    test -t 0 && echo "$@"
+    logger -t $PROG -p $PRI "$@"
+}
+
+mkdir -p $DIR
+
+# Clear out old backups
+find $DIR -type f -mtime +$DAYS -print0 | xargs --null --no-run-if-empty /bin/rm
+
+BEGIN=`date +%s`
+for i in $DBS; do
+    LAST=`date +%s`
+    mysqldump --databases $i | gzip --best > $DIR/$i-$DATE.gz
+    NOW=`date +%s`
+    message "$i dumped in `expr $NOW - $LAST` second(s)."
+done
+message "MySQL dumps took `expr $NOW - $BEGIN` second(s)."
+
+#BEGIN=`date +%s`
+#mysqldump --all-databases | gzip --best > $DIR/all-$DATE.gz
+#NOW=`date +%s`
+#message "MySQL dump of all databases took `expr $NOW - $BEGIN` second(s)."
+

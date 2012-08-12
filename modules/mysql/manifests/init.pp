@@ -37,3 +37,15 @@ class mysql::client::package {
 	}
 }
 
+class mysql::server::scripts {
+	ulb { 'mysql-dumpall':
+		source_class	=> "mysql",
+	}
+	cron_job { "mysql-dumpall":
+		interval	=> "daily",
+		script		=> "#!/bin/sh
+/usr/local/bin/mysql-dumpall
+",
+	}
+}
+
