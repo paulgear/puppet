@@ -5,7 +5,11 @@ set -u
 
 #PATH=$PATH:$HOME/bin:/usr/sbin         # add /usr/sbin for tmpwatch
 PROG="$0"
+<<<<<<< HEAD
 DAYS=99
+=======
+DAYS=66
+>>>>>>> master
 PRI=local0.info
 DIR=/share/backup/mysql
 DATE=`date +%Y%m%d.%H%M`
@@ -19,6 +23,12 @@ message()
 
 mkdir -p $DIR
 
+<<<<<<< HEAD
+=======
+# Clear out old backups
+find $DIR -type f -mtime +$DAYS -print0 | xargs --null --no-run-if-empty /bin/rm
+
+>>>>>>> master
 BEGIN=`date +%s`
 for i in $DBS; do
     LAST=`date +%s`
@@ -28,6 +38,7 @@ for i in $DBS; do
 done
 message "MySQL dumps took `expr $NOW - $BEGIN` second(s)."
 
+<<<<<<< HEAD
 BEGIN=`date +%s`
 mysqldump --all-databases | gzip --best > $DIR/all-$DATE.gz
 NOW=`date +%s`
@@ -35,4 +46,10 @@ message "MySQL dump of all databases took `expr $NOW - $BEGIN` second(s)."
 
 # Clear out old backups
 find $DIR -type f -mtime +$DAYS -print0 | xargs --null --no-run-if-empty /bin/rm
+=======
+#BEGIN=`date +%s`
+#mysqldump --all-databases | gzip --best > $DIR/all-$DATE.gz
+#NOW=`date +%s`
+#message "MySQL dump of all databases took `expr $NOW - $BEGIN` second(s)."
+>>>>>>> master
 

@@ -26,23 +26,6 @@ class mysql::server::service {
 	}
 }
 
-class mysql::server::scripts {
-	$script = "/usr/local/bin/mysql-dumpall"
-	file { $script:
-		ensure		=> file,
-		mode		=> 755,
-		owner		=> root,
-		group		=> root,
-		source		=> "puppet:///modules/mysql/mysql-dumpall",
-	}
-	cron_job { "mysql-dumpall":
-		interval	=> "daily",
-		script		=> "#!/bin/sh
-$script
-",
-	}
-}
-
 class mysql::client {
 	include mysql::client::package
 }
@@ -51,6 +34,18 @@ class mysql::client::package {
 	$pkg = "mysql-client"
 	package { $pkg:
 		ensure	=> installed,
+	}
+}
+
+class mysql::server::scripts {
+	ulb { 'mysql-dumpall':
+		source_class	=> "mysql",
+	}
+	cron_job { "mysql-dumpall":
+		interval	=> "daily",
+		script		=> "#!/bin/sh
+/usr/local/bin/mysql-dumpall
+",
 	}
 }
 

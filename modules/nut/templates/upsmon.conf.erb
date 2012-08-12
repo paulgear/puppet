@@ -1,17 +1,22 @@
-
-# RUN_AS_USER nutmon
-# MONITOR <system> <powervalue> <username> <password> ("master"|"slave")
+# Created by puppet on <%= servername %> - do not edit here
+DEADTIME 15
+FINALDELAY 5
+HOSTSYNC 15
 MINSUPPLIES 1
-SHUTDOWNCMD "/sbin/shutdown -h +0"
-# NOTIFYCMD /usr/local/ups/bin/notifyme
+MONITOR <%= upsname %>@<%= mastername %> <%= numsupplies %> <%= username %> <%= password %> <%= mode %>
+NOCOMMWARNTIME 300
 POLLFREQ 5
 POLLFREQALERT 5
-HOSTSYNC 15
-DEADTIME 15
 POWERDOWNFLAG /etc/killpower
-# NOTIFYMSG <notify type> "message"
+RBWARNTIME 86400
+# RUN_AS_USER nutmon
+SHUTDOWNCMD "/sbin/shutdown -h +0"
+# NOTIFYCMD /usr/local/ups/bin/notifyme
 # NOTIFYFLAG <notify type> <flag>[+<flag>][+<flag>] ...
-RBWARNTIME 43200
-NOCOMMWARNTIME 300
-FINALDELAY 5
-
+# NOTIFYMSG <notify type> "message"
+<% if upssched == "true" %>
+NOTIFYCMD /usr/sbin/upssched
+NOTIFYFLAG LOWBATT SYSLOG+WALL+EXEC
+NOTIFYFLAG ONBATT SYSLOG+EXEC
+NOTIFYFLAG ONLINE SYSLOG+EXEC
+<% end %>
