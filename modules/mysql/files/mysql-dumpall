@@ -3,7 +3,6 @@
 set -e
 set -u
 
-#PATH=$PATH:$HOME/bin:/usr/sbin         # add /usr/sbin for tmpwatch
 PROG="$0"
 DAYS=66
 PRI=local0.info
@@ -30,9 +29,4 @@ for i in $DBS; do
     message "$i dumped in `expr $NOW - $LAST` second(s)."
 done
 message "MySQL dumps took `expr $NOW - $BEGIN` second(s)."
-
-#BEGIN=`date +%s`
-#mysqldump --all-databases | gzip --best > $DIR/all-$DATE.gz
-#NOW=`date +%s`
-#message "MySQL dump of all databases took `expr $NOW - $BEGIN` second(s)."
 
