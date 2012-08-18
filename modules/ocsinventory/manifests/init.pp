@@ -29,8 +29,8 @@ class ocsinventory::server {
 
 class ocsinventory::server::package {
 	include mysql::client
-	$pkg = "ocsinventory-server"
-	package { $pkg:
+	$pkgs = [ "ocsinventory-server", "libsoap-lite-perl", ]
+	package { $pkgs:
 		ensure	=> installed,
 	}
 }
