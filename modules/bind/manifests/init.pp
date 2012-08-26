@@ -6,6 +6,19 @@ class bind {
 	include bind::service
 }
 
+define bind::named_etc_file () {
+	include bind::config
+	file { "${bind::config::etc}/$name":
+		ensure		=> file,
+		owner		=> root,
+		group		=> "${bind::config::group}",
+		mode		=> 640,
+		source		=> "puppet:///modules/bind/$name",
+		require		=> [ File["${bind::config::etc}"], Class["bind::package"] ],
+		notify		=> Class["bind::service"],
+	}
+}
+
 class bind::config {
 	include bind::package
 	include bind::service
@@ -66,19 +79,7 @@ class bind::config {
 			"rndc.key",
 			"named.conf",
 		]
-		define named_etc_file () {
-			include bind::config
-			file { "${bind::config::etc}/$name":
-				ensure		=> file,
-				owner		=> root,
-				group		=> "${bind::config::group}",
-				mode		=> 640,
-				source		=> "puppet:///modules/bind/$name",
-				require		=> [ File["${bind::config::etc}"], Class["bind::package"] ],
-				notify		=> Class["bind::service"],
-			}
-		}
-		named_etc_file { $etc_files: }
+		bind::named_etc_file { $etc_files: }
 	}
 
 }

@@ -38,6 +38,13 @@ class clamav::service {
 	}
 }
 
+define clamav::remove_file () {
+	file { "/var/clamav/$name":
+		ensure		=> absent,
+		require		=> Class["clamav::package"],
+	}
+}
+
 class clamav::centos {
 	# these files are managed automatically on Debian & Ubuntu
 	if $operatingsystem == "CentOS" {
@@ -89,13 +96,7 @@ class clamav::centos {
 		}
 
 		$remove_files = [ "daily.cld", "daily.cvd.rpmnew", "main.cld", "main.cvd.rpmnew" ]
-		define remove_file () {
-			file { "/var/clamav/$name":
-				ensure		=> absent,
-				require		=> Class["clamav::package"],
-			}
-		}
-		remove_file { $remove_files: }
+		clamav::remove_file { $remove_files: }
 
 	}
 
