@@ -46,6 +46,7 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 		script		=> "#!/bin/sh
 cd /etc
 git gc --quiet
+git fsck --full --strict
 ",
 	}
 
