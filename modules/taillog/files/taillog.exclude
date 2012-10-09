@@ -20,6 +20,7 @@ named\[[0-9]+\]: (connection refused|FORMERR|lame server|network unreachable|une
 named\[[0-9]+\]: too many timeouts resolving .*: (disabling EDNS|reducing the advertised EDNS UDP packet size to 512 octets)
 ntop\[[0-9]+\]:.*WARNING.. packet truncated
 ntpd\[[0-9]+\]: synchronized to [0-9.]+, stratum [0-9]+
+ospfd\[[0-9]+\]: Packet\[[A-Z]+\]: Neighbor [0-9.] state is 2-Way, packet discarded.
 ovpn-.*\[[0-9]+\]: Control Channel: TLSv1, cipher TLSv1/SSLv3 DHE-RSA-AES256-SHA, [0-9]+ bit RSA
 ovpn-.*\[[0-9]+\]: Data Channel (De|En)crypt: Cipher 'BF-CBC' initialized with 128 bit key
 ovpn-.*\[[0-9]+\]: Data Channel (De|En)crypt: Using 160 bit message hash 'SHA1' for HMAC authentication
