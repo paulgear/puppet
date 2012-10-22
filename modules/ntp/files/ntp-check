@@ -35,7 +35,7 @@ error()
 
 verbose()
 {
-	if [ $VERBOSE ]; then
+	if [ "$VERBOSE" -eq 1 ]; then
 		echo "$@"
 	fi
 }
