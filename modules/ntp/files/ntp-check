@@ -50,7 +50,7 @@ ntpq -pn $HOST | grep -Ev \
 if [ ! -s $OUTPUT ]; then
 	error 1 "NTP server $HOST did not respond"
 else
-	if [ "$VERBOSE" ]; then
+	if [ "$VERBOSE" -eq 1 ]; then
 		echo "ntpq -pn results:"
 		cat $OUTPUT
 	fi
