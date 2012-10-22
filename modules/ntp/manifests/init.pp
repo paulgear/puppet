@@ -44,5 +44,9 @@ class ntp {
 		"3.$country.pool.ntp.org",
 	]
 
+	ulb { "ntp-check":
+		source_class	=> "ntp",
+	}
+
 }
 

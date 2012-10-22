@@ -1,0 +1,79 @@
+#!/bin/sh
+
+# Perform a number of checks on NTP that ensure that it is running correctly:
+# 1. 'ntpq -pn' responds with vaguely sensible output - this is sufficient evidence that ntpd is
+#    running.
+# 2. There is a non-localhost sync peer.
+# 3. There are at least 3 reachable peers defined.
+# 4. The reachability of included peers is > 6 on average.
+# 5. The offset from included peers is < 250 ms on average.
+
+set -e
+set -u
+
+PROG=`basename $0`
+HOST=${1:-'localhost'}
+OUTPUT=`mktemp`
+trap "rm -f $OUTPUT" 0
+
+error()
+{
+	local exit=$1
+	shift
+	if [ -t 0 && -n "$1" ]; then
+		echo "$PROG: $1" >&2
+		exit $exit
+	fi
+}
+
+
+# check for NTP response
+ntpq -pn $HOST | grep -Ev \
+	-e '^=*$' \
+	-e '^ *remote *refid' \
+	-e '^127\.' \
+		> $OUTPUT
+if [ ! -s $OUTPUT ]; then
+	error 1 "NTP server $HOST did not respond"
+fi
+
+# Check for sync peer
+if ! grep -q '^\*' $OUTPUT; then
+	error 2 "NTP server has no synchronizing peer"
+fi
+
+# Check for peer reachability and offsets
+eval `awk '
+# apparently, awk has no absolute function
+function abs(val)
+{
+	return (val < 0 ? -val : val);
+}
+
+$7 > 0 {
+	++count;
+	bits+=count_bits($7);
+	offset+=abs($9);
+}
+
+END {
+	printf "COUNT=%d\n", count;
+	if (count > 0) {
+		printf "REACH=%d\n", bits / count;
+		printf "OFFSET=%d\n", offset / count;
+	}
+	exit 0;
+}
+'`
+
+if [ "$COUNT" < 3 ]; then
+	error 3 "Not enough peers defined ($COUNT)"
+fi
+if [ "$REACH" < 6 ]; then
+	error 4 "Peer reachability too low ($REACH)"
+fi
+if [ "$OFFSET" > 250 ]; then
+	error 5 "Peer offset too high ($OFFSET)"
+fi
+
+exit 0
