@@ -20,7 +20,7 @@ error()
 {
 	local exit=$1
 	shift
-	if [ -t 0 && -n "$1" ]; then
+	if [ -t 0  -a  -n "$1" ]; then
 		echo "$PROG: $1" >&2
 		exit $exit
 	fi
