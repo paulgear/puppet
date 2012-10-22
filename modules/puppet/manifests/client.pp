@@ -5,7 +5,7 @@
 class puppet::client {
 	include puppet::client::bucket_clean
 	#include puppet::client::report
-	#include puppet::client::service
+	include puppet::client::service
 	include puppet::client::weekly
 }
 
@@ -31,6 +31,12 @@ class puppet::client::daily {
 		script		=> "#!/bin/sh
 /etc/init.d/puppet restart >/dev/null 2>&1
 "
+	}
+}
+
+class puppet::client::service {
+	service { "puppet":
+		enable		=> true,
 	}
 }
 
