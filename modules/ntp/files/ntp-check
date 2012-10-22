@@ -51,14 +51,21 @@ function abs(val)
 }
 
 # count the number of bits set in the n-bit integer
+# BEWARE: no local variables in awk!
 function count_bits(val, n)
 {
-	bits=0;
+	b=0;
 	for (num=0; num < n; ++num) {
-		bits+=and(val,1);
+		b+=and(val,1);
 		val=rshift(val,1);
 	}
-	return bits;
+	return b;
+}
+
+BEGIN {
+	count=0;
+	bits=0;
+	offset=0;
 }
 
 # only include reachable hosts in the statistics
@@ -66,6 +73,7 @@ $7 > 0 {
 	++count;
 	bits+=count_bits(strtonum("0" $7), 8);
 	offset+=abs($9);
+	#printf "%d %d %d\n", count, bits, offset > "/dev/stderr";
 }
 
 END {
