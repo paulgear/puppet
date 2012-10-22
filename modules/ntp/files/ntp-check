@@ -16,13 +16,27 @@ HOST=${1:-'localhost'}
 OUTPUT=`mktemp`
 trap "rm -f $OUTPUT" 0
 
+if [ -t 0 ]; then
+	VERBOSE=1
+else
+	VERBOSE=0
+fi
+
 error()
 {
 	local exit=$1
 	shift
-	if [ -t 0  -a  -n "$1" ]; then
+	if [ "$VERBOSE" -eq 1  -a  -n "$1" ]; then
 		echo "$PROG: $1" >&2
-		exit $exit
+	fi
+	exit $exit
+}
+
+
+verbose()
+{
+	if [ $VERBOSE ]; then
+		echo "$@"
 	fi
 }
 
@@ -35,11 +49,18 @@ ntpq -pn $HOST | grep -Ev \
 		> $OUTPUT
 if [ ! -s $OUTPUT ]; then
 	error 1 "NTP server $HOST did not respond"
+else
+	if [ "$VERBOSE" ]; then
+		echo "ntpq -pn results:"
+		cat $OUTPUT
+	fi
 fi
 
 # Check for sync peer
 if ! grep -q '^\*' $OUTPUT; then
 	error 2 "NTP server has no synchronizing peer"
+else
+	verbose "NTP synchronised to:		`awk '/^\*/ {print $1}' $OUTPUT|tr -d '*'`"
 fi
 
 # Check for peer reachability and offsets
@@ -88,12 +109,20 @@ END {
 
 if [ "$COUNT" -lt 3 ]; then
 	error 3 "Not enough peers defined ($COUNT)"
+else
+	verbose "Peers defined:			$COUNT"
 fi
+
 if [ "$REACH" -lt 6 ]; then
 	error 4 "Peer reachability too low ($REACH)"
+else
+	verbose "Average peer reachability:	$REACH"
 fi
+
 if [ "$OFFSET" -gt 250 ]; then
 	error 5 "Peer offset too high ($OFFSET)"
+else
+	verbose "Average peer offset:		$OFFSET"
 fi
 
 exit 0
