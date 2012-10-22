@@ -64,7 +64,7 @@ function count_bits(val, n)
 # only include reachable hosts in the statistics
 $7 > 0 {
 	++count;
-	bits+=count_bits($7, 8);
+	bits+=count_bits(strtonum("0" $7), 8);
 	offset+=abs($9);
 }
 
@@ -78,13 +78,13 @@ END {
 }
 ' $OUTPUT`
 
-if [ "$COUNT" < 3 ]; then
+if [ "$COUNT" -lt 3 ]; then
 	error 3 "Not enough peers defined ($COUNT)"
 fi
-if [ "$REACH" < 6 ]; then
+if [ "$REACH" -lt 6 ]; then
 	error 4 "Peer reachability too low ($REACH)"
 fi
-if [ "$OFFSET" > 250 ]; then
+if [ "$OFFSET" -gt 250 ]; then
 	error 5 "Peer offset too high ($OFFSET)"
 fi
 
