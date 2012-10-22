@@ -50,9 +50,21 @@ function abs(val)
 	return (val < 0 ? -val : val);
 }
 
+# count the number of bits set in the n-bit integer
+function count_bits(val, n)
+{
+	bits=0;
+	for (num=0; num < n; ++num) {
+		bits+=and(val,1);
+		val=rshift(val,1);
+	}
+	return bits;
+}
+
+# only include reachable hosts in the statistics
 $7 > 0 {
 	++count;
-	bits+=count_bits($7);
+	bits+=count_bits($7, 8);
 	offset+=abs($9);
 }
 
@@ -64,7 +76,7 @@ END {
 	}
 	exit 0;
 }
-'`
+' $OUTPUT`
 
 if [ "$COUNT" < 3 ]; then
 	error 3 "Not enough peers defined ($COUNT)"
