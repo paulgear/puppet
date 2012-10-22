@@ -45,7 +45,7 @@ verbose()
 ntpq -pn $HOST | grep -Ev \
 	-e '^=*$' \
 	-e '^ *remote *refid' \
-	-e '^127\.' \
+	-e '^.127\.' \
 		> $OUTPUT
 if [ ! -s $OUTPUT ]; then
 	error 1 "NTP server $HOST did not respond"
