@@ -13,15 +13,19 @@ set -u
 
 if [ -f /etc/debian_version ]; then
 	# Debian-based distribution
+	ret=0
 	REBOOT_FILE=/var/run/reboot-required
 	if [ -e $REBOOT_FILE ]; then
 		cat $REBOOT_FILE
+		ret=1
 	fi
 	REBOOT_FILE=$REBOOT_FILE.pkgs
 	if [ -e $REBOOT_FILE ]; then
 		echo "Reboot required due to the following package updates:"
 		cat $REBOOT_FILE
+		ret=2
 	fi
+	exit $ret
 else
 	# Assume RPM-based distribution
 	INSTALLED="`rpm -q kernel kernel-PAE|grep -v is.not.installed|tail -1|sed -e 's/^kernel-//' -e 's/.i686$//' -e 's/.x86_64$//' -e 's/^PAE-\(.*\)$/\1PAE/'`"
