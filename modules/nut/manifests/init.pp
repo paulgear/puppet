@@ -3,7 +3,7 @@
 # Example usage:
 #
 # 1. Standalone USB UPS
-#	nut::ups::apc_smart_750 { "apcusb": }
+#	nut::ups::usbhid { "apcusb": }
 #	nut::master::config { $fqdn:
 #		ups		=> "apcusb",
 #		username	=> "master",
@@ -11,10 +11,10 @@
 #	}
 #
 # 2. Serial UPS with port specified
-#	nut::ups::apc_smart_1400xl { "apcsmart": port => "/dev/ttyS1" }
+#	nut::ups::apcsmart_serial { "apcsmart": port => "/dev/ttyS1" }
 #
 # 3. Serial UPS and slaves allowed to connect
-#	nut::ups::apc_smart_3000xl { "apcsmart": }
+#	nut::ups::apcsmart_serial { "apcsmart": }
 #	nut::master::config { $fqdn:
 #		ups		=> "apcsmart",
 #		username	=> "master",
@@ -70,8 +70,7 @@ class nut::master {
 class nut::master::package {
 	$pkg = $operatingsystem ? {
 		centos	=> [ "nut", "nut-client", ],
-		debian	=> "nut",
-		ubuntu	=> "nut",
+		default	=> "nut",
 	}
 	package { $pkg:
 		ensure	=> installed,
@@ -81,8 +80,7 @@ class nut::master::package {
 class nut::master::service {
 	$svc = $operatingsystem ? {
 		centos	=> "ups",
-		debian	=> "nut",
-		ubuntu	=> "nut",
+		default	=> "nut",
 	}
 }
 
@@ -102,11 +100,9 @@ class nut::report {
 # Managed by puppet on $servername - do not edit here
 set -e
 set -u
-if [ `date +%w` = 0 ]; then
-	TMPFILE=`mktemp`
-	/usr/local/bin/nut-report >\$TMPFILE 2>&1
-	test -s \$TMPFILE && mail -s 'Weekly UPS report' $mailto < \$TMPFILE
-fi
+TMPFILE=`mktemp`
+/usr/local/bin/nut-report >\$TMPFILE 2>&1
+test -s \$TMPFILE && mail -s 'Weekly UPS report' $mailto < \$TMPFILE
 ",
 	}
 }
@@ -191,49 +187,26 @@ define nut::config::ups (
 		group	=> $nut::group,
 		mode	=> 644,
 		content	=> template("nut/ups.conf.erb"),
-		require	=> Class["nut::master::package",
+		require	=> Class["nut::master::package"],
 	}
 }
 
-define nut::ups::apc_back_cs500 (
-		$port = "auto"
-		) {
-	nut::config::ups { $name:
-		desc	=> "APC BackUPS CS500",
-		driver	=> "usbhid-ups",
-		port	=> $port,
-	}
-}
-
-define nut::ups::apc_smart_750 (
-		$port = "auto"
-		) {
-	nut::config::ups { $name:
-		desc	=> "APC SmartUPS 750",
-		driver	=> "usbhid-ups",
-		port	=> $port,
-	}
-}
-
-define nut::ups::apc_smart_1400xl (
+define nut::ups::apcsmart_serial (
 		$port = "/dev/ttyS0"
 		) {
 	nut::config::ups { $name:
-		desc	=> "APC SmartUPS 1400XL",
 		driver	=> "apcsmart",
 		port	=> $port,
 		sdtype	=> 0,
 	}
 }
 
-define nut::ups::apc_smart_3000xl (
-		$port = "/dev/ttyS0"
+define nut::ups::usbhid (
+		$port = "auto"
 		) {
 	nut::config::ups { $name:
-		desc	=> "APC SmartUPS 3000XL",
-		driver	=> "apcsmart",
+		driver	=> "usbhid-ups",
 		port	=> $port,
-		sdtype	=> 0,
 	}
 }
 

@@ -1,7 +1,13 @@
 [<%= name %>]
+<% if desc <> "" %>
 	desc	= "<%= desc %>"
+<% end %>
 	driver	= <%= driver %>
 	port	= <%= port %>
 <% if sdtype <> "" %>
 	sdtype	= <%= sdtype %>
 <% end %>
+
+# This is supported on later versions of the NUT APC driver:
+#override.battery.runtime.low = 300
+#ignorelb = 1

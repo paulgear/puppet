@@ -1,5 +1,7 @@
 [<%= username %>]
 	password	= <%= password %>
+<% if allowfrom <> "" %>
 	allowfrom	= <%= allowfrom %>
+<% end %>
 	upsmon		<%= type %>
 
