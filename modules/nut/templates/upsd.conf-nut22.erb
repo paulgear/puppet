@@ -1,0 +1,18 @@
+# ACL <name> <ipblock>
+# ACL myhost 10.0.0.1/32
+#
+# ACCEPT <aclname> [<aclname>...]
+# REJECT <aclname> [<aclname>...]
+
+ACL all 0.0.0.0/0
+ACL localhost 127.0.0.1/32
+ACL slaves 192.168.0.0/16
+ACL slaves 10.3.0.0/16
+
+ACCEPT localhost
+ACCEPT slaves
+REJECT all
+
+# MAXAGE 15
+
+# LISTEN 0.0.0.0 3493
