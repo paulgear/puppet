@@ -5,7 +5,7 @@ This is a collection of puppet modules focused on support of remote office Linux
 servers.  The collection is tested only on Debian, CentOS, and Ubuntu Linux at
 present.
 
-    Copyright (c) 2010 Gear Consulting Pty Ltd http://libertysys.com.au/
+    Copyright (c) 2010-2012 Gear Consulting Pty Ltd http://libertysys.com.au/
 
     Written by Paul Gear <github@libertysys.com.au>
 
