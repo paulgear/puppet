@@ -28,7 +28,7 @@
 #		username	=> "myslave",
 #		password	=> "myslavepassword",
 #		type		=> "slave",
-#		allowfrom	=> "slave_acl",
+#		allowfrom	=> "slave_acl",		# ACLs only supported on NUT 2.2 and earlier
 #	}
 #
 # 4. Slave of the above system, with upssched used to shut down after 180 seconds of no power
@@ -43,21 +43,29 @@
 #
 
 class nut {
-	$dir = $operatingsystem ? {
-		centos	=> "/etc/ups",
-		debian	=> "/etc/nut",
-		ubuntu	=> "/etc/nut",
+	case $::osfamily {
+	Debian: {
+		$dir		= "/etc/nut"
+		$group		= "nut"
+		$user		= "root"
+		$master_pkgs	= [ "nut" ]
+		$master_svc	= "nut"
+		$slave_pkgs	= [ "nut" ]
+		$slave_svc	= "nut"
 	}
-	$group = $operatingsystem ? {
-		centos	=> "nut",
-		debian	=> "nut",
-		ubuntu	=> "nut",
+	RedHat: {
+		$dir		= "/etc/ups"
+		$group		= "nut"
+		$user		= "nut"
+		$master_pkgs	= [ "nut", "nut-client", ]
+		$master_svc	= "ups"
+		$slave_pkgs	= [ "nut-client" ]
+		$slave_svc	= "nut"
 	}
-	$user = $operatingsystem ? {
-		centos	=> "nut",
-		debian	=> "root",
-		ubuntu	=> "root",
+	default: {
+		fail("The ${module_name} module is not supported on ${::osfamily}-based systems")
 	}
+
 	$users = "$dir/upsd.users"
 	$frags = "$users.d"
 }
@@ -68,24 +76,24 @@ class nut::master {
 }
 
 class nut::master::package {
-	$pkg = $operatingsystem ? {
-		centos	=> [ "nut", "nut-client", ],
-		default	=> "nut",
-	}
-	package { $pkg:
+	include nut
+	package { $nut::master_pkgs:
 		ensure	=> installed,
 	}
 }
 
 class nut::master::service {
-	$svc = $operatingsystem ? {
-		centos	=> "ups",
-		default	=> "nut",
+	include nut
+	service { $nut::master_svc:
+		enable	=> true,
+		require	=> Class["nut::master::package"],
 	}
 }
 
-class nut::report {
-	$mailto = "root@localhost"
+define nut::report (
+	$mailto = "root@localhost",
+	$syslog = "/var/log/sysmgt/all"
+) {
 	file { "/usr/local/bin/nut-report":
 		ensure	=> file,
 		owner	=> root,
@@ -95,14 +103,9 @@ class nut::report {
 	}
 	cron_job { "000-nut-report":
 		interval	=> weekly,
-		# Beware!  Here be quoting dragons.
 		script		=> "#!/bin/sh
 # Managed by puppet on $servername - do not edit here
-set -e
-set -u
-TMPFILE=`mktemp`
-/usr/local/bin/nut-report >\$TMPFILE 2>&1
-test -s \$TMPFILE && mail -s 'Weekly UPS report' $mailto < \$TMPFILE
+/usr/local/bin/nut-report '$mailto' '$syslog'
 ",
 	}
 }
@@ -113,25 +116,16 @@ class nut::slave {
 }
 
 class nut::slave::package {
-	$pkg = $operatingsystem ? {
-		centos	=> "nut-client",
-		debian	=> "nut",
-		ubuntu	=> "nut",
-	}
-	package { $pkg:
+	include nut
+	package { $nut::slave_pkgs:
 		ensure	=> installed,
 	}
 }
 
 class nut::slave::service {
-	$svc = $operatingsystem ? {
-		centos	=> "ups",
-		debian	=> "nut",
-		ubuntu	=> "nut",
-	}
-	service { $svc:
+	include nut
+	service { $nut::slave_svc:
 		enable		=> true,
-		hasrestart	=> true,
 		require		=> Class["nut::slave::package"],
 	}
 }
@@ -164,19 +158,20 @@ class nut::user {
 define nut::master::user (
 		$username,
 		$password,
-		$allowfrom,
-		$type
+		$type,
+		$allowfrom = ""		# supported only on nut 2.2 and earlier
 		) {
+	include nut::master
 	include nut::user
 	concat::fragment { $name:
 		content => template("nut/upsd.user.erb"),
 	}
 }
 
-define nut::config::ups (
-		$desc,
+define nut::ups (
 		$driver,
 		$port,
+		$desc = "",
 		$sdtype = ""
 		) {
 	include nut
@@ -194,7 +189,7 @@ define nut::config::ups (
 define nut::ups::apcsmart_serial (
 		$port = "/dev/ttyS0"
 		) {
-	nut::config::ups { $name:
+	nut::ups { $name:
 		driver	=> "apcsmart",
 		port	=> $port,
 		sdtype	=> 0,
@@ -204,19 +199,19 @@ define nut::ups::apcsmart_serial (
 define nut::ups::usbhid (
 		$port = "auto"
 		) {
-	nut::config::ups { $name:
+	nut::ups { $name:
 		driver	=> "usbhid-ups",
 		port	=> $port,
 	}
 }
 
-define nut::config::upsmon (
+define nut::upsmon (
 		$ups,
 		$master,
-		$numsupplies = 1,
 		$username,
 		$password,
 		$mode,
+		$numsupplies = 1,
 		$graceseconds = 120,
 		$upssched = ""
 		) {
@@ -236,15 +231,15 @@ define nut::config::upsmon (
 
 define nut::master::config (
 		$ups,
-		$master = "localhost",
-		$numsupplies = 1,
 		$username,
 		$password,
+		$master = "localhost",
+		$numsupplies = 1,
 		$graceseconds = 120,
 		$upssched = ""
 		) {
 	include nut::master
-	nut::config::upsmon { $name:
+	nut::upsmon { $name:
 		ups		=> $ups,
 		master		=> $master,
 		numsupplies	=> $numsupplies,
@@ -272,7 +267,7 @@ define nut::slave::config (
 		$upssched = ""
 		) {
 	include nut::slave
-	nut::config::upsmon { $name:
+	nut::upsmon { $name:
 		ups		=> $ups,
 		master		=> $master,
 		numsupplies	=> $numsupplies,
