@@ -7,13 +7,14 @@ class isp {
 			$mirrorbase = "http://ftp.iinet.net.au"
 			$centosbase = "$mirrorbase/pub/centos"
 			$debianbase = "$mirrorbase/debian/debian"
-			$debianbackports = "$mirrorbase/pub/debian-backports"
+			$debianbackports = "$mirrorbase/pub/debian/debian-backports"
 		}
 
 		"internode": {
 			$mirrorbase = "http://mirror.internode.on.net"
+			$centosbase = "$mirrorbase/pub/centos"
 			$debianbase = "$mirrorbase/pub/debian"
-			$debianbackports = "http://ftp.au.debian.org/backports.org"
+			$debianbackports = "$mirrorbase/pub/debian-backports"
 		}
 
 		"exetel": {
@@ -27,14 +28,14 @@ class isp {
 			$mirrorbase = "http://mirror.aarnet.edu.au"
 			$centosbase = "$mirrorbase/pub/centos"
 			$debianbase = "$mirrorbase/pub/debian"
-			$debianbackports = "http://ftp.iinet.net.au/pub/debian-backports"
+			$debianbackports = "http://ftp.iinet.net.au/pub/debian/debian-backports"
 		}
 
 		default: {
 			$mirrorbase = "http://ftp.au.debian.org"
 			$centosbase = "http://mirror.aarnet.edu.au/pub/centos"
 			$debianbase = "$mirrorbase/debian"
-			$debianbackports = "$mirrorbase/backports.org"
+			$debianbackports = "http://ftp.iinet.net.au/pub/debian/debian-backports"
 		}
 
 	}
