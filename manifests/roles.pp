@@ -38,7 +38,6 @@ class role::internetfacing {
 class role::mailrelay {
 	include amavis
 	include amavis::decoders
-	include amavis_stats
 	include clamav
 	include mailgraph
 	# maildrop is included here in case there are local users on the relay, e.g. for spamtraps
