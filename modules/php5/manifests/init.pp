@@ -12,6 +12,7 @@ class php5::package {
 	}
 	package { $pkg:
 		ensure		=> installed,
+		notify		=> Class["apache::service"],
 	}
 }
 
@@ -29,6 +30,7 @@ class php5::mysql::package {
 	package { $pkg:
 		ensure		=> installed,
 		require		=> Class["php5::package"],
+		notify		=> Class["apache::service"],
 	}
 }
 
