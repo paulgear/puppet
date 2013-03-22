@@ -5,6 +5,7 @@ class php5 {
 }
 
 class php5::package {
+	include apache
 	$pkg = $operatingsystem ? {
 		centos	=> "php",
 		debian	=> [ "libapache2-mod-php5", "php5-cli" ],
