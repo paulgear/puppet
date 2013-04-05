@@ -32,5 +32,9 @@ class fail2ban::jails::postfix {
 		maxretry	=> 3,
 		port		=> 'smtp,ssmtp',
 	}
+	# remove old jail
+	fail2ban::jail { "postfix-sasl-auth-failure":
+		enable		=> false,
+	}
 }
 

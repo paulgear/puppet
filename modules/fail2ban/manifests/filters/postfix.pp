@@ -20,5 +20,9 @@ class fail2ban::filters::postfix {
 	fail2ban::filter { "postfix-sasl":
 		failregex	=> 'postfix/smtpd.*: warning: .*\[<HOST>\]: SASL LOGIN authentication failed: authentication failure',
 	}
+	# remove old filter
+	fail2ban::filter { "postfix-sasl-auth-failure":
+		enable		=> false,
+	}
 }
 
