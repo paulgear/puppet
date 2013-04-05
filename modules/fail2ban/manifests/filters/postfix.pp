@@ -16,5 +16,9 @@ class fail2ban::filters::postfix {
 	fail2ban::filter { "postfix-invalid-user":
 		failregex	=> 'reject: RCPT from (.*)\[<HOST>\]: 550 5\.1\.1',
 	}
+	# block hosts attempting to brute-force saslauthd
+	fail2ban::filter { "postfix-sasl-auth-failure":
+		failregex	=> 'postfix/smtpd.*: warning: .*\[<HOST>\]: SASL LOGIN authentication failed: authentication failure',
+	}
 }
 
