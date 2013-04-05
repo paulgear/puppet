@@ -23,6 +23,7 @@ class fail2ban::filters::postfix {
 	# remove old filter
 	fail2ban::filter { "postfix-sasl-auth-failure":
 		ensure		=> absent,
+		failregex	=> "",
 	}
 }
 
