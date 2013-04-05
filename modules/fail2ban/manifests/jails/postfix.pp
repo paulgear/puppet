@@ -34,7 +34,7 @@ class fail2ban::jails::postfix {
 	}
 	# remove old jail
 	fail2ban::jail { "postfix-sasl-auth-failure":
-		enable		=> false,
+		ensure		=> absent,
 	}
 }
 

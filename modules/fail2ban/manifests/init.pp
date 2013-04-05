@@ -69,13 +69,10 @@ actionunban	= $actionunban
 
 # NOTE: filter $name must not contain spaces - see fail2ban::filters::* for examples
 # Keep names short if you use the iptables banaction.
-define fail2ban::filter ( $failregex, $ignoreregex = "", $enable = "true" ) {
+define fail2ban::filter ( $failregex, $ignoreregex = "", $ensure = "file" ) {
 	include fail2ban
 	file { "$fail2ban::dir/filter.d/$name.local":
-		ensure	=> $enable ? {
-			/^("false"|"off"|"no"|"0"|false|off|no|0)$/ => absent,
-			default	=> file,
-		},
+		ensure	=> $ensure,
 		owner	=> root,
 		group	=> root,
 		mode	=> 640,
@@ -92,7 +89,7 @@ ignoreregex	= $ignoreregex
 define fail2ban::jail (	
 		$action = "",
 		$bantime = "",
-		$enable = "true",
+		$ensure = "file",
 		$filtername = "",
 		$findtime = "",
 		$ignoreip = "",
@@ -110,10 +107,7 @@ define fail2ban::jail (
 		$filter = $filtername
 	}
 	file { "${fail2ban::jail_d}/fragments/$name.local":
-		ensure	=> $enable ? {
-			/^("false"|"off"|"no"|"0"|false|off|no|0)$/ => absent,
-			default	=> file,
-		},
+		ensure	=> $ensure,
 		owner	=> root,
 		group	=> root,
 		mode	=> 640,
