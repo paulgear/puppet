@@ -16,7 +16,7 @@
     'maxretry',
     'port',
 ].each do |v|
-unless scope.lookupvar(v).empty? then -%>
+unless scope.lookupvar(v) == nil or scope.lookupvar(v).empty? then -%>
 <%= "#{v}=#{scope.lookupvar(v)}" %>
 <% end
 end -%>
