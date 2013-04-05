@@ -98,20 +98,26 @@ define fail2ban::jail (
 		$port = "http,https"
 		) {
 	include fail2ban
-	$banaction = ""
-	$jailname = "$name"
-	if $filtername == "" {
-		$filter = $name
+	if $ensure == "absent" {
+		$content = ""
 	}
 	else {
-		$filter = $filtername
+		$banaction = ""
+		$jailname = "$name"
+		if $filtername == "" {
+			$filter = $name
+		}
+		else {
+			$filter = $filtername
+		}
+		$content = template("fail2ban/jaildef.erb")
 	}
 	file { "${fail2ban::jail_d}/fragments/$name.local":
 		ensure	=> $ensure,
 		owner	=> root,
 		group	=> root,
 		mode	=> 640,
-		content	=> template("fail2ban/jaildef.erb"),
+		content	=> $content,
 		# if fail2ban ever supports jail.d, change this to
 		#	notify	=> Service["$fail2ban::svc"],
 		# as per the filters & actions above.
