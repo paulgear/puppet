@@ -26,5 +26,11 @@ class fail2ban::jails::postfix {
 		maxretry	=> 5,
 		port		=> 'smtp,ssmtp',
 	}
+	fail2ban::jail { "postfix-sasl-auth-failure":
+		findtime	=> 3600,
+		logpath		=> '/var/log/mail.log',
+		maxretry	=> 3,
+		port		=> 'smtp,ssmtp',
+	}
 }
 
