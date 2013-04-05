@@ -89,6 +89,7 @@ ignoreregex	= $ignoreregex
 define fail2ban::jail (	
 		$action = "",
 		$bantime = "",
+		$enabled = "true",
 		$ensure = "file",
 		$filtername = "",
 		$findtime = "",
@@ -98,26 +99,20 @@ define fail2ban::jail (
 		$port = "http,https"
 		) {
 	include fail2ban
-	if $ensure == "absent" {
-		$content = ""
+	$banaction = ""
+	$jailname = "$name"
+	if $filtername == "" {
+		$filter = $name
 	}
 	else {
-		$banaction = ""
-		$jailname = "$name"
-		if $filtername == "" {
-			$filter = $name
-		}
-		else {
-			$filter = $filtername
-		}
-		$content = template("fail2ban/jaildef.erb")
+		$filter = $filtername
 	}
 	file { "${fail2ban::jail_d}/fragments/$name.local":
 		ensure	=> $ensure,
 		owner	=> root,
 		group	=> root,
 		mode	=> 640,
-		content	=> $content,
+		content	=> template("fail2ban/jaildef.erb"),
 		# if fail2ban ever supports jail.d, change this to
 		#	notify	=> Service["$fail2ban::svc"],
 		# as per the filters & actions above.
@@ -128,6 +123,7 @@ define fail2ban::jail (
 define fail2ban::setup (
 		$banaction = "",
 		$bantime = "",
+		$enabled = "",
 		$filter = "",
 		$findtime = "",
 		$ignoreip = "${fail2ban::default_ignoreip}",
