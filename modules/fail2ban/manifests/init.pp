@@ -68,6 +68,7 @@ actionunban	= $actionunban
 }
 
 # NOTE: filter $name must not contain spaces - see fail2ban::filters::* for examples
+# Keep names short if you use the iptables banaction.
 define fail2ban::filter ( $failregex, $ignoreregex = "" ) {
 	include fail2ban
 	file { "$fail2ban::dir/filter.d/$name.local":
