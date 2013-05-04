@@ -38,3 +38,11 @@ class fail2ban::jails::postfix {
 	}
 }
 
+class fail2ban::jails::postfix::unverified {
+	fail2ban::jail { "postfix-unverified-address":
+		findtime	=> 300,
+		logpath		=> '/var/log/mail.log',
+		maxretry	=> 3,
+		port		=> 'smtp,ssmtp',
+	}
+}
