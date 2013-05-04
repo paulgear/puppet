@@ -20,6 +20,10 @@ class fail2ban::filters::postfix {
 	fail2ban::filter { "postfix-sasl":
 		failregex	=> 'postfix/smtpd.*: warning: .*\[<HOST>\]: SASL LOGIN authentication failed: authentication failure',
 	}
+	# block hosts attempting to send to unverified addresses
+	fail2ban::filter { "postfix-unverified-address":
+		failregex	=> 'reject: RCPT from (.*)\[<HOST>\]: 450 4\.1\.1 .*: Recipient address rejected: unverified address: host .* said: 550 5\.1\.1 ',
+	}
 	# remove old filter
 	fail2ban::filter { "postfix-sasl-auth-failure":
 		ensure		=> absent,
