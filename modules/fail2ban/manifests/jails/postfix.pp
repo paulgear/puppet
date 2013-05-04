@@ -39,6 +39,9 @@ class fail2ban::jails::postfix {
 }
 
 class fail2ban::jails::postfix::unverified {
+	fail2ban::jail { "postfix-unverified-address":
+		ensure		=> absent,
+	}
 	fail2ban::jail { "postfix-unverified":
 		findtime	=> 300,
 		logpath		=> '/var/log/mail.log',
