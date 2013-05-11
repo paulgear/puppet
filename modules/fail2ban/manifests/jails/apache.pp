@@ -15,4 +15,10 @@ class fail2ban::jails::apache {
 		maxretry	=> 5,
 		port		=> 'http,https',
 	}
+	fail2ban::jail { "apache-denied":
+		findtime	=> 120,
+		logpath		=> '/var/log/apache*/*error*',
+		maxretry	=> 3,
+		port		=> 'http,https',
+	}
 }
