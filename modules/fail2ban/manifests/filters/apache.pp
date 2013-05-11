@@ -7,4 +7,8 @@ class fail2ban::filters::apache {
 	fail2ban::filter { "apache-notfound":
 		failregex	=> '^<HOST> .*HTTP.[0-9.]+. 404',
 	}
+	fail2ban::filter { "apache-denied":
+		failregex	=> '\[error\] \[client <HOST>\] client denied by server configuration',
+	}
+
 }
