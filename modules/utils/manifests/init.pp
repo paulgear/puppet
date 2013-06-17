@@ -60,7 +60,7 @@ class utils::gethost {
 	]
 	file { $dirs:
 		ensure	=> directory,
-		mode	=> 750
+		mode	=> 750,
 		owner	=> root,
 		group	=> root,
 	}
