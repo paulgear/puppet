@@ -1,0 +1,75 @@
+#!/bin/sh
+set -e
+set -u
+DIR=/usr/local/etc/hosts
+if [ -r $HOME/.hosts ]; then
+	. $HOME/.hosts
+fi
+
+if [ "$#" -eq 0 ]; then
+	echo "Usage: $0 [-a|-h host ...|-l|tag ...|-x tag]"
+	echo "	-a	All hosts"
+	echo "	-h	Get tags for host"
+	echo "	-l	List all tags"
+	echo "	-x	All hosts except those tagged"
+	exit 1
+fi
+
+# temp file for use of -x option
+TMPFILE=`mktemp -t`
+trap 'rm -f $TMPFILE' 0 1 2 15
+
+EXIT=0
+cd $DIR
+while [ $# -gt 0 ]; do
+	FEATURE="$1"
+	shift
+	case "$FEATURE" in
+
+	"-a")
+		# list all hosts
+		PATTERN="."
+		FILES="*"
+		FIELD=1
+		EXIT=1
+		EXCLUDE='\.disabled'
+		;;
+	"-h")
+		# list all tags for the given hosts
+		PATTERN="."
+		FILES="$@"
+		FIELD=2
+		EXIT=1
+		EXCLUDE=''
+		;;
+	"-l")
+		# list all tags
+		PATTERN="^[^#]"
+		FILES="*"
+		FIELD=2
+		EXIT=1
+		EXCLUDE=''
+		;;
+	"-x")
+		# list all hosts except those tagged
+		PATTERN="."
+		FILES="*"
+		FIELD=1
+		$0 "$1" | sed -e 's/^/^/' -e 's/$/$/' > $TMPFILE
+		EXCLUDE="-f $TMPFILE"
+		EXIT=1
+		;;
+	*)
+		# default: list hosts in a tag
+		PATTERN="^$FEATURE$"
+		FILES="*"
+		FIELD=1
+		EXCLUDE=''
+		;;
+	esac
+
+	grep -e "$PATTERN" $FILES | cut -d: -f$FIELD | (test -n "$EXCLUDE" && grep -v $EXCLUDE || cat)
+	if [ $EXIT -eq 1 ]; then
+		exit 0
+	fi
+done | sort -u
