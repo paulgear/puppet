@@ -41,3 +41,28 @@ class utils {
 
 }
 
+class utils::gethost {
+	$files = [
+		'allhosts',
+		'gethost',
+	]
+	ulb { $files: source_class => utils }
+
+	file { "/usr/local/bin/rsyncallhosts":
+		ensure	=> link,
+		target	=> 'allhosts',
+		require	=> Ulb['allhosts'],
+	}
+
+	$dirs = [
+		'/usr/local/etc/hosts',
+		'/var/local/hosts',
+	]
+	file { $dirs:
+		ensure	=> directory,
+		mode	=> 750
+		owner	=> root,
+		group	=> root,
+	}
+}
+

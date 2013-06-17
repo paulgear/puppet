@@ -1,0 +1,94 @@
+#!/bin/bash
+#
+# Author:	Paul Gear
+# Created:	2010-06-20
+# Modified:	2010-06-20
+# Description:	Run a command on, or rsync files from, all hosts specified on the command line
+#
+
+PROG=`basename $0`
+set -u
+
+DATA=/var/local/hosts
+if [ -r $HOME/.hosts ]; then
+	. $HOME/.hosts
+fi
+
+ONELINE=0
+while [ $# -gt 1 ]; do
+	case $1 in
+	--oneline|--one-line)
+		ONELINE=1
+		shift
+		;;
+	--*)
+		shift
+		;;
+	*)
+		break
+		;;
+	esac
+done
+
+if [ "$#" -lt 1 ]; then
+	echo "Usage: $0 command {host|host group}" >&2
+	exit 1
+fi
+CMD="$1"
+shift
+
+mkdir -p $DATA
+cd $DATA
+
+if [ "$ONELINE" -eq 1 ]; then
+	HOSTLEN=`gethost -a|awk '{ if (length($0) > MAX) { MAX=length($0) } } END { print MAX }'`
+	(( ++HOSTLEN ))
+fi
+
+hostup()
+{
+	if [ "$ONELINE" -eq 1 ]; then
+		printf "%-*s " "$HOSTLEN" "$1"
+	else
+		echo "**** $1"
+	fi
+}
+
+hostdown()
+{
+	echo "** $1 down"
+}
+
+run_host_cmd()
+{
+	if ping -A -c 3 $1 >/dev/null; then
+		hostup "$1"
+		if [ "$PROG" = "rsyncallhosts" ]; then
+			rsync --recursive --times --relative $1:"$CMD" $DATA/$1/
+			test -d $DATA/$1 && git add $DATA/$1/
+		else
+			if [ "$CMD" = "" ]; then
+				ssh $1
+			else
+				ssh $1 "$CMD"
+			fi
+		fi
+	else
+		hostdown "$1"
+	fi
+}
+
+for h in "$@"; do
+	# if it's a real host, run the command on it
+	if host $h >/dev/null 2>&1; then
+		run_host_cmd $h
+	else
+	# otherwise assume it's a gethost group
+		for i in `gethost $h`; do
+			run_host_cmd $i
+		done
+	fi
+done
+if [ "$PROG" = "rsyncallhosts" ]; then
+	git commit -m"Automatically updated by $PROG" $BASEDIR/
+fi
