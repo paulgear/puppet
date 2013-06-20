@@ -36,6 +36,9 @@ if [ "$#" -lt 1 ]; then
 fi
 CMD="$1"
 shift
+if [ "$#" -lt 1 ]; then
+	set -- -a
+fi
 
 mkdir -p $DATA
 cd $DATA
@@ -79,12 +82,13 @@ run_host_cmd()
 }
 
 for h in "$@"; do
-	# if it's a real host, run the command on it
-	if host $h >/dev/null 2>&1; then
+	HOSTS=`gethost $h`
+	if [ -z "$HOSTS" ]; then
+		# if gethost returns nothing, assume it's a hostname
 		run_host_cmd $h
 	else
-	# otherwise assume it's a gethost group
-		for i in `gethost $h`; do
+		# otherwise it's a gethost group
+		for i in $HOSTS; do
 			run_host_cmd $i
 		done
 	fi
