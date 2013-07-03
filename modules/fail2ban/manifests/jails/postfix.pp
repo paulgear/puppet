@@ -8,7 +8,7 @@ class fail2ban::jails::postfix {
 		port		=> 'smtp,ssmtp',
 	}
 	fail2ban::jail { "postfix-connection":
-		findtime	=> 3600,
+		findtime	=> 600,
 		logpath		=> '/var/log/mail.log',
 		maxretry	=> 5,
 		port		=> 'smtp,ssmtp',

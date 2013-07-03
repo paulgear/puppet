@@ -6,7 +6,7 @@
 class fail2ban::filters::postfix {
 	# block hosts sending excessive messages
 	fail2ban::filter { "postfix-connection":
-		failregex	=> 'postfix/smtpd.*: (lost connection|timeout) after (CONNECT|DATA|EHLO|MAIL) from .*\[<HOST>\]',
+		failregex	=> 'postfix/smtpd.*: (lost connection|timeout) after (AUTH|CONNECT|DATA|EHLO|MAIL) from .*\[<HOST>\]',
 	}
 	# block hosts greylisted by postgrey
 	fail2ban::filter { "postfix-postgrey":
