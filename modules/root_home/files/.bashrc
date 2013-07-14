@@ -17,7 +17,7 @@ alias lr='lm | grep rpm'
 alias lrpm='ls --color=always | grep rpm | more'
 alias mv='mv -i'
 case "`puppet agent --version 2>/dev/null`" in
-2.6*)
+2.6*|2.7*|3.*)
 	alias kp='kill -USR1 $(cat /var/run/puppet/agent.pid)'
 	alias tp='tme -n 1|grep puppet-agent'
 	;;
