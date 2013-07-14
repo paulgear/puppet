@@ -50,7 +50,7 @@ NOTES
 -   Some third-party code is used in the modules.  These modules are covered under
     a separate license - see the documentation in each module for details.
     Directories currently containing code covered under separate licenses are:
-    	modules/aptitude
+	modules/apt
 	modules/logwatch
 	modules/puppet-concat
 	modules/resolver

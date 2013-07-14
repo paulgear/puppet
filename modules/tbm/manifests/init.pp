@@ -3,14 +3,14 @@
 class tbm {
 
 	# include latest Marvell orion packages
-	aptitude::source { "tbm":
+	apt::source { "tbm":
 		comment		=> "Kernel packages for Marvell-based ARM systems",
 		uri		=> "http://people.debian.org/~tbm/orion",
 		distribution	=> "$lsbdistcodename",
 		components	=> [ "main" ],
 	}
 
-	aptitude::key { "68FD549F":
+	apt::key { "68FD549F":
 		ensure	=> present,
 	}
 

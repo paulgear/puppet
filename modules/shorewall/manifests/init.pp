@@ -35,21 +35,21 @@ class shorewall {
 			case $lsbdistcodename {
 				lenny: {
 					# if Debian lenny, add extra repo
-					include aptitude
+					include apt
 
-					aptitude::source { "shorewall-$lsbdistcodename-repo":
+					apt::source { "shorewall-$lsbdistcodename-repo":
 						comment		=> "Unofficial Shorewall packages",
 						components	=> [ "main" ],
 						distribution	=> $lsbdistcodename,
 						uri		=> "http://people.connexer.com/~roberto/debian/",
 					}
 
-					aptitude::key { "B2B97BB1": }
-					aptitude::key { "DDA7B20F": }
+					apt::key { "B2B97BB1": }
+					apt::key { "DDA7B20F": }
 
 					# add this source and its keys to the requires for the package
 					Package[$pkg] {
-						require	+> [ Aptitude::Source[ "shorewall-$lsbdistcodename-repo" ], Aptitude::Key["DDA7B20F"], Aptitude::Key["B2B97BB1"] ],
+						require	+> [ Apt::Source[ "shorewall-$lsbdistcodename-repo" ], Apt::Key["DDA7B20F"], Apt::Key["B2B97BB1"] ],
 					}
 				}
 			}

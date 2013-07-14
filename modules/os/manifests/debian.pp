@@ -2,7 +2,7 @@
 
 class os::debian {
 
-	include aptitude
+	include apt
 	include hostname::setfqdn
 	include isp
 
@@ -20,7 +20,7 @@ class os::debian {
 	}
 
 	define base($components = ["main", "contrib", "non-free"], $ensure = "file") {
-		aptitude::source { "$name-main":
+		apt::source { "$name-main":
 			ensure		=> $ensure,
 			comment		=> "$operatingsystem base distribution",
 			uri		=> "$isp::debianbase",
@@ -30,7 +30,7 @@ class os::debian {
 	}
 
 	define security($components = ["main", "contrib", "non-free"], $ensure = "file") {
-		aptitude::source { "$name-security":
+		apt::source { "$name-security":
 			ensure		=> $ensure,
 			comment		=> "$operatingsystem security updates",
 			uri		=> "http://security.debian.org/",
@@ -40,7 +40,7 @@ class os::debian {
 	}
 
 	define updates($components = ["main", "contrib", "non-free"], $ensure = "file") {
-		aptitude::source { "$name-updates":
+		apt::source { "$name-updates":
 			ensure		=> $ensure,
 			comment		=> "$operatingsystem $lsbdistcodename updates",
 			uri		=> "$isp::debianbase",
@@ -50,7 +50,7 @@ class os::debian {
 	}
 
 	define volatile($components = ["main", "contrib", "non-free"], $ensure = "file") {
-		aptitude::source { "$name-volatile":
+		apt::source { "$name-volatile":
 			ensure		=> $ensure,
 			comment		=> "$operatingsystem volatile updates",
 			uri		=> "http://volatile.debian.org/debian-volatile",
@@ -60,14 +60,14 @@ class os::debian {
 	}
 
 	define backports($components = ["main", "contrib", "non-free"], $ensure = "file") {
-		aptitude::source { "$name-backports":
+		apt::source { "$name-backports":
 			ensure		=> $ensure,
 			comment		=> "$operatingsystem backports from testing/unstable",
 			uri		=> "$isp::debianbackports",
 			distribution	=> "$name-backports",
 			components	=> $components,
 		}
-		aptitude::key { "EA8E8B2116BA136C":
+		apt::key { "EA8E8B2116BA136C":
 			ensure		=> $ensure ? {
 				absent	=> "absent",
 				default	=> "present",
@@ -158,28 +158,28 @@ class os::debian::physical {
 
 class os::debian::lenny {
 	$components = ["main", "contrib", "non-free"]
-	aptitude::source { "lenny-main":
+	apt::source { "lenny-main":
 		ensure		=> file,
 		comment		=> "$operatingsystem base distribution",
 		uri		=> "http://archive.debian.org/debian",
 		distribution	=> "lenny",
 		components	=> $components,
 	}
-	aptitude::source { "lenny-security":
+	apt::source { "lenny-security":
 		ensure		=> file,
 		comment		=> "$operatingsystem security",
 		uri		=> "http://archive.debian.org/debian-security",
 		distribution	=> "lenny/updates",
 		components	=> $components,
 	}
-	aptitude::source { "lenny-volatile":
+	apt::source { "lenny-volatile":
 		ensure		=> file,
 		comment		=> "$operatingsystem volatile",
 		uri		=> "http://archive.debian.org/debian-volatile",
 		distribution	=> "lenny/volatile",
 		components	=> $components,
 	}
-	aptitude::source { "lenny-backports":
+	apt::source { "lenny-backports":
 		ensure		=> file,
 		comment		=> "$operatingsystem backports",
 		uri		=> "http://archive.debian.org/debian-backports",

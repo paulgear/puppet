@@ -1,36 +1,38 @@
-# based on generic module from puppet.kumina.nl
+# based on aptitude module from puppet.kumina.nl
 #
 # Copyright (c) 2009 by Kees Meijs <kees@kumina.nl> for Kumina bv.
 # CC BY-SA 3.0 unported
 # 
 # Updates by Paul Gear <github@libertysys.com.au>
-# Copyright (c) 2010 Gear Consulting Pty Ltd <http://libertysys.com.au/>
+# Copyright (c) 2010,2013 Gear Consulting Pty Ltd <http://libertysys.com.au/>
 
-class aptitude {
+class apt {
 
 	# location of commands
-	$aptitude = "/usr/bin/aptitude"
+	$apt_get = "/usr/bin/apt-get"
 	$apt_key = "/usr/bin/apt-key"
 	$wget = "/usr/bin/wget"
 	$apt_dir = "/etc/apt"
 	$sources_dir = "$apt_dir/sources.list.d"
-	$refresh = "$aptitude refresh"
+	$refresh = "$apt_get refresh"
+
+	include apt::refresh
 
 	# set default package options
 	Package {
-		provider	=> "aptitude",
-		require		=> Exec[$aptitude::refresh],
+		provider	=> "apt",
+		require		=> Class["apt::refresh"],
 	}
 
 	define source($sourcetype="deb", $uri, $distribution="stable", $components=[], $comment="", $ensure="file") {
-		file { "$aptitude::sources_dir/$name.list":
+		file { "$apt::sources_dir/$name.list":
 			ensure	=> $ensure,
 			owner	=> root,
 			group	=> root,
 			mode	=> 644,
-			content	=> template("aptitude/source.list"),
-			require	=> File[$aptitude::sources_dir],
-			notify	=> Exec[$aptitude::refresh],
+			content	=> template("apt/source.list"),
+			require	=> File[$apt::sources_dir],
+			notify	=> Class["apt::refresh"],
 		}
 	}
 
@@ -40,14 +42,15 @@ class aptitude {
 				err("unknown ensure value ${ensure}")
 			}
 			present: {
-				exec { "$aptitude::wget -qq -O - 'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x$name' | $aptitude::apt_key add -":
-					unless	=> "$aptitude::apt_key export $name | grep -q -e '-----END PGP PUBLIC KEY BLOCK-----'",
-					notify	=> Exec[$aptitude::refresh];
+				exec { "$apt::wget -qq -O -
+				'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x$name' | $apt::apt_key add -":
+					unless	=> "$apt::apt_key export $name | grep -q -e '-----END PGP PUBLIC KEY BLOCK-----'",
+					notify	=> Class["apt::refresh"];
 				}
 			}
 			absent: {
-				exec { "$aptitude::apt_key del $name":
-					onlyif	=> "$aptitude::apt_key list | grep -q -e $name",
+				exec { "$apt::apt_key del $name":
+					onlyif	=> "$apt::apt_key list | grep -q -e $name",
 				}
 			}
 		}
@@ -61,19 +64,22 @@ class aptitude {
 		ensure	=> directory,
 	}
 
-	# update aptitude when a config file changes
-	exec { $refresh:
-		command		=> "$aptitude update",
-		refreshonly	=> true,
-	}
 
 }
 
-# empty the sources.list file and save the original
-class aptitude::sources_list {
-	include aptitude
+class apt::refresh {
+	# run apt-get update when a config file changes
+	exec { $refresh:
+		command		=> "$apt_get update",
+		refreshonly	=> true,
+	}
+}
 
-	$sources_file = "$aptitude::apt_dir/sources.list"
+# empty the sources.list file and save the original
+class apt::sources_list {
+	include apt
+
+	$sources_file = "$apt::apt_dir/sources.list"
 	$sources_file_save = "$sources_file.pre-puppet"
 
 	file { $sources_file:
@@ -84,7 +90,7 @@ class aptitude::sources_list {
 		content		=> '# This file intentionally left blank - see /etc/apt/sources.list.d/*
 ',
 		require		=> Exec[$sources_file_save],
-		notify		=> Exec[$aptitude::refresh],
+		notify		=> Class["apt::refresh"],
 	}
 
 	exec { $sources_file_save:

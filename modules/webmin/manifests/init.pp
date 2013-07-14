@@ -30,9 +30,9 @@ class webmin {
 		}
 
 		"debian", "ubuntu": {
-			include aptitude
+			include apt
 
-			aptitude::source { $pkg:
+			apt::source { $pkg:
 				uri             => "http://download.webmin.com/download/repository",
 				comment		=> "Webmin apt repository",
 				distribution    => "sarge",
@@ -41,10 +41,10 @@ class webmin {
 
 			package { $pkg:
 				ensure          => installed,
-				require         => Aptitude::Source[ $pkg ],
+				require         => Apt::Source[ $pkg ],
 			}               
 
-			aptitude::key { "11F63C51":
+			apt::key { "11F63C51":
 				ensure  => present,
 			}               
 
