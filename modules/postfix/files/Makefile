@@ -27,9 +27,6 @@ force-aliases:
 sender-access.db:	sender-access
 	$(POSTMAP) hash:$<
 
-transport.db:	transport
-	$(POSTMAP) $<
-
-virtual.db:	virtual
+%.db:	%
 	$(POSTMAP) $<
 
