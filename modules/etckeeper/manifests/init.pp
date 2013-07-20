@@ -45,8 +45,15 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 		interval	=> weekly,
 		script		=> "#!/bin/sh
 cd /etc
-git gc --quiet
 git fsck --full --strict
+",
+	}
+
+	cron_job { "$pkg-git-gc-daily":
+		interval	=> daily,
+		script		=> "#!/bin/sh
+cd /etc
+git gc --quiet
 ",
 	}
 
