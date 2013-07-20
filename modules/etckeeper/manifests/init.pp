@@ -49,6 +49,7 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 	cron_job { "$pkg-git-fsck-weekly":
 		interval	=> weekly,
 		script		=> "#!/bin/sh
+# Managed by puppet on $servername - do not edit here!
 cd /etc
 git fsck --full --strict
 ",
@@ -57,6 +58,7 @@ git fsck --full --strict
 	cron_job { "$pkg-git-gc-daily":
 		interval	=> daily,
 		script		=> "#!/bin/sh
+# Managed by puppet on $servername - do not edit here!
 cd /etc
 git gc --quiet
 ",
