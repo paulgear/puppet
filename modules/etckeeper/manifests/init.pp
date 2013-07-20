@@ -43,6 +43,11 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 
 	cron_job { "$pkg-git-gc":
 		interval	=> weekly,
+		enable		=> false,
+	}
+
+	cron_job { "$pkg-git-fsck-weekly":
+		interval	=> weekly,
 		script		=> "#!/bin/sh
 cd /etc
 git fsck --full --strict
