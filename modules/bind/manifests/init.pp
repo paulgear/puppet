@@ -164,6 +164,11 @@ class bind::config::named_conf_local {
 		mode	=> 640,
 		notify	=> Class["bind::service"],
 	}
+	concat::fragment { "HEADER":
+		target	=> "${bind::config::local}",
+		content	=> "//\n// Managed by puppet on $servername - do not edit here\n//\n\n",
+		order	=> 0,
+	}
 }
 
 # add fragment to named.conf.local
