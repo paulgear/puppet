@@ -1,5 +1,5 @@
 <% if comment and not comment.empty? -%>
-# Managed by puppet - do not edit here!
+# Managed by puppet on <%= servername %> - do not edit here!
 # <%= comment %>
 <% end -%>
 <%= sourcetype %>	<%= uri %>	<%= distribution %>	<%= components.to_a.join(" ") %>
