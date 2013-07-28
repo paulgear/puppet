@@ -18,7 +18,7 @@ class dhcp::server::package {
 
 class dhcp::server::service {
 	$svc = $operatingsystem ? {
-		debian	=> "dhcp3-server",
+		debian	=> "isc-dhcp-server",
 		ubuntu	=> "dhcp3-server",
 		centos	=> "dhcpd",
 	}
