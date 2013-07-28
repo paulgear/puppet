@@ -52,6 +52,14 @@ class snmp::mibs {
 	package { "snmp-mibs-downloader":
 		ensure	=> installed,
 	}
+	text::replace_lines { "$fqdn-snmpd-$lsbdistcodename-mibs": 
+		file	=> $snmp::defaults,
+		pattern	=> '^export MIBS= *$',
+		replace	=> '#export MIBS=',
+		optimise=> 1,
+		notify	=> Class["snmp::service"],
+		require	=> Class["snmp::package"],
+	}
 }
 
 # call this with appropriate parameters to define snmpd.conf
