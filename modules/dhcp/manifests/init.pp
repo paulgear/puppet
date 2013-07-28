@@ -23,7 +23,7 @@ class dhcp::server::service {
 	$svc = $operatingsystem ? {
 		debian	=> $lsbdistcodename ? {
 			lenny	=> "dhcp3-server",
-			squeeze	=> "isc-dhcp-server",
+			default	=> "isc-dhcp-server",
 		},
 		ubuntu	=> "dhcp3-server",
 		centos	=> "dhcpd",
@@ -54,7 +54,7 @@ class dhcp::server::config {
 	$cfg = $operatingsystem ? {
 		debian	=> $lsbdistcodename ? {
 			lenny	=> "/etc/dhcp3/dhcpd.conf",
-			squeeze	=> "/etc/dhcp/dhcpd.conf",
+			default	=> "/etc/dhcp/dhcpd.conf",
 		},
 		ubuntu	=> "/etc/dhcp3/dhcpd.conf",
 		centos	=> "/etc/dhcpd.conf",
