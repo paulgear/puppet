@@ -210,7 +210,7 @@ class os::debian::squeeze {
 	os::debian::security	{ "squeeze": }
 	os::debian::updates	{ "squeeze": }
 	os::debian::volatile	{ "squeeze": ensure => absent }
-	#os::debian::backports	{ "squeeze": ensure => absent }
+	os::debian::backports	{ "squeeze": }
 	$packages = [ "byobu" ]
 	package { $packages: ensure => installed }
 }
