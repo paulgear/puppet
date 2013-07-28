@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2009 by Kees Meijs <kees@kumina.nl> for Kumina bv.
 # CC BY-SA 3.0 unported
-# 
+#
 # Updates by Paul Gear <github@libertysys.com.au>
 # Copyright (c) 2010,2013 Gear Consulting Pty Ltd <http://libertysys.com.au/>
 
@@ -41,8 +41,7 @@ class apt {
 				err("unknown ensure value ${ensure}")
 			}
 			present: {
-				exec { "$apt::wget -qq -O -
-				'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x$name' | $apt::apt_key add -":
+				exec { "$apt::wget -qq -O - 'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x$name' | $apt::apt_key add -":
 					unless	=> "$apt::apt_key export $name | grep -q -e '-----END PGP PUBLIC KEY BLOCK-----'",
 					notify	=> Class["apt::refresh"];
 				}
