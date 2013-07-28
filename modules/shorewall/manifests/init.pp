@@ -10,10 +10,7 @@ class shorewall {
 			/^5/	=> "shorewall-perl",
 			default	=> "shorewall",
 		},
-		debian	=> $lsbdistcodename ? {
-			lenny	=> "shorewall-perl",
-			squeeze	=> "shorewall",
-		},
+		debian	=> "shorewall",
 		ubuntu	=> "shorewall",
 		default	=> undef,
 	}
@@ -32,28 +29,6 @@ class shorewall {
 
 	case $operatingsystem {
 		debian: {
-			case $lsbdistcodename {
-				lenny: {
-					# if Debian lenny, add extra repo
-					include apt
-
-					apt::source { "shorewall-$lsbdistcodename-repo":
-						comment		=> "Unofficial Shorewall packages",
-						components	=> [ "main" ],
-						distribution	=> $lsbdistcodename,
-						uri		=> "http://people.connexer.com/~roberto/debian/",
-					}
-
-					apt::key { "B2B97BB1": }
-					apt::key { "DDA7B20F": }
-
-					# add this source and its keys to the requires for the package
-					Package[$pkg] {
-						require	+> [ Apt::Source[ "shorewall-$lsbdistcodename-repo" ], Apt::Key["DDA7B20F"], Apt::Key["B2B97BB1"] ],
-					}
-				}
-			}
-
 			# enable startup
 			$defaults = "/etc/default/shorewall"
 			text::replace_lines { $defaults:

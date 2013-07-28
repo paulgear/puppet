@@ -11,15 +11,8 @@ class snmp {
 	# operating system-specific customisations
 	case $operatingsystem {
 		debian: {
-			case $lsbdistcodename {
-				squeeze: {
-					include snmp::set_debug_level
-					include snmp::mibs
-				}
-				lenny: {
-					include snmp::no_loopback
-				}
-			}
+			include snmp::set_debug_level
+			include snmp::mibs
 		}
 		ubuntu: {
 			case $lsbdistcodename {

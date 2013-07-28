@@ -156,47 +156,6 @@ class os::debian::physical {
 	package { $packages: ensure => installed }
 }
 
-class os::debian::lenny {
-	$components = ["main", "contrib", "non-free"]
-	apt::source { "lenny-main":
-		ensure		=> file,
-		comment		=> "$operatingsystem base distribution",
-		uri		=> "http://archive.debian.org/debian",
-		distribution	=> "lenny",
-		components	=> $components,
-	}
-	apt::source { "lenny-security":
-		ensure		=> file,
-		comment		=> "$operatingsystem security",
-		uri		=> "http://archive.debian.org/debian-security",
-		distribution	=> "lenny/updates",
-		components	=> $components,
-	}
-	apt::source { "lenny-volatile":
-		ensure		=> file,
-		comment		=> "$operatingsystem volatile",
-		uri		=> "http://archive.debian.org/debian-volatile",
-		distribution	=> "lenny/volatile",
-		components	=> $components,
-	}
-	apt::source { "lenny-backports":
-		ensure		=> file,
-		comment		=> "$operatingsystem backports",
-		uri		=> "http://archive.debian.org/debian-backports",
-		distribution	=> "lenny-backports",
-		components	=> $components,
-	}
-
-	$packages = [ "sysvconfig" ]
-	package { $packages: ensure => installed }
-
-	case $architecture {
-		armv5tel: {
-			include tbm
-		}
-	}
-}
-
 class os::debian::wheezy {
 	os::debian::base	{ "wheezy": }
 	os::debian::security	{ "wheezy": }

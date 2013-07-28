@@ -7,13 +7,14 @@ class xen {
 	#include xen::virtualmin
 
 	$pkgs = $lsbdistcodename ? {
-		lenny		=> [
-			"linux-image-xen-$architecture",
-			"xen-hypervisor-3.2-1-$architecture"
-		],
 		squeeze		=> [
-			"linux-image-xen-amd64",
+			"linux-image-xen-$architecture",
 			"xen-hypervisor-4.0-$architecture",
+			"xen-tools",
+		],
+		wheezy		=> [
+			"linux-image-$architecture",
+			"xen-hypervisor-4.1-$architecture",
 			"xen-tools",
 		],
 	}
