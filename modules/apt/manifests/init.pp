@@ -14,7 +14,6 @@ class apt {
 	$wget = "/usr/bin/wget"
 	$apt_dir = "/etc/apt"
 	$sources_dir = "$apt_dir/sources.list.d"
-	$refresh = "$apt_get refresh"
 
 	include apt::refresh
 
@@ -69,8 +68,8 @@ class apt {
 
 class apt::refresh {
 	# run apt-get update when a config file changes
-	exec { $refresh:
-		command		=> "$apt_get update",
+	exec { "apt::refresh":
+		command		=> "$apt::apt_get update",
 		refreshonly	=> true,
 	}
 }
