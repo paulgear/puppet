@@ -218,6 +218,7 @@ define bind::zone (
 define bind::master_zone (
 	$zone = "",
 	$order = "",
+	$zoneprefix = "master/",
 	$zone_notify = "yes",
 	$allow_transfer = []
 ) {
@@ -228,7 +229,7 @@ define bind::master_zone (
 	}
 	bind::zone { $name:
 		zonetype	=> "master",
-		zonefile	=> "master/$zonename",
+		zonefile	=> "$zoneprefix$zonename",
 		zone		=> $zonename,
 		zone_notify	=> $zone_notify,
 		allow_transfer	=> $allow_transfer,
