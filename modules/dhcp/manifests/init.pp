@@ -9,7 +9,7 @@ class dhcp::server::package {
 	$pkg = $operatingsystem ? {
 		debian	=> $lsbdistcodename ? {
 			lenny	=> "dhcp3-server",
-			squeeze	=> "isc-dhcp-server",
+			default	=> "isc-dhcp-server",
 		},
 		ubuntu	=> "dhcp3-server",
 		centos	=> "dhcp",
