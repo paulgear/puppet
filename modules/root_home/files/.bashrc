@@ -66,3 +66,15 @@ function pdate
 	perl -we 'print localtime($ARGV[0]) . "\n";' "$@"
 }
 
+# make iptables output brief
+function iptb
+{
+	awk '
+/^Chain /	{HEAD1=$0; next}
+/^ pkts /	{HEAD2=$0; next}
+/^    0     0 /	{next}
+/^$/		{if (HEAD1=="") {print} next}
+		{if (HEAD1!="") {print HEAD1; print HEAD2; HEAD1=""} print}
+'
+}
+
