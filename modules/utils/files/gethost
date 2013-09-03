@@ -55,6 +55,7 @@ while [ $# -gt 0 ]; do
 		;;
 	"-f")
 		FQDN=1
+		continue
 		;;
 	"-h")
 		# list all tags for the given hosts
