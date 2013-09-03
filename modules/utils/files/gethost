@@ -9,15 +9,34 @@ fi
 if [ "$#" -eq 0 ]; then
 	echo "Usage: $0 [-a|-h host ...|-l|tag ...|-x tag]"
 	echo "	-a	All hosts"
+	echo "	-f	Use fqdn (perform DNS lookup on name)"
 	echo "	-h	Get tags for host"
 	echo "	-l	List all tags"
 	echo "	-x	All hosts except those tagged"
 	exit 1
 fi
 
+FQDN=0
+
 # temp file for use of -x option
 TMPFILE=`mktemp -t`
 trap 'rm -f $TMPFILE' 0 1 2 15
+
+fqdn_filter()
+{
+	if [ "$FQDN" -ne 0 ]; then
+		while read host; do
+			FQDN="`host $host 2>&1 | awk '/has address/ {print $1}' | sort -u`"
+			if [ -n "$FQDN" ]; then
+				echo "$FQDN"
+			else
+				echo "$host"
+			fi
+		done
+	else
+		cat
+	fi
+}
 
 EXIT=0
 cd $DIR
@@ -33,6 +52,9 @@ while [ $# -gt 0 ]; do
 		FIELD=1
 		EXIT=1
 		EXCLUDE='\.disabled'
+		;;
+	"-f")
+		FQDN=1
 		;;
 	"-h")
 		# list all tags for the given hosts
@@ -68,7 +90,7 @@ while [ $# -gt 0 ]; do
 		;;
 	esac
 
-	grep -e "$PATTERN" $FILES | cut -d: -f$FIELD | (test -n "$EXCLUDE" && grep -v $EXCLUDE || cat)
+	grep -e "$PATTERN" $FILES | cut -d: -f$FIELD | (test -n "$EXCLUDE" && grep -v $EXCLUDE || cat) | fqdn_filter
 	if [ $EXIT -eq 1 ]; then
 		exit 0
 	fi
