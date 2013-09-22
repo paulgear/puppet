@@ -77,7 +77,7 @@ class shorewall::service {
 }
 
 
-class shorewall::util {
+class shorewall::utils {
 	$email = "root@localhost"
 	include shorewall::package
 	file { "/usr/local/bin/shorewall-send-dump":
