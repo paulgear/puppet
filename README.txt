@@ -40,7 +40,9 @@ NOTES
 
 -   The modules as supplied may not be completely usable - some may depend on files
     which are not included in the repository.  These files should be supplied after
-    the repository is cloned.
+    the repository is cloned.  The following modules are known to be in a
+    non-functional state:
+    	modules/nut
 
 -   The modules contained here may or may not adhere to best practices for the
     software in question.  In some cases this may be intentional; in others it may
