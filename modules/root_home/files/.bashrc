@@ -66,6 +66,12 @@ function pdate
 	perl -we 'print localtime($ARGV[0]) . "\n";' "$@"
 }
 
+# print mail queue with one entry per line
+function mq
+{
+        mailq | awk '/^-/ {print; next} { gsub( /^ */, "") } NF > 0 { if (LINE == "") { LINE=$0 } else { LINE=LINE " " $0 } next } NF == 0 {print LINE; LINE=""}'
+}
+
 # make iptables output brief
 function iptb
 {
