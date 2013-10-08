@@ -19,7 +19,7 @@
 #################################
 
 http_port 3128
-<% if transparent_port != 0 -%>
+<% if transparent_port.length > 0 -%>
 http_port <%= transparent_port %> transparent
 <% end -%>
 hierarchy_stoplist cgi-bin ?
