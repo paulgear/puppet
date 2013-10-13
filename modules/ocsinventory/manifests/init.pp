@@ -19,6 +19,15 @@ define ocsinventory::client ( $server ) {
 		require	=> Class["ocsinventory::package"],
 		content	=> "# Managed by puppet on $servername - do not edit here\nserver=$server\n",
 	}
+	if $operatingsystem == "centos" {
+		include text
+		text::replace_lines { "$fqdn ocsinventory-agent":
+			file	=> '/etc/sysconfig/ocsinventory-agent',
+			pattern	=> '^OCSMODE\[0\]=none',
+			replace	=> 'OCSMODE[0]=cron',
+			optimise=> 1,
+		}
+	}
 }
 
 class ocsinventory::server {
