@@ -39,6 +39,7 @@ alias vi='vim'
 
 export EDITOR=vim
 export VISUAL=vim
+export VTYSH_PAGER=more
 
 if [ -d $HOME/bin ]; then
 	PATH=$HOME/bin:$PATH
