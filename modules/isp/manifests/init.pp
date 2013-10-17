@@ -7,7 +7,7 @@ class isp {
 			$mirrorbase = "http://ftp.iinet.net.au"
 			$centosbase = "$mirrorbase/pub/centos"
 			$debianbase = "$mirrorbase/debian/debian"
-			$debianbackports = "http://mirror.internode.on.net/pub/debian/debian-backports"
+			$debianbackports = "$mirrorbase/pub/debian/debian-backports"
 		}
 
 		"internode": {
