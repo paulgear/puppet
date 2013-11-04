@@ -3,12 +3,6 @@
 #
 
 class ocsinventory::package {
-	# CentOS RPM for ocsinventory-agent doesn't include required dependency
-	if $operatingsystem == "centos" {
-		package { "perl-XML-Simple":
-			ensure => installed,
-		}
-	}
 	$pkg = "ocsinventory-agent"
 	package { $pkg:
 		ensure => installed,
