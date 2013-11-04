@@ -17,7 +17,7 @@ fi
 DEVICE="$1"
 MOUNTP="$2"
 LABEL="$3"
-FSTYPE="ext4"
+FSTYPE="${4:-'ext4'}"
 
 . /usr/local/bin/cryptfs-common
 
