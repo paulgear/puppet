@@ -20,7 +20,7 @@ class autofs {
 		require		=> Package[$pkg],
 	}
 
-	define autofs( $device = "/dev/sdc1", $fstype = "ext3" ) {
+	define autofs( $device = "/dev/sdc1", $fstype = "ext4" ) {
 
 		file { "/etc/auto.master":
 			ensure		=> file,

@@ -17,7 +17,7 @@ fi
 DEVICE="$1"
 MOUNTP="$2"
 LABEL="$3"
-FSTYPE="ext3"
+FSTYPE="ext4"
 
 . /usr/local/bin/cryptfs-common
 
@@ -42,14 +42,14 @@ crypt_setup()
 	cryptsetup luksFormat --align-payload=512 $1
 }
 
-# usage: make_filesystem /dev/mapper/device_crypt label ext3
+# usage: make_filesystem /dev/mapper/device_crypt label ext4
 make_filesystem()
 {
 	warning "Creating filesystem on $1"
 	mkfs -t $3 -L $2 $1
 }
 
-# usage: update_fstab label /mount/point ext3
+# usage: update_fstab label /mount/point ext4
 update_fstab()
 {
 	local DEVICE="LABEL=$1" FSTAB="/etc/fstab"
