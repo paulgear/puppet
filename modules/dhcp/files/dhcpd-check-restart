@@ -8,6 +8,16 @@ CONF=/etc/dhcp/dhcpd.conf
 TIMESTAMP=/var/local/`basename $CONF`.timestamp
 COPY="rsync -t"
 
+find_dhcp_init()
+{
+	for i in /etc/init.d/isc-dhcp-server /etc/init.d/dhcpd; do
+		if [ -x "$i" ]; then
+			echo "$i"
+			return
+		fi
+	done
+}
+
 # If $CONF does not exist, exit
 if [ ! -r $CONF ]; then
 	exit 0
@@ -23,12 +33,13 @@ if [ $CONF -nt $TIMESTAMP ]; then
 	$COPY $CONF $TIMESTAMP
 	if [ `ps -e|awk '$NF == "dhcpd"'|wc -l` -ne 0 ]; then
 		echo "$CONF changed: restarting DHCP server"
-		/etc/init.d/isc-dhcp-server restart 2>&1 | grep -v \
-			-e 'Shutting down DHCP server ..done' \
-			-e 'Starting DHCP server \[chroot\]..done' \
-			-e 'Stopping ISC DHCP server: dhcpd' \
-			-e 'Starting ISC DHCP server: dhcpd' \
-				|| true
+		INITSCRIPT=`find_dhcp_init`
+		if [ -n "$INITSCRIPT" ]; then
+			$INITSCRIPT restart 2>&1 | grep -iv \
+				-e '^Shutting down.*DHCP' \
+				-e '^Starting.*DHCP' \
+					|| true
+		fi
 	fi
 fi 2>&1 | logger -t $PROG -p user.info
 
