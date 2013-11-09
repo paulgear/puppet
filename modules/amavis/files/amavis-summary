@@ -45,6 +45,7 @@ while (<>) {
 # May 20 02:51:51 lamech amavis[25448]: (25448-05) Passed SPAM, [190.108.144.53] [190.108.144.53] <fuellingdkp5@dansmath.com> -> <george@gear.dyndns.org>, quarantine: spam-dHdg-+l7UPcC.gz, Message-ID: <000d01c9d8a1$fb47f0e0$6400a8c0@fuellingdkp5>, mail_id: dHdg-+l7UPcC, Hits: 21.125, queued_as: 758B44CEDA4, 4108 ms
 # May 20 03:56:05 lamech amavis[10799]: (10799-02) Blocked SPAM, [66.114.252.251] [76.73.68.111] <incnow@nchinc.com> -> <bigfoot@gear.dyndns.org>, quarantine: spam-PSiTkG0qtd1t.gz, Message-ID: <10829CD0.3824743D@nchinc.com>, mail_id: PSiTkG0qtd1t, Hits: 9.234, 6998 ms
 # May 20 08:54:05 lamech amavis[13908]: (13908-09) Blocked INFECTED (HTML.Phishing.Account-1), [208.124.242.190] [67.81.186.39] <commonwealth@email.commonwealth.com> -> <angela@gear.dyndns.org>, quarantine: virus-34z2AqHJ8gNE, Message-ID: <SERVER2K3Ec7mDLu4iF00001b82@server2k3.gracechurch.local>, mail_id: 34z2AqHJ8gNE, Hits: -, 1861 ms
+# Nov 10 03:46:16 mail amavis[22342]: (22342-01-12) Passed CLEAN {RelayedOutbound}, LOCAL [172.22.1.11]:40591 [172.22.1.11] <root@methuselah.gear.dyndns.org> -> <root@gear.dyndns.org>, Queue-ID: 4BF24929B6, Message-ID: <20131108020503.DF901C4A6E@methuselah.gear.dyndns.org>, mail_id: qTQDAQN06ach, Hits: -5.01, size: 1176, queued_as: 681B792173, 15814 ms
 
 	# 0 = action
 	# 1 = status
@@ -57,7 +58,7 @@ while (<>) {
 	# 8 = size
 	# 9 = time
 
-	my @F = /amavis\[\d+\]: \S+ (\S+) (\S+)(?: \((.*)\))?, (?:(?:LOCAL )?\[([\d.]+)\] (?:\[([\d.]+|(?:IPv6)?[a-f:\d.]+)\] )?)?<(\S*)> -> <(\S*)>.*Hits: ([\d.-]+).*size: (\d+).* ([\d.]+) ms/;
+	my @F = /amavis\[\d+\]: \S+ (\S+) (\S+)(?: [\({](.*)[\)}])?, (?:(?:LOCAL )?\[([\d.]+)\](?::\d+)? (?:\[([\d.]+|(?:IPv6)?[a-f:\d.]+)\] )?)?<(\S*)> -> <(\S*)>.*Hits: ([\d.-]+).*size: (\d+).* ([\d.]+) ms/;
 
 	my $score = $F[7];
 	my $size = $F[8] / 1024.0;	# convert to KB
