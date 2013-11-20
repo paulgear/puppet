@@ -243,6 +243,7 @@ define bind::slave_zone (
 	$order = "",
 	$masters,
 	$zone_notify = "no",
+	$allow_transfer = [],
 	$allow_notify = []
 ) {
 	include bind::config
@@ -257,6 +258,7 @@ define bind::slave_zone (
 		zone		=> $zonename,
 		zone_notify	=> $zone_notify,
 		allow_notify	=> $allow_notify,
+		allow_transfer	=> $allow_transfer,
 		order		=> $order,
 		require		=> File["${bind::config::slavedir}"],
 	}
