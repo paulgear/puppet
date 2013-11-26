@@ -6,11 +6,25 @@ class os {
 
 	case $operatingsystem {
 
-	    centos, debian, ubuntu: {
+	    centos: {
 		    info( "OS distro for $fqdn is $operatingsystem $operatingsystemrelease ($lsbdistcodename)" )
 		    include mail::newaliases
-		    include "os::$operatingsystem"
-		    include "os::${operatingsystem}::packages"
+		    include os::centos
+		    include os::centos::packages
+	    }
+
+	    debian: {
+		    info( "OS distro for $fqdn is $operatingsystem $operatingsystemrelease ($lsbdistcodename)" )
+		    include mail::newaliases
+		    include os::debian
+		    include os::debian::packages
+	    }
+
+	    ubuntu: {
+		    info( "OS distro for $fqdn is $operatingsystem $operatingsystemrelease ($lsbdistcodename)" )
+		    include mail::newaliases
+		    include os::ubuntu
+		    include os::ubuntu::packages
 	    }
 
 	    default: {
