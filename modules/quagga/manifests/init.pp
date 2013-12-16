@@ -17,6 +17,7 @@ class quagga::package {
 class quagga::service {
 	$svc = $operatingsystem ? {
 		debian	=> "quagga",
+		ubuntu	=> "quagga",
 		default	=> "zebra",
 	}
 	service { $svc:
