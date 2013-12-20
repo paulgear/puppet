@@ -94,6 +94,7 @@ define bind::config::options (
 	$forwarders = [],
 	$global_notify = "no",
 	$recursion = "",
+	$version = "",
 	$allow_recursion = [],
 	$allow_query = [],
 	$allow_query_cache = [],

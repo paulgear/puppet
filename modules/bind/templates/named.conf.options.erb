@@ -40,6 +40,9 @@ end -%>
 <% if recursion.length > 0 then -%>
 	recursion <%= recursion %>;
 <% end -%>
+<% if version.length > 0 then -%>
+	version "<%= version %>";
+<% end -%>
 <% if options_file.length > 0 then -%>
 	include "<%= options_file %>";
 <% end -%>
