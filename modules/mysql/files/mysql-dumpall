@@ -8,7 +8,7 @@ DAYS=66
 PRI=local0.info
 DIR=/share/backup/mysql
 DATE=`date +%Y%m%d.%H%M`
-DBS="${@:-`cd /var/lib/mysql; ls -1d */|cut -d/ -f1|grep -v '^lost.*found$'`}"
+DBS="`echo "show databases;"|mysql --skip-column-names|grep -ve '^performance_schema$' -e '^information_schema$'`"
 
 message()
 {
@@ -24,7 +24,7 @@ find $DIR -type f -mtime +$DAYS -print0 | xargs --null --no-run-if-empty /bin/rm
 BEGIN=`date +%s`
 for i in $DBS; do
     LAST=`date +%s`
-    mysqldump --databases $i | gzip --best > $DIR/$i-$DATE.gz
+    mysqldump --events --databases $i | gzip --best > $DIR/$i-$DATE.gz
     NOW=`date +%s`
     message "$i dumped in `expr $NOW - $LAST` second(s)."
 done
