@@ -92,7 +92,7 @@ class ssh::package {
 }
 
 class ssh::service {
-	include ssh::service
+	include ssh::package
 	$svc = $operatingsystem ? {
 		centos	=> "sshd",
 		default	=> "ssh",
