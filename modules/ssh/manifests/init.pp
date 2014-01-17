@@ -92,6 +92,7 @@ class ssh::package {
 }
 
 class ssh::service {
+	include ssh::service
 	$svc = $operatingsystem ? {
 		centos	=> "sshd",
 		default	=> "ssh",
@@ -106,6 +107,7 @@ class ssh::service {
 
 define ssh::without_password () {
 	$file = "/etc/ssh/sshd_config"
+	include ssh::service
 	text::replace_lines { $file:
 		file		=> $file,
 		pattern		=> '^PermitRootLogin.*',
