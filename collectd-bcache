@@ -29,7 +29,7 @@ def file_to_line(fname):
     return ''
 
 
-def interpret_sectors(x):
+def interpret_bytes(x):
     '''Interpret a pretty-printed disk size.'''
     factors = {
         'k': 1 << 10,
@@ -46,7 +46,7 @@ def interpret_sectors(x):
     if x[-1] in factors:
         factor = factors[x[-1]]
         x = x[:-1]
-    return int(float(x) * factor / 512)
+    return int(float(x) * factor)
 
 
 def bcache_uuids():
@@ -68,8 +68,8 @@ def get_dirty_data(uuid):
     dirty_data = 0
     for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
         if obj.startswith('bdev'):
-            val = interpret_sectors(file_to_line('%s/%s/%s/dirty_data' %
-                                                 (SYSFS_BCACHE_PATH, uuid, obj)))
+            val = interpret_bytes(file_to_line('%s/%s/%s/dirty_data' %
+                                               (SYSFS_BCACHE_PATH, uuid, obj)))
             dirty_data = dirty_data + int(val)
     return dirty_data
 
