@@ -88,7 +88,7 @@ def main():
         for uuid in uuids:
             dirty_data = get_dirty_data(uuid)
             device = map_uuid_to_bcache(uuid)
-            print('PUTVAL "%s/bcache-%s/df-dirty_data" interval=%s N:%s' %
+            print('PUTVAL "%s/bcache-%s/df_complex-dirty_data" interval=%s N:%s' %
                   (hostname, device, interval, dirty_data))
         time.sleep(interval)
 
