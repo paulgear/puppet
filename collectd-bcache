@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import time
+import socket
+
+SYSFS_BCACHE_PATH = '/sys/fs/bcache/'
+
+hostname = os.environ['COLLECTD_HOSTNAME'] if 'COLLECTD_HOSTNAME' in os.environ else socket.getfqdn()
+interval = float(os.environ['COLLECTD_INTERVAL']) if 'COLLECTD_INTERVAL' in os.environ else 1
+
+
+def file_to_lines(fname):
+    try:
+        with open(fname, "r") as fd:
+            return fd.readlines()
+    except:
+        return []
+
+
+def file_to_line(fname):
+    ret = file_to_lines(fname)
+    if ret:
+        return ret[0].strip()
+    return ''
+
+
+def interpret_sectors(x):
+    '''Interpret a pretty-printed disk size.'''
+    factors = {
+        'k': 1 << 10,
+        'M': 1 << 20,
+        'G': 1 << 30,
+        'T': 1 << 40,
+        'P': 1 << 50,
+        'E': 1 << 60,
+        'Z': 1 << 70,
+        'Y': 1 << 80,
+    }
+
+    factor = 1
+    if x[-1] in factors:
+        factor = factors[x[-1]]
+        x = x[:-1]
+    return int(float(x) * factor / 512)
+
+
+def bcache_uuids():
+    uuids = []
+
+    if not os.path.isdir(SYSFS_BCACHE_PATH):
+        print('bcache is not loaded.')
+        return
+
+    for cache in os.listdir(SYSFS_BCACHE_PATH):
+        if not os.path.isdir('%s%s' % (SYSFS_BCACHE_PATH, cache)):
+            continue
+        uuids.append(cache)
+
+    return uuids
+
+
+def get_dirty_data(uuid):
+    dirty_data = 0
+    for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
+        if obj.startswith('bdev'):
+            val = interpret_sectors(file_to_line('%s/%s/%s/dirty_data' %
+                                                 (SYSFS_BCACHE_PATH, uuid, obj)))
+            dirty_data = dirty_data + int(val)
+    return dirty_data
+
+
+def map_uuid_to_bcache(uuid):
+    for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
+        if obj.startswith('bdev'):
+           return os.path.basename(os.readlink(os.path.join(SYSFS_BCACHE_PATH, uuid, obj, 'dev')))
+
+
+def main():
+    while True:
+        uuids = bcache_uuids()
+        if len(uuids) == 0:
+            continue
+        for uuid in uuids:
+            dirty_data = get_dirty_data(uuid)
+            device = map_uuid_to_bcache(uuid)
+            print('PUTVAL "%s/bcache-%s/df-dirty_data" interval=%s N:%s' %
+                  (hostname, device, interval, dirty_data))
+        time.sleep(interval)
+
+
+if __name__ == '__main__':
+    main()
