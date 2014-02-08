@@ -74,6 +74,15 @@ def get_dirty_data(uuid):
     return dirty_data
 
 
+def get_cache_ratio(uuid, time):
+    for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
+        if obj.startswith('bdev'):
+            val = interpret_bytes(file_to_line('%s/%s/%s/stats_%s/cache_hit_ratio' %
+                                               (SYSFS_BCACHE_PATH, uuid, obj, time)))
+            return val
+    return '0'
+
+
 def map_uuid_to_bcache(uuid):
     for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
         if obj.startswith('bdev'):
@@ -90,6 +99,10 @@ def main():
             device = map_uuid_to_bcache(uuid)
             print('PUTVAL "%s/bcache-%s/df_complex-dirty_data" interval=%s N:%s' %
                   (hostname, device, interval, dirty_data))
+            for t in ['five_minute', 'hour', 'day', 'total']:
+                cache_ratio = get_cache_ratio(uuid, t)
+                print('PUTVAL "%s/bcache-%s/cache_ratio-%s" interval=%s N:%s' %
+                      (hostname, device, t, interval, cache_ratio))
         time.sleep(interval)
 
 
