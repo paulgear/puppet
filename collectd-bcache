@@ -77,9 +77,11 @@ def get_dirty_data(uuid):
 def get_cache_ratio(uuid, time):
     for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
         if obj.startswith('bdev'):
-            val = interpret_bytes(file_to_line('%s/%s/%s/stats_%s/cache_hit_ratio' %
-                                               (SYSFS_BCACHE_PATH, uuid, obj, time)))
-            return val
+            hits = float(file_to_line('%s/%s/%s/stats_%s/cache_hits' %
+                                    (SYSFS_BCACHE_PATH, uuid, obj, time)))
+            misses = float(file_to_line('%s/%s/%s/stats_%s/cache_misses' %
+                                      (SYSFS_BCACHE_PATH, uuid, obj, time)))
+            return hits / (hits + misses) * 100
     return '0'
 
 
