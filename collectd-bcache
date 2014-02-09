@@ -81,8 +81,10 @@ def get_cache_ratio(uuid, time):
                                     (SYSFS_BCACHE_PATH, uuid, obj, time)))
             misses = float(file_to_line('%s/%s/%s/stats_%s/cache_misses' %
                                       (SYSFS_BCACHE_PATH, uuid, obj, time)))
+            if (hits + misses) == 0:
+                return 100
             return hits / (hits + misses) * 100
-    return '0'
+    return 0
 
 
 def map_uuid_to_bcache(uuid):
