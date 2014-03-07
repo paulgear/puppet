@@ -46,7 +46,7 @@ class owncloud::server::repository (
 	apt::source { "owncloud-server-$release":
 		ensure		=> $ensure,
 		comment		=> "owncloud server distribution",
-		uri		=> "http://download.opensuse.org/repositories/isv:ownCloud:community/$release/"
+		uri		=> "http://download.opensuse.org/repositories/isv:ownCloud:community/$release/",
 		distribution	=> "/",
 		require 	=> Class["owncloud::server::key"],
 	}
