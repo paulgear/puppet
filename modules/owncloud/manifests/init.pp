@@ -52,7 +52,7 @@ class owncloud::server::repository (
 	}
 }
 
-class owncloud:server:::service (
+class owncloud:server::service (
 	$svc = "owncloud",
 	$ensure,
 	$release,
