@@ -4,7 +4,7 @@ class owncloud::server (
 	$ensure = "present",
 	$release,	# e.g. "Debian_7.0", "xUbuntu_12.04", etc.
 ) {
-	class { "owncloud::server::service":
+	class { "owncloud::server::package":
 		ensure		=> $ensure,
 		release		=> $release,
 	}
@@ -25,13 +25,15 @@ class owncloud::server::package (
 	$ensure,
 	$release,
 ) {
+	include apache
+	include apt
 	class { "owncloud::server::repository":
 		ensure		=> $ensure,
 		release		=> $release,
 	}
 	package { $pkg:
 		ensure		=> installed,
-		require		=> [ Class["owncloud::server::repository"], Class["apt::refresh"], ],
+		require		=> [ Class["owncloud::server::repository"], Class["apt::refresh"], Class["apache"], ],
 	}
 }
 
@@ -49,33 +51,6 @@ class owncloud::server::repository (
 		uri		=> "http://download.opensuse.org/repositories/isv:ownCloud:community/$release/",
 		distribution	=> "/",
 		require 	=> Class["owncloud::server::key"],
-	}
-}
-
-class owncloud::server::service (
-	$svc = "owncloud",
-	$ensure,
-	$release,
-) {
-	class { "owncloud::server::package":
-		ensure		=> $ensure,
-		release		=> $release,
-	}
-	service { $svc:
-		enable		=> true,
-		require		=> Class["owncloud::server::package"],
-#		hasrestart	=> true,
-#		hasstatus	=> $operatingsystem ? {
-#			debian	=> false,
-#			ubuntu	=> false,
-#			centos	=> true,
-#			default	=> undef,
-#		},
-#		pattern		=> $operatingsystem ? {
-#			debian	=> owncloud,
-#			ubuntu	=> owncloud,
-#			default	=> undef,
-#		},
 	}
 }
 
