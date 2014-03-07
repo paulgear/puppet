@@ -35,13 +35,24 @@ class apt {
 		}
 	}
 
-	define key($ensure = 'present') {
+	define key(
+		$ensure = 'present',
+		$source = 'pgp',
+	) {
+		case $source {
+			pgp: {
+				$url = "http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x$name"
+			}
+			default: {
+				$url = $source
+			}
+		}
 		case $ensure {
 			default: {
 				err("unknown ensure value ${ensure}")
 			}
 			present: {
-				exec { "$apt::wget -qq -O - 'http://keyserver.ubuntu.com:11371/pks/lookup?op=get&search=0x$name' | $apt::apt_key add -":
+				exec { "$apt::wget -qq -O - '$url' | $apt::apt_key add -":
 					unless	=> "$apt::apt_key export $name | grep -q -e '-----END PGP PUBLIC KEY BLOCK-----'",
 					notify	=> Class["apt::refresh"];
 				}
