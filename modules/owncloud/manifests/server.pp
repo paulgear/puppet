@@ -2,7 +2,7 @@
 
 class owncloud::server (
 	$ensure = "present",
-	$release,	# e.g. "Debian 7.0", "xUbuntu_12.04", etc.
+	$release,	# e.g. "Debian_7.0", "xUbuntu_12.04", etc.
 ) {
 	class { "owncloud::server::service":
 		ensure		=> $ensure,
