@@ -14,7 +14,7 @@ class owncloud::server::key (
 	$ensure,
 	$release,
 ) {
-	apt::key { "owncloud-server-$release-key":
+	apt::key { "BA684223":
 		ensure		=> $ensure,
 		source		=> "http://download.opensuse.org/repositories/isv:ownCloud:community/$release/Release.key",
 	}
