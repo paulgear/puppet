@@ -27,6 +27,7 @@ class owncloud::server::package (
 ) {
 	include apache
 	include apt
+	include mysql::server
 	class { "owncloud::server::repository":
 		ensure		=> $ensure,
 		release		=> $release,
