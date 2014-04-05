@@ -87,6 +87,15 @@ def get_cache_ratio(uuid, time):
     return 0
 
 
+def get_cache_result(uuid, stat):
+    value = 0
+    for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
+        if obj.startswith('bdev'):
+            value = int(file_to_line('%s/%s/%s/stats_five_minute/cache_%s' %
+                                    (SYSFS_BCACHE_PATH, uuid, obj, stat)))
+    return value
+
+
 def map_uuid_to_bcache(uuid):
     for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
         if obj.startswith('bdev'):
@@ -107,6 +116,10 @@ def main():
                 cache_ratio = get_cache_ratio(uuid, t)
                 print('PUTVAL "%s/bcache-%s/cache_ratio-%s" interval=%s N:%s' %
                       (hostname, device, t, interval, cache_ratio))
+            for c in ['bypass_hits', 'bypass_misses', 'hits', 'miss_collisions', 'misses', 'readaheads']:
+                cache_result = get_cache_result(uuid, c)
+                print('PUTVAL "%s/bcache-%s/requests-%s" interval=%s N:%s' %
+                      (hostname, device, c, interval, cache_result))
         time.sleep(interval)
 
 
