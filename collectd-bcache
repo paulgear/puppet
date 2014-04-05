@@ -96,6 +96,15 @@ def get_cache_result(uuid, stat):
     return value
 
 
+def get_bypassed(uuid):
+    value = 0
+    for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
+        if obj.startswith('bdev'):
+            value = interpret_bytes(file_to_line('%s/%s/%s/stats_five_minute/bypassed' %
+                                               (SYSFS_BCACHE_PATH, uuid, obj)))
+    return value
+
+
 def map_uuid_to_bcache(uuid):
     for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
         if obj.startswith('bdev'):
@@ -120,6 +129,9 @@ def main():
                 cache_result = get_cache_result(uuid, c)
                 print('PUTVAL "%s/bcache-%s/requests-%s" interval=%s N:%s' %
                       (hostname, device, c, interval, cache_result))
+            bypassed = get_bypassed(uuid)
+            print('PUTVAL "%s/bcache-%s/bytes-bypassed" interval=%s N:%s' %
+                  (hostname, device, interval, bypassed))
         time.sleep(interval)
 
 
