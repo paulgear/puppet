@@ -1,8 +1,6 @@
 #
 # puppet class to install & configure samba
 #
-# FIXME - Ubuntu: only samba 3.4 is available
-#
 
 class samba::base {
 	include samba::package
@@ -24,6 +22,7 @@ class samba::service {
 	include samba::package
 	$svc = $operatingsystem ? {
 		"CentOS"	=> "smb",
+		"Ubuntu"	=> "smbd",
 		default		=> "samba",
 	}
 	service { $svc:
