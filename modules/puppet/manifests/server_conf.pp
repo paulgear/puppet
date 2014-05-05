@@ -28,6 +28,14 @@ find . -type d -print0 | xargs chmod g+s
 ",
 	}
 
+	# clean out puppet reports daily
+	cron_job { "puppetmaster-clean":
+		interval	=> "daily",
+		script		=> "#!/bin/sh
+find /var/lib/puppet/reports -type f -mtime +33 | xargs rm -f
+",
+	}
+
 	# restart puppet master server daily
 	cron_job { "puppetmaster-restart":
 		interval	=> "daily",
