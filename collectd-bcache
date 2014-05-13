@@ -103,9 +103,11 @@ def get_bypassed(uuid):
 
 
 def map_uuid_to_bcache(uuid):
+    devices = []
     for obj in os.listdir(os.path.join(SYSFS_BCACHE_PATH, uuid)):
         if obj.startswith('bdev'):
-           return os.path.basename(os.readlink(os.path.join(SYSFS_BCACHE_PATH, uuid, obj, 'dev')))
+           devices.append(os.path.basename(os.readlink(os.path.join(SYSFS_BCACHE_PATH, uuid, obj, 'dev'))))
+    return devices
 
 
 def main():
@@ -113,20 +115,21 @@ def main():
         uuids = bcache_uuids()
         for uuid in uuids:
             dirty_data = get_dirty_data(uuid)
-            device = map_uuid_to_bcache(uuid)
-            print('PUTVAL "%s/bcache-%s/df_complex-dirty_data" interval=%s N:%s' %
-                  (hostname, device, interval, dirty_data))
-            for t in ['five_minute', 'hour', 'day', 'total']:
-                cache_ratio = get_cache_ratio(uuid, t)
-                print('PUTVAL "%s/bcache-%s/cache_ratio-%s" interval=%s N:%s' %
-                      (hostname, device, t, interval, cache_ratio))
-            for c in ['bypass_hits', 'bypass_misses', 'hits', 'miss_collisions', 'misses', 'readaheads']:
-                cache_result = get_cache_result(uuid, c)
-                print('PUTVAL "%s/bcache-%s/requests-%s" interval=%s N:%s' %
-                      (hostname, device, c, interval, cache_result))
-            bypassed = get_bypassed(uuid)
-            print('PUTVAL "%s/bcache-%s/bytes-bypassed" interval=%s N:%s' %
-                  (hostname, device, interval, bypassed))
+            devices = map_uuid_to_bcache(uuid)
+            for device in devices:
+                print('PUTVAL "%s/bcache-%s/df_complex-dirty_data" interval=%s N:%s' %
+                      (hostname, device, interval, dirty_data))
+                for t in ['five_minute', 'hour', 'day', 'total']:
+                    cache_ratio = get_cache_ratio(uuid, t)
+                    print('PUTVAL "%s/bcache-%s/cache_ratio-%s" interval=%s N:%s' %
+                          (hostname, device, t, interval, cache_ratio))
+                for c in ['bypass_hits', 'bypass_misses', 'hits', 'miss_collisions', 'misses', 'readaheads']:
+                    cache_result = get_cache_result(uuid, c)
+                    print('PUTVAL "%s/bcache-%s/requests-%s" interval=%s N:%s' %
+                          (hostname, device, c, interval, cache_result))
+                bypassed = get_bypassed(uuid)
+                print('PUTVAL "%s/bcache-%s/bytes-bypassed" interval=%s N:%s' %
+                      (hostname, device, interval, bypassed))
         sys.stdout.flush()
         time.sleep(interval)
 
