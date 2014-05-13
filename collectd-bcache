@@ -114,8 +114,6 @@ def map_uuid_to_bcache(uuid):
 def main():
     while True:
         uuids = bcache_uuids()
-        if len(uuids) == 0:
-            continue
         for uuid in uuids:
             dirty_data = get_dirty_data(uuid)
             device = map_uuid_to_bcache(uuid)
