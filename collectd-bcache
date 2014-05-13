@@ -5,9 +5,6 @@ import sys
 import time
 import socket
 
-# disable output buffering
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-
 SYSFS_BCACHE_PATH = '/sys/fs/bcache/'
 
 hostname = os.environ['COLLECTD_HOSTNAME'] if 'COLLECTD_HOSTNAME' in os.environ else socket.getfqdn()
@@ -130,6 +127,7 @@ def main():
             bypassed = get_bypassed(uuid)
             print('PUTVAL "%s/bcache-%s/bytes-bypassed" interval=%s N:%s' %
                   (hostname, device, interval, bypassed))
+        sys.stdout.flush()
         time.sleep(interval)
 
 
