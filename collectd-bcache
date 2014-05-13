@@ -54,7 +54,7 @@ def bcache_uuids():
 
     if not os.path.isdir(SYSFS_BCACHE_PATH):
         print('bcache is not loaded.')
-        return
+        return uuids
 
     for cache in os.listdir(SYSFS_BCACHE_PATH):
         if not os.path.isdir('%s%s' % (SYSFS_BCACHE_PATH, cache)):
