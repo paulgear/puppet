@@ -16,7 +16,7 @@ class bonding::package {
 }
 
 # Only applicable to CentOS/RHEL - Debian/Ubuntu seem to do it automatically.
-class bonding::module ( $interface = "bond0", $mode = 6, $interval = 100 ) {
+define bonding::module ( $interface = "bond0", $mode = 6, $interval = 100 ) {
 	file { "/etc/modprobe.d/$interface.conf":
 		ensure	=> file,
 		owner	=> root,
@@ -31,7 +31,7 @@ options $interface miimon=$interval mode=$mode
 
 # Only applicable to CentOS/RHEL.
 # WARNING: If you mess this up, you probably won't get the opportunity to fix it, because you'll be cut off from the system in question.
-class bonding::ifcfg::slave ( $eth, $bond = "bond0" ) {
+define bonding::ifcfg::slave ( $eth, $bond = "bond0" ) {
 	file { "/etc/sysconfig/network-scripts/ifcfg-$eth":
 		ensure	=> file,
 		owner	=> root,
@@ -51,7 +51,7 @@ USERCTL=no
 # Only applicable to CentOS/RHEL.  Set VLAN to 0 to use the untagged interface.
 # WARNING: If you mess this up, you probably won't get the opportunity to fix it, because you'll be cut off from the system in question.
 # FIXME: IPv6, DHCP support (the latter might work - untested)
-class bonding::ifcfg::vlan ( $vlan, $bootproto = "static", $ip, $netmask, $bond = "bond0" ) {
+define bonding::ifcfg::vlan ( $vlan, $bootproto = "static", $ip, $netmask, $bond = "bond0" ) {
 	$if = $vlan ? {
 		0	=> "$bond",
 		default	=> "$bond.$vlan",
@@ -78,7 +78,7 @@ VLAN=$isvlan
 }
 
 # Only applicable to CentOS/RHEL.
-class bonding::ifcfg::ppp ( $if = "ppp0", $eth, $username ) {
+define bonding::ifcfg::ppp ( $if = "ppp0", $eth, $username ) {
 	file { "/etc/sysconfig/network-scripts/ifcfg-$if":
 		ensure	=> file,
 		owner	=> root,
