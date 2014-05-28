@@ -50,8 +50,8 @@ USERCTL=no
 
 # Only applicable to CentOS/RHEL.  Set VLAN to 0 to use the untagged interface.
 # WARNING: If you mess this up, you probably won't get the opportunity to fix it, because you'll be cut off from the system in question.
-# FIXME: IPv6, DHCP support (the latter might work - untested)
-define bonding::ifcfg::vlan ( $vlan, $bootproto = "static", $ip, $netmask, $bond = "bond0" ) {
+# FIXME: IPv6
+define bonding::ifcfg::vlan ( $vlan, $bootproto = "static", $ip, $netmask, $bond = "bond0", $comment = "" ) {
 	$if = $vlan ? {
 		0	=> "$bond",
 		default	=> "$bond.$vlan",
@@ -66,6 +66,7 @@ define bonding::ifcfg::vlan ( $vlan, $bootproto = "static", $ip, $netmask, $bond
 		group	=> root,
 		mode	=> 644,
 		content	=> "# Managed by puppet on $servername - DO NOT EDIT HERE!
+# $comment
 DEVICE=$if
 BOOTPROTO=$bootproto
 ONBOOT=yes
@@ -78,13 +79,14 @@ VLAN=$isvlan
 }
 
 # Only applicable to CentOS/RHEL.
-define bonding::ifcfg::ppp ( $if = "ppp0", $eth, $username ) {
+define bonding::ifcfg::ppp ( $if = "ppp0", $eth, $username, $comment = "" ) {
 	file { "/etc/sysconfig/network-scripts/ifcfg-$if":
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
 		mode	=> 644,
 		content	=> "# Managed by puppet on $servername - DO NOT EDIT HERE!
+# $comment
 DEVICE=$if
 ETH=$eth
 NAME=DSL$if
