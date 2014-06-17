@@ -112,7 +112,8 @@ define ssh::without_password () {
 		file		=> $file,
 		pattern		=> '^PermitRootLogin.*',
 		replace		=> 'PermitRootLogin without-password',
-		optimise	=> false,
+		check		=> '^PermitRootLogin without-password',
+		optimise	=> true,
 		require		=> Class["ssh::package"],
 		notify		=> Class["ssh::service"],
 	}
