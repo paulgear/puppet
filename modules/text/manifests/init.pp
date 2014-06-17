@@ -43,11 +43,15 @@ define text::comment_lines($file, $pattern) {
 # The main reason you might use this is if the pattern matches the replace.
 # If $replace contains backrefs (such as \1), you probably don't want to use
 # $optimise, since it won't match.
-define text::replace_lines($file, $pattern, $replace, $optimise = 0) {
+define text::replace_lines($file, $pattern, $replace, $optimise = 0, $check = '') {
 	include text
+	$optimise_check = $check ? {
+		''		=> $replace,
+		default		=> $check,
+	}
 	$unless = $optimise ? {
 		/(no|off|false|0)/	=> "/bin/false",
-		default			=> "/bin/grep -Ee '$replace' '$file'",
+		default			=> "/bin/grep -Ee '$optimise_check' '$file'",
 	}
 	exec { "sed -i -r -e 's/$pattern/$replace/' $file":
 		path		=> $text::safe_path,
