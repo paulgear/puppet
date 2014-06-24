@@ -33,6 +33,13 @@ class samba::service {
 	}
 }
 
+define samba::user ( $password ) {
+	exec { "smbpasswd $name":
+		command		=> "echo '$password
+$password' | smbpasswd -as $name",
+	}
+}
+
 class samba::config {
 	include samba::base
 	$cfg = "/etc/samba/smb.conf"
