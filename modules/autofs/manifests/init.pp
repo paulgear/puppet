@@ -25,7 +25,7 @@ class autofs::service {
 }
 
 define autofs::autofs( $device = "/dev/sdc1", $fstype = "ext4" ) {
-	include autofs
+	include ::autofs
 	file { "/etc/auto.master":
 		ensure		=> file,
 		owner		=> root,
