@@ -51,7 +51,7 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 		script		=> "#!/bin/sh
 # Managed by puppet on $servername - do not edit here!
 cd /etc
-git fsck --full --strict 2>&1 | grep -ve '^dangling blob'
+git fsck --full --strict 2>&1 | grep -Eve '^(dangling|missing) (blob|tree) '
 ",
 	}
 
