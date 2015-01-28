@@ -14,7 +14,7 @@ PATH="/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH"
 BACKUPVOL="/media/vmbackup"
 XENDIR="/var/lib/xen/images"
 SLEEP=5
-DIVISOR=5
+DIVISOR=4
 
 if [ "$#" -gt 0 ]; then
 	DOMAINS="$@"
