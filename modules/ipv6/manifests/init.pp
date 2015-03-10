@@ -1,5 +1,5 @@
 #
-# puppet class to create network interface definitions for IPv6 services
+# puppet classes to manage IPv6 interfaces & services
 #
 
 class ipv6::dhcp_pd {
@@ -13,7 +13,7 @@ class ipv6::interface::setup {
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
-		replace => false,
+		replace => false,	# don't replace file if it was locally modified
 		mode	=> 644,
 		content	=> template("network/interfaces.erb"),
 		require => File["/etc/network/interfaces.d"],
@@ -32,7 +32,7 @@ class ipv6::interface::setup {
 	}
 }
 
-class ipv6::address (
+define ipv6::address (
 	$interface,
 	$address = "",
 	$netmask = 64,
@@ -49,5 +49,11 @@ class ipv6::address (
 		require => Class["ipv6::interface::setup"],
 		content => template("network/ipv6_address.erb"),
 	}
+	# TODO: Add exec to down/up the interface
+}
+
+class ipv6::init {
+	# TODO: load hiera definitions for interfaces
+	# TODO: enforce privacy SLAAC via sysctl
 }
 
