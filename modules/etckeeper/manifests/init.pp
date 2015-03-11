@@ -38,7 +38,6 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 	exec { $init:
 		command		=> $init,
 		creates		=> "/etc/.git",
-		logoutput	=> on_failure,
 	}
 
 	cron_job { "$pkg-git-gc":

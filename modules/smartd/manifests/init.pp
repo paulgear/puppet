@@ -11,7 +11,6 @@ class smartd::config {
 	exec { "backup smartd.conf":
 		command		=> "cp -a /etc/smartd.conf /etc/smartd.conf.pre-puppet",
 		creates		=> "/etc/smartd.conf.pre-puppet",
-		logoutput	=> on_failure,
 		require		=> Class["smartd::package"],
 	}
 	file { "/etc/smartd.conf":

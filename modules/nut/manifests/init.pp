@@ -150,7 +150,6 @@ class nut::user {
 	exec { "create $nut::users":
 		command		=> "/usr/local/bin/concatfragments.sh -o $nut::users -d $nut::frags",
 		onlyif		=> "test -n \"`find $nut::frags -newer $nut::users`\" -o ! -r $nut::users",
-		logoutput	=> true,	# on_failure
 		notify		=> Class["nut::master::service"],
 	}
 }

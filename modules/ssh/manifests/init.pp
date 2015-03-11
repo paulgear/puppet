@@ -23,7 +23,6 @@ class ssh {
 		exec { "ssh-keygen-$name":
 			command		=> "ssh-keygen -C $name -f $storedir/id_$type.$name -N '' -t $type -b $bits -v",
 			creates		=> "$storedir/id_$type.$name.pub",
-			logoutput	=> on_failure,
 			unless		=> "test -f $storedir/id_$type.$name",
 		}
 		file { "$storedir/id_$type.$name":
