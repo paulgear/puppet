@@ -57,6 +57,6 @@ define ipv6::address (
 class ipv6::setup {
 	sysctl::value { 'net.ipv6.conf.default.use_tempaddr': value => 2 }
 	$addresses = hiera('ipv6::address', {})
-	create_resources('ipv6::address', $addresses[$::fqdn])
+	create_resources('ipv6::address', $addresses)
 }
 
