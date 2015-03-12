@@ -28,7 +28,7 @@ class ipv6::interface::setup {
 	}
 	exec { "ensure interfaces includes source line":
 		unless		=> "grep -Ee '^source /etc/network/interfaces.d' /etc/network/interfaces",
-		exec		=> "echo 'source /etc/network/interfaces.d' >> /etc/network/interfaces",
+		command		=> "echo 'source /etc/network/interfaces.d' >> /etc/network/interfaces",
 		require		=> [ File["/etc/network/interfaces"], File["/etc/network/interfaces.d"] ],
 	}
 }
