@@ -50,7 +50,6 @@ define ipv6::address (
 		mode		=> "0644",
 		require		=> Class["ipv6::interface::setup"],
 		content		=> template("ipv6/ipv6_address.erb"),
-		notify		=> Exec["ifup"],
 	}
 }
 
