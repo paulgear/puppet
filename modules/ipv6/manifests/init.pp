@@ -17,7 +17,7 @@ class ipv6::interface::setup {
 		group	=> root,
 		replace	=> false,	# don't replace file if it was locally modified
 		mode	=> "0644",
-		content	=> template("network/interfaces.erb"),
+		content	=> template("ipv6/interfaces.erb"),
 		require	=> File["/etc/network/interfaces.d"],
 	}
 	file { "/etc/network/interfaces.d":
@@ -49,7 +49,7 @@ define ipv6::address (
 		group		=> root,
 		mode		=> "0644",
 		require		=> Class["ipv6::interface::setup"],
-		content		=> template("network/ipv6_address.erb"),
+		content		=> template("ipv6/ipv6_address.erb"),
 		notify		=> Exec["ifup"],
 	}
 }
