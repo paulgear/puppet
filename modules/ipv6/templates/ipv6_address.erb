@@ -1,0 +1,11 @@
+<%= include_header( "IPv6 address" ) -%>
+# IPv6 address for <%= name %>-<%= interface %>
+
+<% if description.length > 0 -%>
+# <%= description %>
+<% end -%>
+iface <%= interface %> inet6 <%= mode %>
+<% if mode == "static" -%>
+	address <%= address %>
+	netmask <%= netmask %>
+<% end -%>

@@ -6,7 +6,6 @@ class vlan {
 	}
 
 	exec { "echo 8021q >> /etc/modules":
-		logoutput	=> on_failure,
 		unless		=> "grep -q '^[ 	]*8021q' /etc/modules",
 	}
 

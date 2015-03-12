@@ -18,7 +18,6 @@ class mail::newaliases {
 
 class mail::newaliases::exec {
 	exec { "newaliases":
-		logoutput	=> on_failure,
 		refreshonly	=> true,
 	}
 }
