@@ -34,10 +34,10 @@ class ipv6::interface::setup {
 }
 
 define ipv6::address (
-	$interface = "",
+	$interface,
 	$address = "",
 	$netmask = 64,
-	$mode = "static",
+	$mode = "auto",
 	$description = "",
 	$ensure = "file",
 ) {
@@ -55,7 +55,7 @@ define ipv6::address (
 
 class ipv6::setup {
 	sysctl::value { 'net.ipv6.conf.default.use_tempaddr': value => 2 }
-	$addresses = hiera('ipv6::addresses', {})
-	create_resources('ipv6::address', $addresses)
+	$addresses = hiera('ipv6::address', {})
+	create_resources('ipv6::address', $addresses['catalog'][$fqdn])
 }
 
