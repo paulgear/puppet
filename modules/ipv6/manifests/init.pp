@@ -34,7 +34,7 @@ class ipv6::interface::setup {
 }
 
 define ipv6::address (
-	$interface = "eth0",
+	$interface,
 	$address = "",
 	$netmask = 64,
 	$mode = "auto",
