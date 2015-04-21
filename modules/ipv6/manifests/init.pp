@@ -53,12 +53,15 @@ define ipv6::address (
 	if $address == "" and $mode == "static" {
 	    $subnetnum = $subnets[$subnet]
 	    if $servicegroup == "" {
-		$address = "${prefix}${subnetnum}::${node}"
+		$addr = "${prefix}${subnetnum}::${node}"
 	    }
 	    else {
 		$servicegroupnum = $servicegroups[$servicegroup]
-		$address = "${prefix}${subnetnum}::${servicegroupnum}:${node}"
+		$addr = "${prefix}${subnetnum}::${servicegroupnum}:${node}"
 	    }
+	}
+	else {
+	    $addr = $address
 	}
 	file { $filename:
 		ensure		=> $ensure,
