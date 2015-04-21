@@ -36,13 +36,30 @@ class ipv6::interface::setup {
 define ipv6::address (
 	$interface,
 	$address = "",
+	$prefix = "",
+	$subnet = "",
+	$servicegroup = "",
+	$node = "",
 	$netmask = 64,
 	$mode = "auto",
 	$description = "",
+	$privext = "2",
 	$ensure = "file",
+	$subnets,		# these are expected to be defined in defaults
+	$servicegroups,
 ) {
 	include ipv6::interface::setup
 	$filename = "/etc/network/interfaces.d/${interface}-${name}.cfg"
+	if $address == "" && $mode == "static" {
+	    $subnetnum = $subnets[$subnet]
+	    if $servicegroup == "" {
+		$address = "${prefix}${subnetnum}::${node}"
+	    }
+	    else {
+		$servicegroupnum = $servicegroups[$servicegroup]
+		$address = "${prefix}${subnetnum}::${servicegroupnum}:${node}"
+	    }
+	}
 	file { $filename:
 		ensure		=> $ensure,
 		owner		=> root,
@@ -54,8 +71,8 @@ define ipv6::address (
 }
 
 class ipv6::setup {
-	sysctl::value { 'net.ipv6.conf.default.use_tempaddr': value => 2 }
-	$addresses = hiera('ipv6::address', {})
-	create_resources('ipv6::address', $addresses['catalog'][$fqdn])
+	$catalog = hiera('ipv6::address', {})
+	$defaults = $catalog['defaults']
+	create_resources('ipv6::address', $catalog['hosts'][$fqdn], $defaults)
 }
 
