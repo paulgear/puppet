@@ -54,7 +54,8 @@ class apt {
 			present: {
 				exec { "$apt::wget -qq -O - '$url' | $apt::apt_key add -":
 					unless	=> "$apt::apt_key export $name | grep -q -e '-----END PGP PUBLIC KEY BLOCK-----'",
-					notify	=> Class["apt::refresh"];
+					notify	=> Class["apt::refresh"],
+					require => Package["wget"],
 				}
 			}
 			absent: {
