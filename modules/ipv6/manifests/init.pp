@@ -47,6 +47,7 @@ define ipv6::address (
 	$ensure = "file",
 	$subnets,		# these are expected to be defined in defaults
 	$servicegroups,
+	$prefixes,
 ) {
 	include ipv6::interface::setup
 	$filename = "/etc/network/interfaces.d/${interface}-${name}.cfg"
