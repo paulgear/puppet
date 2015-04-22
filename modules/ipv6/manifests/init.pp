@@ -50,14 +50,15 @@ define ipv6::address (
 ) {
 	include ipv6::interface::setup
 	$filename = "/etc/network/interfaces.d/${interface}-${name}.cfg"
+	$pref = $prefixes[$prefix]
 	if $address == "" and $mode == "static" {
 	    $subnetnum = $subnets[$subnet]
 	    if $servicegroup == "" {
-		$addr = "${prefix}${subnetnum}::${node}"
+		$addr = "${pref}${subnetnum}::${node}"
 	    }
 	    else {
 		$servicegroupnum = $servicegroups[$servicegroup]
-		$addr = "${prefix}${subnetnum}::${servicegroupnum}:${node}"
+		$addr = "${pref}${subnetnum}::${servicegroupnum}:${node}"
 	    }
 	}
 	else {
