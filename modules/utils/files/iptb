@@ -1,0 +1,6 @@
+#!/usr/bin/awk -f
+/^Chain /	{HEAD1=$0; next}
+/^ pkts /	{HEAD2=$0; next}
+/^    0     0 /	{next}
+/^$/		{if (HEAD1=="") {print} next}
+		{if (HEAD1!="") {print HEAD1; print HEAD2; HEAD1=""} print}

@@ -34,6 +34,7 @@ class utils {
 	$files = [
 		'check-reboot-required',
 		'fix-tun-devices',
+		'iptb',
 		'randomsleep',
 		'upgrade-dansguardian',
 	]

@@ -72,16 +72,3 @@ function mq
 {
         mailq | awk '/^-/ {print; next} { gsub( /^ */, "") } NF > 0 { if (LINE == "") { LINE=$0 } else { LINE=LINE " " $0 } next } NF == 0 {print LINE; LINE=""}'
 }
-
-# make iptables output brief
-function iptb
-{
-	awk '
-/^Chain /	{HEAD1=$0; next}
-/^ pkts /	{HEAD2=$0; next}
-/^    0     0 /	{next}
-/^$/		{if (HEAD1=="") {print} next}
-		{if (HEAD1!="") {print HEAD1; print HEAD2; HEAD1=""} print}
-'
-}
-
