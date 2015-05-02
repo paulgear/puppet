@@ -23,7 +23,7 @@ class postfix::files {
 	}
 
 	# files that merely need to be present - should not be overwritten by puppet
-	$files = [ "header-checks", "sender-access", "transport", "virtual" ]
+	$files = [ "access", "header-checks", "sender-access", "transport", "virtual" ]
 	postfix_file { $files: }
 
 	# files that puppet distributes

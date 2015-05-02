@@ -1,6 +1,6 @@
 PLAINTEXT=header-checks main.cf master.cf
-SOURCES=header-checks sender-access transport virtual
-DATABASES=sender-access.db transport.db virtual.db /etc/aliases.db
+SOURCES=access header-checks sender-access transport virtual
+DATABASES=access.db sender-access.db transport.db virtual.db /etc/aliases.db
 FILES=$(PLAINTEXT) $(DATABASES)
 POSTMAP=postmap
 PGREY=/etc/postgrey
