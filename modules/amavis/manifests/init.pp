@@ -48,7 +48,7 @@ class amavis::decoders {
 	$pkgs = [
 		"arj",
 		"cabextract",
-		"lha",
+		"lhasa",
 		"lzop",
 		"nomarch",
 		"p7zip",
