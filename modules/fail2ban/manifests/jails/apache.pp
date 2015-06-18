@@ -21,4 +21,10 @@ class fail2ban::jails::apache {
 		maxretry	=> 3,
 		port		=> 'http,https',
 	}
+	fail2ban::jail { "apache-generic-user":
+		findtime	=> 60,
+		logpath		=> '/var/log/apache*/*access*',
+		maxretry	=> 5,
+		port		=> 'http,https',
+	}
 }
