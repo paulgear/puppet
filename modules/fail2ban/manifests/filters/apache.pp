@@ -11,6 +11,6 @@ class fail2ban::filters::apache {
 		failregex	=> '\[error\] \[client <HOST>\] client denied by server configuration',
 	}
 	fail2ban::filter { "apache-generic-user":
-		failregex	=> 'POST /user HTTP/1',
+		failregex	=> '^<HOST> .*"POST /user HTTP/1',
 	}
 }
