@@ -5,11 +5,18 @@ options {
 <% if operatingsystem == "CentOS" then -%>
 	directory "/var/named";
 	dump-file "/var/named/data/cache_dump.db";
-        statistics-file "/var/named/data/named_stats.txt";
+	<% if statistics_file.length > 0 then -%>
+		statistics-file "<%= statistics_file %>";
+	<% else -%>
+		statistics-file "/var/named/data/named_stats.txt";
+	<% end -%>
 <% else -%>
         directory "<%= binddir %>";
 	auth-nxdomain no;    # conform to RFC1035
 	listen-on-v6 { any; };
+	<% if statistics_file.length > 0 then -%>
+		statistics-file "<%= statistics_file %>";
+	<% end -%>
 <% end -%>
 <% if check_names.length > 0 then
 check_names.each do |cn| -%>
@@ -67,6 +74,9 @@ end -%>
 		<%= ar %>;
 <% end -%>
 	};
+<% end -%>
+<% if zone_statistics.length > 0 then -%>
+	zone-statistics <%= zone_statistics %>;
 <% end -%>
 };
 

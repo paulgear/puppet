@@ -99,6 +99,8 @@ define bind::config::options (
 	$allow_query = [],
 	$allow_query_cache = [],
 	$options_file = "",
+	$statistics_file = "",
+	$zone_statistics = "no",
 	$edns_udp_size = "512",
 	$max_udp_size = "512"
 ) {
