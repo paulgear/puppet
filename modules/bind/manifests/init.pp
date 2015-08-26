@@ -200,6 +200,8 @@ define bind::zone (
 	$forwarders = [],
 	$masters = [],
 	$zone_notify = "",
+	$notify_source = "",
+	$notify_source_v6 = "",
 	$allow_notify = [],
 	$allow_transfer = [],
 	$order = ""
