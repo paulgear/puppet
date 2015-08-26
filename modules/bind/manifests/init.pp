@@ -223,6 +223,8 @@ define bind::master_zone (
 	$order = "",
 	$zoneprefix = "master/",
 	$zone_notify = "yes",
+	$notify_source = "",
+	$notify_source_v6 = "",
 	$allow_transfer = []
 ) {
 	include bind::config
@@ -235,6 +237,8 @@ define bind::master_zone (
 		zonefile	=> "$zoneprefix$zonename",
 		zone		=> $zonename,
 		zone_notify	=> $zone_notify,
+		notify_source	=> $notify_source,
+		notify_source_v6 => $notify_source_v6,
 		allow_transfer	=> $allow_transfer,
 		order		=> $order,
 		require		=> File["${bind::config::masterdir}"],

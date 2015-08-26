@@ -28,6 +28,12 @@ zone "<%= zone %>" {
 <% end -%>
 	};
 <% end -%>
+<% if notify_source.length > 0 then -%>
+	notify-source <%= notify_source %>;
+<% end -%>
+<% if notify_source_v6.length > 0 then -%>
+	notify-source-v6 <%= notify_source_v6 %>;
+<% end -%>
 <% if allow_transfer.length > 0 then -%>
 	allow-transfer {
 <% allow_transfer.each do |at| -%>
