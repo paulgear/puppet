@@ -95,6 +95,8 @@ define bind::config::options (
 	$global_notify = "no",
 	$recursion = "",
 	$version = "",
+	$listen_on = [],
+	$listen_on_v6 = [],
 	$allow_recursion = [],
 	$allow_query = [],
 	$allow_query_cache = [],

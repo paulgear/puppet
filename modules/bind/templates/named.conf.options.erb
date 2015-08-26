@@ -13,7 +13,6 @@ options {
 <% else -%>
         directory "<%= binddir %>";
 	auth-nxdomain no;    # conform to RFC1035
-	listen-on-v6 { any; };
 	<% if statistics_file.length > 0 then -%>
 		statistics-file "<%= statistics_file %>";
 	<% end -%>
@@ -41,6 +40,20 @@ end -%>
 <% end -%>
 <% if edns_udp_size.length > 0 then -%>
 	edns-udp-size <%= edns_udp_size %>;
+<% end -%>
+<% if listen_on.length > 0 then -%>
+	listen-on {
+<% listen_on.each do |lo| -%>
+		<%= lo %>;
+<% end -%>
+	};
+<% end -%>
+<% if listen_on_v6.length > 0 then -%>
+	listen-on-v6 {
+<% listen_on_v6.each do |lo| -%>
+		<%= lo %>;
+<% end -%>
+	};
 <% end -%>
 <% if max_udp_size.length > 0 then -%>
 	max-udp-size <%= max_udp_size %>;
