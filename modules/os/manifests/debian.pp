@@ -156,6 +156,14 @@ class os::debian::physical {
 	package { $packages: ensure => installed }
 }
 
+class os::debian::jessie {
+	os::debian::base	{ "jessie": }
+	os::debian::security	{ "jessie": }
+	os::debian::updates	{ "jessie": }
+	$packages = [ "byobu" ]
+	package { $packages: ensure => installed }
+}
+
 class os::debian::wheezy {
 	os::debian::base	{ "wheezy": }
 	os::debian::security	{ "wheezy": }
