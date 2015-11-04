@@ -56,10 +56,10 @@ fi
 function paul
 {
 	alias dir='ls -Fabl'
-	alias df='df -m'
+	alias df='df -h'
 	alias more=less
 	set -o vi
-	export LESS=-eiMRX
+	export LESS=-eiMRXj.4
 }
 
 function pdate
