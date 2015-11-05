@@ -21,6 +21,9 @@ Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/b
 <% superusers.each do |su| -%>
 <%= su %> ALL=(ALL) ALL
 <% end -%>
+<% nopasswd.each do |su| -%>
+<%= su %> ALL=(ALL) NOPASSWD:ALL
+<% end -%>
 
 # Add your local sudoers here
 

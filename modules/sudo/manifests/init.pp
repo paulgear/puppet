@@ -12,7 +12,8 @@ class sudo::package {
 }
 
 define sudo::sudoers (
-		$superusers = [ "root" ]
+		$superusers = [ "root" ],
+		$nopasswd = []
 		) {
 	include sudo
 	$templatedir = "/etc/puppet/modules/sudo/templates"
