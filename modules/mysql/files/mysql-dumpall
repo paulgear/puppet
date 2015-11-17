@@ -23,6 +23,7 @@ find $DIR -type f -mtime +$DAYS -print0 | xargs --null --no-run-if-empty /bin/rm
 
 BEGIN=`date +%s`
 for i in $DBS; do
+    message "Starting dump of $i"
     LAST=`date +%s`
     mysqldump --events --databases $i | gzip --best > $DIR/$i-$DATE.gz
     NOW=`date +%s`
