@@ -9,7 +9,7 @@ iface <%= interface %> inet6 <%= mode %>
 	address <%= addr %>
 	netmask <%= netmask %>
 <% else -%>
-    <% if privext.length > 0 -%>
+<% if privext.length > 0 -%>
 	privext <%= privext  %>
-    <% end -%>
+<% end -%>
 <% end -%>
