@@ -124,7 +124,6 @@ class os::debian::packages {
 		"time",
 		"tshark",
 		"vim",
-		"wireshark",
 
 	]
 	package { $packages:

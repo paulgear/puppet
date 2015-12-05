@@ -13,7 +13,7 @@ class os::ubuntu {
 }
 
 class os::ubuntu::packages {
-	$packages = [ 'byobu', 'lsscsi', 'screen', 'strace', 'vim', 'wireshark', ]
+	$packages = [ 'byobu', 'lsscsi', 'screen', 'strace', 'vim', 'tshark', ]
 
 	package { $packages:
 		ensure	=> installed,
