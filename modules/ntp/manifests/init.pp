@@ -1,8 +1,6 @@
 #
 # puppet class with basic ntp definitions
 #
-# DONE: Checked for Ubuntu compatibility
-#
 
 class ntp {
 
@@ -43,10 +41,6 @@ class ntp {
 		"2.$country.pool.ntp.org",
 		"3.$country.pool.ntp.org",
 	]
-
-	ulb { "ntp-check":
-		source_class	=> "ntp",
-	}
 
 }
 
