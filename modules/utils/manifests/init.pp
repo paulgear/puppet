@@ -36,7 +36,6 @@ class utils {
 		'fix-tun-devices',
 		'iptb',
 		'randomsleep',
-		'upgrade-dansguardian',
 	]
 	ulb { $files: source_class => utils }
 
