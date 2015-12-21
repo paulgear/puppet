@@ -15,6 +15,7 @@ class snmp {
 			include snmp::mibs
 		}
 		ubuntu: {
+			include snmp::mibs
 			case $lsbdistcodename {
 				lucid: {
 					include snmp::no_loopback
