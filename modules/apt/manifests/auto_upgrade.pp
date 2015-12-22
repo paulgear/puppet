@@ -5,10 +5,9 @@ class apt::auto_upgrade {
 	case $operatingsystem {
 
 		debian, ubuntu: {
-			$pkg = "update-notifier-common"
-			$pkgs = [ $pkg, "unattended-upgrades" ]
+			$pkg = "unattended-upgrades"
 
-			package { $pkgs:
+			package { $pkg:
 				ensure	=> installed,
 			}
 
