@@ -1,16 +1,16 @@
 #!/bin/sh
 
-# Back up observium mysql database - assumes mysql is running on the same host as observium
+# Back up LibreNMS MySQL database - assumes MySQL is running on the same host as LibreNMS
 
 set -e
 set -u
 
-BASE=${1:-'/opt/observium'}
+BASE=${1:-'/opt/librenms'}
 MY_CNF=${2:-"$BASE/.my.cnf"}
-DUMPFILE=${3:-"$BASE/observium.mysql.dump"}
+DUMPFILE=${3:-"$BASE/librenms.mysql.dump"}
 
 # This is probably insecure.  If you put shell code exploits
-# in your observium config.php, you're on your own.
+# in your LibreNMS config.php, you're on your own.
 eval `awk -F\" '
 	/^[:space:]*#/ {next}
 	/db_host/ {print "HOST=\"" $2 "\""}
