@@ -162,7 +162,7 @@ class librenms::vhost (
 	}
 	file { "$apachedir/sites-available/$dnsname.conf":
 		ensure	=> present,
-		content	=> template("librenms/librenms-apache.erb"),
+		content	=> template("librenms/librenms-apache.conf.erb"),
 		owner	=> "root",
 		group	=> "root",
 		mode	=> 0644,

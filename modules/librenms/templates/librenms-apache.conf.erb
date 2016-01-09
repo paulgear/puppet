@@ -1,0 +1,17 @@
+<VirtualHost *:80>
+    DocumentRoot <%= dir %>/html/
+    ServerName  <%= dnsname %>
+<% aliases.sort.each do |a| -%>
+    ServerAlias <%= a %>
+<% end -%>
+    CustomLog <%= dir %>/logs/access_log combined
+    ErrorLog <%= dir %>/logs/error_log
+    AllowEncodedSlashes On
+    <Directory "<%= dir %>/html/">
+	AllowOverride All
+	Options FollowSymLinks MultiViews
+<% if apachever == "2.4" -%>
+	Require all granted
+<% end -%>
+    </Directory>
+</VirtualHost>
