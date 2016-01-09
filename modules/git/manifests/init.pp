@@ -17,7 +17,7 @@ class git::install {
 	}
 }
 
-class git::config (
+define git::config (
 	$overwrite = true,
 	$value,
 ) {
