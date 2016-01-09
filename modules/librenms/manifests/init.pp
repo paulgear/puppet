@@ -65,9 +65,14 @@ class librenms::install (
 	$user,
 	$group,
 	$repo,
+	$proxy,
 ) {
+	$config = $proxy ? {
+		""	=> "",
+		default	=> "--config 'http.proxy=$proxy' --config 'https.proxy=$proxy'",
+	}
 	exec { 'librenms::clone':
-		command => "git clone --config 'http.proxy=$proxy' --config 'https.proxy=$proxy' $repo $dir",
+		command => "git clone $config $repo $dir",
 		creates	=> "$dir/includes/defaults.inc.php",
 		require	=> [ Class["librenms::packages"], File[$dir], ],
 		user	=> $user,
