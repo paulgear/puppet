@@ -3,11 +3,7 @@
 class git {
 
 	$cfg = "/root/.gitconfig"
-	$pkg = $operatingsystem ? {
-		centos		=> "git",
-		debian		=> "git-core",
-		ubuntu		=> "git-core",
-	}
+	$pkg = "git"
 
 	package { $pkg:
 		ensure		=> installed,
