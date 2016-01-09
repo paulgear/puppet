@@ -27,7 +27,7 @@ class librenms (
 		recurse	=> true,
 		owner	=> $user,
 		group	=> $group,
-		require	=> [ User[$user], Group[$group], ],
+		require	=> [ User[$user], Group[$group], Class["librenms::install"], ],
 	}
 	file { "$dir/rrd":
 		ensure	=> directory,
