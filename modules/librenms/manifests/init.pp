@@ -49,6 +49,7 @@ class librenms (
 		group	=> $group,
 	}
 	class { "librenms::vhost":
+		dir	=> $dir,
 		dnsname	=> $vhost,
 		aliases	=> $vhost_aliases,
 	}
