@@ -30,6 +30,6 @@ define git::config (
 		unless	=> "test $(git config --get $name) = $value",
 		require	=> Class["git::install"],
 		user	=> $user,
-		environment => [ "HOME" => $home ],
+		environment => [ "HOME=$home" ],
 	}
 }
