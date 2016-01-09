@@ -35,4 +35,15 @@ class php5::mysql::package {
 	}
 }
 
-
+class php5::mcrypt {
+	include php5
+	package { "php5-mcrypt":
+		ensure		=> installed,
+		notify		=> Exec["php5::mcrypt::enable"],
+	}
+	exec { "php5::mcrypt::enable":
+		command		=> "php5enmod mcrypt",
+		refreshonly	=> true,
+		notify		=> Class["apache::service"],
+	}
+}

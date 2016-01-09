@@ -1,26 +1,89 @@
-# puppet class to manage librenms dependencies
+# puppet class to manage LibreNMS installs
 
-class librenms {
+class librenms (
+	$dir = "/opt/librenms",
+	$user = "librenms",
+	$group = "librenms",
+	$www_group = "www-data",
+	$repo = "https://github.com/librenms/librenms.git",
+	$vhost,
+	$vhost_aliases = [],
+) {
 	include librenms::packages
-	#include librenms::pear
-	#include librenms::cron
+	group { $group:
+		ensure	=> present,
+	}
+	user { $user:
+		ensure	=> present,
+		comment	=> "LibreNMS",
+		home	=> $dir,
+		group	=> $group,
+		groups	=> [ $www_group ],
+		require	=> [ Class["librenms::packages"], ],
+	}
+	file { $dir:
+		ensure	=> directory,
+		replace	=> false,
+		recurse	=> true,
+		owner	=> $user,
+		group	=> $group,
+		require	=> [ User[$user], Group[$group], ],
+	}
+	file { "$dir/rrd":
+		ensure	=> directory,
+		owner	=> $user,
+		group	=> $group,
+		mode	=> "ug+rw",
+		recurse	=> true,
+	}
+	file { "$dir/logs":
+		ensure	=> directory,
+		owner	=> $user,
+		group	=> $www_group,
+		mode	=> "ug+rw",
+		recurse	=> true,
+	}
+	class { "librenms::install":
+		dir	=> $dir,
+		user	=> $user,
+		group	=> $group,
+	}
+	class { "librenms::vhost":
+		dnsname	=> $vhost,
+		aliases	=> $vhost_aliases,
+	}
+}
+
+class librenms::install (
+	$dir,
+	$user,
+	$group,
+) {
+	exec { 'librenms::clone':
+		command => "git clone $repo $dir",
+		creates	=> "$dir/includes/defaults.inc.php",
+		require	=> [ Class["librenms::packages"], File[$dir], ],
+		user	=> $user,
+		group	=> $group,
+	}
 }
 
 class librenms::packages {
-	include apache
-	include php5
+
+	include git
+	include php5::mcrypt
 	include snmp
 
 	$common_pkgs = [
 
 		"fping",
-		"git",
 		"graphviz",
 		"nmap",
 		"php-pear",
 		"rrdtool",
 
 	]
+
 	$deb_pkgs = [
 
 		"imagemagick",
@@ -31,7 +94,6 @@ class librenms::packages {
 		"php5-curl",
 		"php5-gd",
 		"php5-json",
-		"php5-mcrypt",
 		"php5-mysql",
 		"php5-snmp",
 		"php5-xcache",
@@ -70,16 +132,42 @@ class librenms::packages {
 	}
 }
 
-class librenms::pear {
-	# TODO:
-	# pear config-set http_proxy http://host:port/
-	# pear install Net_IPv4
-	# pear install Net_IPv6
-}
+# TODO:
+# Update timezone in /etc/php5/apache2/php.ini and /etc/php5/cli/php.ini
 
-class librenms::install {
-	# TODO:
-	# install files
+# TODO: non-Debian/Ubuntu support
+class librenms::vhost (
+	$apachedir = "/etc/apache2",
+	$apachever = "2.4",
+	$dir,
+	$dnsname,
+	$aliases = [],
+) {
+	exec { "librenms::a2dissite-default":
+		command	=> "a2dissite 000-default",
+		onlyif	=> "test -d $apachedir/sites-enabled/000-default",
+		notify	=> Exec["librenms::a2ensite"],
+		refreshonly => true,
+	}
+	exec { "librenms::a2ensite":
+		command => "a2ensite $dnsname.conf",
+		notify	=> Class["apache::service"],
+		refreshonly => true,
+	}
+	exec { "librenms::mod_rewrite":
+		command => "a2enmod rewrite",
+		notify	=> Exec["librenms::a2dissite-default"],
+		refreshonly => true,
+	}
+	file { "$apachedir/sites-available/$dnsname.conf":
+		ensure	=> present,
+		content	=> template("librenms/librenms-apache.erb"),
+		owner	=> "root",
+		group	=> "root",
+		mode	=> 0644,
+		require	=> Class["librenms::install"],
+		notify	=> Exec["librenms::mod_rewrite"],
+	}
 }
 
 class librenms::mysql::dump {
