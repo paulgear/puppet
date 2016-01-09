@@ -18,6 +18,8 @@ class git::install {
 }
 
 define git::config (
+	$user = "root",
+	$home = "/root",
 	$overwrite = true,
 	$value,
 ) {
@@ -27,5 +29,7 @@ define git::config (
 		onlyif	=> "test $overwrite = true",
 		unless	=> "test $(git config --get $name) = $value",
 		require	=> Class["git::install"],
+		user	=> $user,
+		environment => [ "HOME" => $home ],
 	}
 }
