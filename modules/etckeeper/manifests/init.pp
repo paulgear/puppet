@@ -31,7 +31,7 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 
 	package { $pkg:
 		ensure	=> installed,
-		require	=> [ File[$cfgfile], Package[$git::pkg] ],
+		require	=> [ File[$cfgfile], Class["git"] ],
 		notify	=> Exec[$init],
 	}
 
@@ -47,15 +47,11 @@ LOWLEVEL_PACKAGE_MANAGER=dpkg
 
 	cron_job { "$pkg-git-fsck-weekly":
 		interval	=> weekly,
-		script		=> "#!/bin/sh
-# Managed by puppet on $servername - do not edit here!
-cd /etc
-git fsck --full --strict 2>&1 | grep -Eve '^(dangling|missing) (blob|commit|tree) '
-",
+		enable		=> false,
 	}
 
-	cron_job { "$pkg-git-gc-daily":
-		interval	=> daily,
+	cron_job { "$pkg-git-gc-weekly":
+		interval	=> weekly,
 		script		=> "#!/bin/sh
 # Managed by puppet on $servername - do not edit here!
 cd /etc
