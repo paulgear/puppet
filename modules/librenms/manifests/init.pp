@@ -28,7 +28,6 @@ class librenms::packages {
 		"ipmitool",
 		"mtr-tiny",
 		"mysql-client",
-		"php5-cli",
 		"php5-curl",
 		"php5-gd",
 		"php5-json",
