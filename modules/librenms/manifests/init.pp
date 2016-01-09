@@ -17,7 +17,7 @@ class librenms (
 		ensure	=> present,
 		comment	=> "LibreNMS",
 		home	=> $dir,
-		group	=> $group,
+		gid	=> $group,
 		groups	=> [ $www_group ],
 		require	=> [ Class["librenms::packages"], ],
 	}
