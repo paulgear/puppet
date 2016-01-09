@@ -47,6 +47,7 @@ class librenms (
 		dir	=> $dir,
 		user	=> $user,
 		group	=> $group,
+		repo	=> $repo,
 	}
 	class { "librenms::vhost":
 		dir	=> $dir,
@@ -59,6 +60,7 @@ class librenms::install (
 	$dir,
 	$user,
 	$group,
+	$repo,
 ) {
 	exec { 'librenms::clone':
 		command => "git clone $repo $dir",
