@@ -65,7 +65,7 @@ class librenms::install (
 	exec { 'librenms::clone':
 		command => "git clone $repo $dir",
 		creates	=> "$dir/includes/defaults.inc.php",
-		require	=> [ Class["librenms::packages"], File[$dir], ],
+		require	=> [ Class["librenms::packages"], ],
 		user	=> $user,
 		group	=> $group,
 	}
