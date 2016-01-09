@@ -6,6 +6,7 @@ class librenms (
 	$group = "librenms",
 	$www_group = "www-data",
 	$repo = "https://github.com/librenms/librenms.git",
+	$proxy = "",
 	$vhost,
 	$vhost_aliases = [],
 ) {
@@ -34,6 +35,7 @@ class librenms (
 		user	=> $user,
 		group	=> $group,
 		repo	=> $repo,
+		proxy	=> $proxy,
 	}
 	file { "$dir/rrd":
 		ensure	=> directory,
@@ -65,7 +67,7 @@ class librenms::install (
 	$repo,
 ) {
 	exec { 'librenms::clone':
-		command => "git clone $repo $dir",
+		command => "git clone --config 'http.proxy=$proxy' --config 'https.proxy=$proxy' $repo $dir",
 		creates	=> "$dir/includes/defaults.inc.php",
 		require	=> [ Class["librenms::packages"], File[$dir], ],
 		user	=> $user,
