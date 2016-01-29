@@ -1,0 +1,11 @@
+uid = <%= user %>
+gid = <%= group %>
+pid file = /var/run/rsyncd.pid
+syslog facility = daemon
+socket options = SO_KEEPALIVE
+timeout = <%= timeout %>
+max connections = <%= max_connections %>
+#motd file = /etc/rsyncd/motd
+
+&include /etc/rsync.d
+
