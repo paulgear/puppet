@@ -40,6 +40,7 @@ class php5::mcrypt {
 	package { "php5-mcrypt":
 		ensure		=> installed,
 		notify		=> Exec["php5::mcrypt::enable"],
+		require		=> Class["php5::package"],
 	}
 	exec { "php5::mcrypt::enable":
 		command		=> "php5enmod mcrypt",
