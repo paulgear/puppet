@@ -25,9 +25,9 @@ class librenms (
 	file { $dir:
 		ensure	=> directory,
 		replace	=> false,
-		recurse	=> true,
 		owner	=> $user,
 		group	=> $group,
+		mode	=> "u+rwx,g+rwxs",
 		require	=> [ User[$user], Group[$group], ],
 	}
 	class { "librenms::install":
@@ -41,16 +41,14 @@ class librenms (
 		ensure	=> directory,
 		owner	=> $user,
 		group	=> $group,
-		mode	=> "ug+rw",
-		recurse	=> true,
+		mode	=> "u+rwx,g+rwxs",
 		require	=> Class["librenms::install"],
 	}
 	file { "$dir/logs":
 		ensure	=> directory,
 		owner	=> $user,
 		group	=> $www_group,
-		mode	=> "ug+rw",
-		recurse	=> true,
+		mode	=> "u+rwx,g+rwxs",
 		require	=> Class["librenms::install"],
 	}
 	class { "librenms::vhost":
