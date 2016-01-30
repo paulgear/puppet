@@ -47,6 +47,7 @@ class utils::gethost {
 		'gethost',
 	]
 	ulb { $files: source_class => utils }
+	include rsync
 
 	file { "/usr/local/bin/rsyncallhosts":
 		ensure	=> link,

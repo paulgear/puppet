@@ -117,7 +117,6 @@ class os::debian::packages {
 		"patch",
 		"perl",
 		"psmisc",
-		"rsync",
 		"screen",
 		"strace",
 		"telnet",

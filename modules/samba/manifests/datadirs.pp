@@ -10,6 +10,7 @@ class samba::datadirs {
 		group		=> root,
 		mode		=> 777,
 	}
+	include rsync
 
 	# create a data directory and its update job
 	define data_directory( $minute, $hour, $dest, $server = "", $extra = "", $sleep = 300 ) {

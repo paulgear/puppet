@@ -4,6 +4,7 @@
 
 class backup::lvm {
 
+	include rsync
 	# copy scripts to /usr/local/bin
 	define usr_local_bin() {
 		file { "/usr/local/bin/$name":

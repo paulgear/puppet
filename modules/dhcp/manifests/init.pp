@@ -32,6 +32,7 @@ class dhcp::server::service {
 
 class dhcp::server::restarter {
 	include dhcp::server
+	include rsync
 	ulb { "dhcpd-check-restart":
 		source_class	=> "dhcp",
 	}
