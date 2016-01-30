@@ -19,16 +19,8 @@ alias lm='ls -la --color=always | more'
 alias lr='lm | grep rpm'
 alias lrpm='ls --color=always | grep rpm | more'
 alias mv='mv -i'
-case "`puppet agent --version 2>/dev/null`" in
-2.6*|2.7*|3.*)
-    alias kp='kill -USR1 $(cat /var/run/puppet/agent.pid)'
-    alias tp='tme -n 1|grep puppet-agent'
-    ;;
-*)
-    alias kp='killall -USR1 puppetd'
-    alias tp='tme -n 1|grep puppetd'
-    ;;
-esac
+alias kp='service puppet reload'
+alias tp='tme -n 1|grep puppet-agent'
 alias pt='kp; tp'
 alias rm='rm -i'
 alias taillog='tme|grep -Evf ~/taillog.exclude'
@@ -52,7 +44,7 @@ VTYSH="`which vtysh 2>/dev/null`"
 if [ -x "$VTYSH" ]; then
     function show
     {
-        $VTYSH -c "show $*"
+	$VTYSH -c "show $*"
     }
 fi
 
