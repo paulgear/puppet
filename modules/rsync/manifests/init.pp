@@ -22,7 +22,7 @@ class rsync {
 class rsync::config (
         $user = "nobody",
         $group = "nogroup",
-        $timeout = 60,
+        $client_timeout = 60,
         $max_connections = 10,
         $enable = "true",
         $nice = 15,
