@@ -4,6 +4,13 @@
 
 class root_home {
 
+	file { "/root":
+		owner	=> root,
+		group	=> root,
+		mode	=> 2750,
+		ensure	=> directory,
+	}
+
 	file { "/root/.bashrc":
 		owner	=> root,
 		group	=> root,
