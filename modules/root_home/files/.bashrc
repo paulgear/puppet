@@ -1,7 +1,10 @@
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
-        . /etc/bashrc
+    . /etc/bashrc
+fi
+if [ -f . /etc/bash_completion ]; then
+    . /etc/bash_completion
 fi
 
 # User specific aliases and functions
@@ -18,13 +21,13 @@ alias lrpm='ls --color=always | grep rpm | more'
 alias mv='mv -i'
 case "`puppet agent --version 2>/dev/null`" in
 2.6*|2.7*|3.*)
-	alias kp='kill -USR1 $(cat /var/run/puppet/agent.pid)'
-	alias tp='tme -n 1|grep puppet-agent'
-	;;
+    alias kp='kill -USR1 $(cat /var/run/puppet/agent.pid)'
+    alias tp='tme -n 1|grep puppet-agent'
+    ;;
 *)
-	alias kp='killall -USR1 puppetd'
-	alias tp='tme -n 1|grep puppetd'
-	;;
+    alias kp='killall -USR1 puppetd'
+    alias tp='tme -n 1|grep puppetd'
+    ;;
 esac
 alias pt='kp; tp'
 alias rm='rm -i'
@@ -42,33 +45,33 @@ export VISUAL=vim
 export VTYSH_PAGER=more
 
 if [ -d $HOME/bin ]; then
-	PATH=$HOME/bin:$PATH
+    PATH=$HOME/bin:$PATH
 fi
 
 VTYSH="`which vtysh 2>/dev/null`"
 if [ -x "$VTYSH" ]; then
-	function show
-	{
-		$VTYSH -c "show $*"
-	}
+    function show
+    {
+        $VTYSH -c "show $*"
+    }
 fi
 
 function paul
 {
-	alias dir='ls -Fabl'
-	alias df='df -h'
-	alias more=less
-	set -o vi
-	export LESS=-eiMRXj.4
+    alias dir='ls -Fabl'
+    alias df='df -h'
+    alias more=less
+    set -o vi
+    export LESS=-eiMRXj.4
 }
 
 function pdate
 {
-	perl -we 'print localtime($ARGV[0]) . "\n";' "$@"
+    perl -we 'print localtime($ARGV[0]) . "\n";' "$@"
 }
 
 # print mail queue with one entry per line
 function mq
 {
-        mailq | awk '/^-/ {print; next} { gsub( /^ */, "") } NF > 0 { if (LINE == "") { LINE=$0 } else { LINE=LINE " " $0 } next } NF == 0 {print LINE; LINE=""}'
+    mailq | awk '/^-/ {print; next} { gsub( /^ */, "") } NF > 0 { if (LINE == "") { LINE=$0 } else { LINE=LINE " " $0 } next } NF == 0 {print LINE; LINE=""}'
 }
