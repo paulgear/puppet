@@ -33,7 +33,7 @@ class rsync::config (
                 owner           => "root",
                 group           => "root",
                 mode            => 0644,
-                contents        => template("rsync/rsyncd.conf.erb"),
+                content         => template("rsync/rsyncd.conf.erb"),
                 replace         => false,
                 require         => Class['rsync'],
         }
@@ -42,7 +42,7 @@ class rsync::config (
                 owner           => "root",
                 group           => "root",
                 mode            => 0644,
-                contents        => template("rsync/rsync-defaults.erb"),
+                content         => template("rsync/rsync-defaults.erb"),
                 replace         => false,
                 require         => Class['rsync'],
         }
