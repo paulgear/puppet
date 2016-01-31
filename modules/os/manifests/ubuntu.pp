@@ -18,6 +18,7 @@ class os::ubuntu::packages {
             'byobu',
             'lsof',
             'lsscsi',
+            'psmisc',
             'screen',
             'strace',
             'tshark',
