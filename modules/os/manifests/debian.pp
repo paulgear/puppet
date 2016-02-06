@@ -161,14 +161,12 @@ class os::debian::jessie {
 	os::debian::base	{ "jessie": }
 	os::debian::security	{ "jessie": }
 	os::debian::updates	{ "jessie": }
-	package { $packages: ensure => installed }
 }
 
 class os::debian::wheezy {
 	os::debian::base	{ "wheezy": }
 	os::debian::security	{ "wheezy": }
 	os::debian::updates	{ "wheezy": }
-	package { $packages: ensure => installed }
 }
 
 class os::debian::sid {
