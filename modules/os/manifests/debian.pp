@@ -161,7 +161,6 @@ class os::debian::jessie {
 	os::debian::base	{ "jessie": }
 	os::debian::security	{ "jessie": }
 	os::debian::updates	{ "jessie": }
-	$packages = [ "byobu" ]
 	package { $packages: ensure => installed }
 }
 
@@ -169,17 +168,6 @@ class os::debian::wheezy {
 	os::debian::base	{ "wheezy": }
 	os::debian::security	{ "wheezy": }
 	os::debian::updates	{ "wheezy": }
-	$packages = [ "byobu" ]
-	package { $packages: ensure => installed }
-}
-
-class os::debian::squeeze {
-	os::debian::base	{ "squeeze": }
-	os::debian::security	{ "squeeze": }
-	os::debian::updates	{ "squeeze": }
-	os::debian::volatile	{ "squeeze": ensure => absent }
-	os::debian::backports	{ "squeeze": }
-	$packages = [ "byobu" ]
 	package { $packages: ensure => installed }
 }
 
