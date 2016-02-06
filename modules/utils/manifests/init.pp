@@ -33,7 +33,6 @@ class utils {
 	# utility scripts
 	$files = [
 		'check-reboot-required',
-		'fix-tun-devices',
 		'iptb',
 		'randomsleep',
 	]
