@@ -1,0 +1,128 @@
+#!/bin/sh
+
+# Perform a number of checks on NTP that ensure that it is running correctly:
+# 1. 'ntpq -pn' responds with vaguely sensible output - this is sufficient evidence that ntpd is
+#    running.
+# 2. There is a non-localhost sync peer.
+# 3. There are at least 3 reachable peers defined.
+# 4. The reachability of included peers is > 6 on average.
+# 5. The offset from included peers is < 250 ms on average.
+
+set -e
+set -u
+
+PROG=`basename $0`
+HOST=${1:-'localhost'}
+OUTPUT=`mktemp`
+trap "rm -f $OUTPUT" 0
+
+if [ -t 0 ]; then
+	VERBOSE=1
+else
+	VERBOSE=0
+fi
+
+error()
+{
+	local exit=$1
+	shift
+	if [ "$VERBOSE" -eq 1  -a  -n "$1" ]; then
+		echo "$PROG: $1" >&2
+	fi
+	exit $exit
+}
+
+
+verbose()
+{
+	if [ "$VERBOSE" -eq 1 ]; then
+		echo "$@"
+	fi
+}
+
+
+# check for NTP response
+ntpq -pn $HOST | grep -Ev \
+	-e '^=*$' \
+	-e '^ *remote *refid' \
+	-e '^.127\.' \
+		> $OUTPUT
+if [ ! -s $OUTPUT ]; then
+	error 1 "NTP server $HOST did not respond"
+else
+	if [ "$VERBOSE" -eq 1 ]; then
+		echo "ntpq -pn results:"
+		cat $OUTPUT
+	fi
+fi
+
+# Check for sync peer
+if ! grep -q '^\*' $OUTPUT; then
+	error 2 "NTP server has no synchronizing peer"
+else
+	verbose "NTP synchronised to:		`awk '/^\*/ {print $1}' $OUTPUT|tr -d '*'`"
+fi
+
+# Check for peer reachability and offsets
+eval `awk '
+# apparently, awk has no absolute function
+function abs(val)
+{
+	return (val < 0 ? -val : val);
+}
+
+# count the number of bits set in the n-bit integer
+# BEWARE: no local variables in awk!
+function count_bits(val, n)
+{
+	b=0;
+	for (num=0; num < n; ++num) {
+		b+=and(val,1);
+		val=rshift(val,1);
+	}
+	return b;
+}
+
+BEGIN {
+	count=0;
+	bits=0;
+	offset=0;
+}
+
+# only include reachable hosts in the statistics
+$7 > 0 {
+	++count;
+	bits+=count_bits(strtonum("0" $7), 8);
+	offset+=abs($9);
+	#printf "%d %d %d\n", count, bits, offset > "/dev/stderr";
+}
+
+END {
+	printf "COUNT=%d\n", count;
+	if (count > 0) {
+		printf "REACH=%d\n", bits / count;
+		printf "OFFSET=%d\n", offset * 1.0 / count;
+	}
+	exit 0;
+}
+' $OUTPUT`
+
+if [ "$COUNT" -lt 3 ]; then
+	error 3 "Not enough peers defined ($COUNT)"
+else
+	verbose "Peers defined:			$COUNT"
+fi
+
+if [ "$REACH" -lt 6 ]; then
+	error 4 "Peer reachability too low ($REACH)"
+else
+	verbose "Average peer reachability:	$REACH"
+fi
+
+if [ "$OFFSET" -gt 250 ]; then
+	error 5 "Peer offset too high ($OFFSET)"
+else
+	verbose "Average peer offset:		$OFFSET"
+fi
+
+exit 0

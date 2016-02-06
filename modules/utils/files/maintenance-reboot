@@ -1,0 +1,126 @@
+#!/bin/bash
+
+# Perform a maintenance reboot if:
+# - a reboot required,
+# - the time is in sync, and
+# - it's the right week of the month (if specified)
+
+NTP=1
+SLEEP=1
+TEST=0
+WEEK=""
+PATH=/usr/sbin:/sbin:/usr/bin:/bin:/usr/local/bin:$PATH
+PROG=`basename $0`
+VERBOSE=""
+
+set -e
+set -u
+
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--nontp|--no-ntp)
+		NTP=0
+		shift
+		;;
+	--nosleep|--no-sleep)
+		SLEEP=0
+		shift
+		;;
+	--test)
+		TEST=1
+		shift
+		;;
+	--week)
+		WEEK=$2
+		shift 2
+		;;
+	--verbose)
+		VERBOSE=1
+		shift
+		;;
+	--*)
+		echo "Error - ignored invalid option: $1" >&2
+		shift
+		;;
+	*)
+		break
+		;;
+	esac
+done
+
+# If stdout is a terminal or verbose requested, use verbose output
+if [ -t 1  -o  -n "$VERBOSE" ]; then
+	VERBOSE="-s"
+fi
+
+(
+# by default sleep for a random amount up to 20 minutes
+TIME=${1:-'20 * 60'}
+
+if check-reboot-required; then
+	if [ "$TEST" -eq 0 ]; then
+		exit 0
+	else
+		echo "We would have stopped here if we weren't in test mode"
+	fi
+fi
+
+# check the week, if specified
+if [ -n "$WEEK"  -a "$WEEK" != "*" ]; then
+	DOM=`date +%d | sed -e 's/^0*//g'`		# remove leading zero
+	(( WOM=( DOM + 6 ) / 7 ))
+	if [ $WOM -ne $WEEK ]; then
+		echo "It's week $WOM in the month and we only run on week $WEEK"
+		if [ "$TEST" -eq 0 ]; then
+			echo "Exiting"
+			exit 0
+		else
+			echo "We would have stopped here if we weren't in test mode"
+		fi
+	fi
+fi
+
+# ensure our time is in sync before doing a reboot
+if [ "$NTP" -ne 0 ]; then
+	if [ -n "`which ntp-check 2>/dev/null`" ]; then
+		if ! ntp-check; then
+			if [ "$TEST" -eq 0 ]; then
+				service ntpd restart
+				sleep 600
+				ntp-check || exit 1
+			else
+				echo "We would have restarted ntpd here if we weren't in test mode"
+			fi
+		else
+			:
+		fi
+	else
+		echo "ntp-check not found; assuming the clock is correct"
+	fi
+else
+	echo "Skipping ntp-check"
+fi
+
+# wait for a random amount of time
+if [ "$TEST" -eq 0 ]; then
+	if [ "$SLEEP" -ne 0 ]; then
+		echo Sleeping
+		randomsleep "$TIME"
+	else
+		echo "Skipping sleep"
+	fi
+else
+	echo "Would have called randomsleep $TIME if we weren't in test mode"
+fi
+
+# now do the reboot
+if [ "$TEST" -eq 0 ]; then
+	echo Rebooting
+	reboot
+else
+	echo "Would have rebooted if we weren't in test mode"
+fi
+
+
+)
+
