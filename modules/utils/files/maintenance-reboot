@@ -83,7 +83,7 @@ fi
 # ensure our time is in sync before doing a reboot
 if [ "$NTP" -ne 0 ]; then
 	if [ -n "`which ntp-check 2>/dev/null`" ]; then
-		if ! ntp-check; then
+		if ! ntp-check --relaxed; then
 			if [ "$TEST" -eq 0 ]; then
 				service ntpd restart
 				sleep 600

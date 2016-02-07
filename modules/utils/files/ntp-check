@@ -7,11 +7,20 @@
 # 3. There are at least 3 reachable peers defined.
 # 4. The reachability of included peers is > 6 on average.
 # 5. The offset from included peers is < 250 ms on average.
+# If --relaxed is specified, skip the peers & reachability checks.
 
 set -e
 set -u
 
 PROG=`basename $0`
+
+if [ "$1" = "--relaxed" ]; then
+    RELAXED=1
+    shift
+else
+    RELAXED=0
+fi
+
 HOST=${1:-'localhost'}
 OUTPUT=`mktemp`
 trap "rm -f $OUTPUT" 0
@@ -107,13 +116,13 @@ END {
 }
 ' $OUTPUT`
 
-if [ "$COUNT" -lt 3 ]; then
+if [ "$COUNT" -lt 3  -a  "$RELAXED" -eq 0 ]; then
 	error 3 "Not enough peers defined ($COUNT)"
 else
 	verbose "Peers defined:			$COUNT"
 fi
 
-if [ "$REACH" -lt 6 ]; then
+if [ "$REACH" -lt 6  -a  "$RELAXED" -eq 0 ]; then
 	error 4 "Peer reachability too low ($REACH)"
 else
 	verbose "Average peer reachability:	$REACH"
