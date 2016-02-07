@@ -9,19 +9,14 @@ class ntp {
 	# set package names appropriately
 	case $operatingsystem {
 		centos: {
-			$ntpdate_pkg = "ntp"
 			$ntpd_pkg = "ntp"
 			$ntpd_svc = "ntpd"
 		}
 		default: {
-			$ntpdate_pkg = "ntpdate"
 			$ntpd_pkg = "ntp"
 			$ntpd_svc = "ntp"
 		}
 	}
-
-	# name of the cron job we use for ntpdate runs
-	$ntpdate_cron = "ntpdate"
 
 	# name of the ntp server config file
 	$ntp_conf = "/etc/ntp.conf"

@@ -1,18 +1,10 @@
 #
 # puppet class to define ntp server
 #
-# DONE: Checked for Ubuntu compatibility
-#
 
 class ntp::server {
 
 	include ntp
-
-	# disable ntpdate client
-	cron_job { $ntp::ntpdate_cron:
-		enable	=> "false",
-		script	=> "",
-	}
 
 	# ensure ntp is installed & running by default
 	package { $ntp::ntpd_pkg:
