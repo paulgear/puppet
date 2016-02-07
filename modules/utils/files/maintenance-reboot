@@ -66,7 +66,7 @@ if check-reboot-required; then
 fi
 
 # check the week, if specified
-if [ -n "$WEEK"  -a "$WEEK" != "*" ]; then
+if [ -n "$WEEK"  -a "$WEEK" != "all" ]; then
 	DOM=`date +%d | sed -e 's/^0*//g'`		# remove leading zero
 	(( WOM=( DOM + 6 ) / 7 ))
 	if [ $WOM -ne $WEEK ]; then

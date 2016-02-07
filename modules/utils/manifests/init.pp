@@ -72,7 +72,7 @@ class utils::gethost {
 define utils::reboot (
         $dow = "*",
         $day = "*",
-        $week = "*",
+        $week = "all",
         $hour = 1,
         $min = 0,
         $rnd = 900,
@@ -81,7 +81,7 @@ define utils::reboot (
         if ! $dow =~ /^[1-7]$/ {
                 fail("Error: day of week must be between 1 and 7")
         }
-        if ! $week =~ /^[1-4]$/ {
+        if ! ( $week =~ /^[1-4]$/ or $week == "all" ) {
                 fail("Error: week number must be between 1 and 4")
         }
         cron_job { "maintenance-reboot":
