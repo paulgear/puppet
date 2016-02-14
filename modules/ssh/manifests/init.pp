@@ -50,34 +50,6 @@ class ssh {
 		}
 	}
 
-	# installs a private key and its corresponding public key from the puppet master on the client
-	define private_key( $user = "root", $type = "rsa", $storedir = "$ssh::storedir" ) {
-		# ugly hack for home dir - how to do better?
-		$home = $user ? {
-			root	=> "",
-			default	=> "/home",
-		}
-		file { "$home/$user/.ssh":
-			ensure	=> directory,
-			owner	=> $user,
-			mode	=> 700,
-		}
-		file { "$home/$user/.ssh/id_$type.pub":
-			ensure	=> file,
-			content	=> generate("/bin/cat", "$storedir/id_$type.$name.pub"),
-			owner	=> $user,
-			mode	=> 644,
-			require	=> File[ "$home/$user/.ssh" ],
-		}
-		file { "$home/$user/.ssh/id_$type":
-			ensure	=> file,
-			content	=> generate("/bin/cat", "$storedir/id_$type.$name"),
-			owner	=> $user,
-			mode	=> 600,
-			require	=> File[ "$home/$user/.ssh" ],
-		}
-	}
-
 }
 
 class ssh::package {
