@@ -115,6 +115,7 @@ class os::debian::packages {
 		'lsscsi',
 		'ltrace',
 		'mlocate',
+		'needrestart',
 		'netcat-traditional',
 		'openssl',
 		'patch',

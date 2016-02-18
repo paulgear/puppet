@@ -32,6 +32,7 @@ class os::ubuntu::packages {
                 'lsscsi',
                 'ltrace',
                 'mlocate',
+                'needrestart',
                 'netcat-openbsd',
                 'openssl',
                 'patch',
