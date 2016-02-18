@@ -168,6 +168,7 @@ class os::debian::wheezy {
 	os::debian::base	{ "wheezy": }
 	os::debian::security	{ "wheezy": }
 	os::debian::updates	{ "wheezy": }
+	os::debian::backports	{ "wheezy": }
 }
 
 class os::debian::sid {
