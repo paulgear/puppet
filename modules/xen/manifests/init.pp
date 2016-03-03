@@ -17,6 +17,11 @@ class xen {
 			"xen-hypervisor-4.1-$architecture",
 			"xen-tools",
 		],
+		jessie		=> [
+			"linux-image-$architecture",
+			"xen-hypervisor-4.4-$architecture",
+			"xen-tools",
+		],
 	}
 
 	package { $pkgs:
