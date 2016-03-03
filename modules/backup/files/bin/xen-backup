@@ -1,10 +1,8 @@
 #!/bin/bash
 #
 # Author:	Paul Gear
-# Created:	2010-11-18
 # Description:	Back up all VMs on the current host
 #		Designed for use with VMs created by xen-tools.
-# TODO:		- Support multiple VM hosts - at the moment, only Xen is supported
 #
 
 #set -e
@@ -15,11 +13,12 @@ BACKUPVOL="/media/vmbackup"
 XENDIR="/var/lib/xen/images"
 SLEEP=5
 DIVISOR=4
+XEN=xl
 
 if [ "$#" -gt 0 ]; then
 	DOMAINS="$@"
 else
-	DOMAINS=`xm list | awk '$1 == "Name" || $1 == "Domain-0" {next} $5 ~ /^(r-|-b)/ {print $1}'`
+	DOMAINS=`$XEN list | awk '$1 == "Name" || $1 == "Domain-0" {next} $5 ~ /^(r-|-b)/ {print $1}'`
 fi
 
 log()
@@ -55,20 +54,20 @@ $LVS > $TMPDIR/before
 
 SNAPSHOT_LIST=""
 for domain in $DOMAINS; do
-	log "Start backup of $domain"
-	xm pause $domain
+	starttime=$(date +%s)
+	$XEN pause $domain
 
 	sleep $SLEEP
 
 	# wait for domain to pause
 	tries=0
-	while [ -z "`xm list $domain | awk '$5 ~ /^--p/ {print $1}'`" ]; do
+	while [ -z "`$XEN list $domain | awk '$5 ~ /^--p/ {print $1}'`" ]; do
 		log "Waiting for pause"
 		sleep $SLEEP
 		(( tries++ ))
 		if [ $tries -gt 9 ]; then
 			log "Abort waiting for $domain (after $tries tries at $SLEEP second intervals)"
-			xm unpause $domain
+			$XEN unpause $domain
 			continue
 		fi
 	done
@@ -99,14 +98,11 @@ EOF
 		rsync -SHax $XENDIR/$domain/ $XENDIR/$domain.bak/
 	fi
 
-	log "Finish backup of $domain"
-	xm unpause $domain
+	$XEN unpause $domain
+	finishtime=$(date +%s)
+	(( backuptime = finishtime - starttime ))
+	log "Backed up $domain in $backuptime seconds"
 done
-
-log "Changes in LV use:"
-$LVS > $TMPDIR/after
-diff $TMPDIR/before $TMPDIR/after
-rm -rf $TMPDIR/
 
 # save snapshots to external media
 if ismounted $BACKUPVOL; then
@@ -121,3 +117,13 @@ if ismounted $BACKUPVOL; then
 	log "Finished snapshot backups to $BACKUPVOL"
 fi
 
+log "Changes in LV use:"
+$LVS > $TMPDIR/after
+diff $TMPDIR/before $TMPDIR/after
+rm -rf $TMPDIR/
+
+log "Removing snapshot volumes"
+for LV in $SNAPSHOT_LIST; do
+    lvremove --force $LV
+done
+log "Finished removing snapshot volumes"

@@ -149,7 +149,7 @@ fi
 
 if islv $SNAPSHOT_LV; then
 	sleep 1
-	lvremove --debug --force $SNAPSHOT_LV
+	lvremove --force $SNAPSHOT_LV
 	sleep 3
 fi
 
