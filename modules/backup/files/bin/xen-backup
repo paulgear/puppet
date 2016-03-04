@@ -18,7 +18,7 @@ XEN=xl
 if [ "$#" -gt 0 ]; then
 	DOMAINS="$@"
 else
-	DOMAINS=`$XEN list | awk '$1 == "Name" || $1 == "Domain-0" {next} $5 ~ /^(r-|-b)/ {print $1}'`
+	DOMAINS=`$XEN list | awk '$1 == "Name" || $1 == "Domain-0" {next} $5 ~ /^(r-|-b|--)/ {print $1}'`
 fi
 
 log()
