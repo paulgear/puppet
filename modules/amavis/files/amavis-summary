@@ -26,14 +26,15 @@ my ($minscore, $maxscore, $minsize, $maxsize, $mintime, $maxtime) = (9999, -9999
 while (<>) {
 
 	next unless /amavis.*->/;
+	next if /local delivery: <\S+> -> (bad-header-quarantine|spam-quarantine), mbx=/;
 #	next if /WARN: address modified/;
 #	next if /(FWD|SEND) via SMTP:/;
-	next if /local delivery: <\S+> -> spam-quarantine, mbx=/;
 
 	my @tmp = split /\s+/;
 	next if $tmp[6] eq "ESMTP::10024";
 	next if $tmp[6] eq "Checking:";
 	next if $tmp[6] eq "FWD" && $tmp[7] eq "from";
+	next if $tmp[6] eq "SEND" && $tmp[7] eq "from";
 
 	chomp;
 
@@ -55,6 +56,11 @@ while (<>) {
 
 	my @F = /amavis\[\d+\]: \S+ (\S+) (\S+)(?: [\({](.*)[\)}])?, (?:(?:LOCAL )?\[([\d.]+)\](?::\d+)? (?:\[([\d.]+|(?:IPv6)?[a-f:\d.]+)\] )?)?<(\S*)> -> <(\S*)>.*Hits: ([\d.-]+).*size: (\d+).* ([\d.]+) ms/;
 
+	if ($#F != 9) {
+		print STDERR "UNMATCHED: $_\n";
+		next;
+	}
+
 	# 0 = action
 	# 1 = status
 	# 2 = status detail (virus name)
@@ -70,15 +76,10 @@ while (<>) {
 	my $size = $F[8] / 1024.0;	# convert to KB
 	my $time = $F[9] / 1000.0;	# convert to seconds
 
-	if ($#F == 9) {
-		#print "@F\n";			# print all
-		#print "$score $time\n";	# print score & time
-		#print "$#F -> dst = $F[6]\n" if $#F != 8;
-		#print "field 2:  $F[2]\n" if $F[2];
-	} else {
-		print STDERR "UNMATCHED: $_\n";
-		next;
-	}
+	#print "@F\n";			# print all
+	#print "$score $time\n";	# print score & time
+	#print "$#F -> dst = $F[6]\n" if $#F != 8;
+	#print "field 2:  $F[2]\n" if $F[2];
 
 	# Score is a placeholder if client is whitelisted
 	$score = 0 if $score eq "-";
